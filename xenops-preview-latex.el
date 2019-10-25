@@ -41,7 +41,7 @@
            (save-excursion
              (let ((now-in (xenops-preview-latex-preview-at-point-coords)))
                (let ((entered (and (not was-in) now-in))
-                     (exited (and was-in (not now-in))))
+                     (exited (and was-in (not (equal now-in was-in)))))
                  (cond
                   (entered (if (org--list-latex-overlays (plist-get now-in :begin)
                                                          (plist-get now-in :end))
