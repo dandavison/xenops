@@ -1,120 +1,120 @@
 (defvar xenops-latex-prettify-symbols-alist-extra
-      '(("\\R" . "ℝ")
-        ("\\N" . "ℕ")
-        ("\\C" . "ℂ")
-        ("\\Q" . "ℚ")
-        ("\\grad" . "∇")
-        ("\\sqrt" . "√")
-        ;; https://unicode-table.com/en/0307/
-        ;; U+0307 Combining Dot Above
-        ("\\ddot{\\r}" . "r̈")
-        ("\\dot{\\r}" . "ṙ")
-        ("\\dot{\\v}" . "v̇")
-        ("\\dot{x}" . "ẋ")
-        ("\\dot{y}" . "ẏ")
-        ("\\xdot" . "ẋ")
-        ("\\ydot" . "ẏ")
-        ("\\\\" . "")  ;; "⏎"
-        ("``" . "\"")
-        ("''" . "\"")
-        ("^2" . "²")
-        ("^3" . "³")
-        ("$" . "​")  ;; zero-width space
-        (" ~ " . " ")))
+  '(("\\R" . "ℝ")
+    ("\\N" . "ℕ")
+    ("\\C" . "ℂ")
+    ("\\Q" . "ℚ")
+    ("\\grad" . "∇")
+    ("\\sqrt" . "√")
+    ;; https://unicode-table.com/en/0307/
+    ;; U+0307 Combining Dot Above
+    ("\\ddot{\\r}" . "r̈")
+    ("\\dot{\\r}" . "ṙ")
+    ("\\dot{\\v}" . "v̇")
+    ("\\dot{x}" . "ẋ")
+    ("\\dot{y}" . "ẏ")
+    ("\\xdot" . "ẋ")
+    ("\\ydot" . "ẏ")
+    ("\\\\" . "")  ;; "⏎"
+    ("``" . "\"")
+    ("''" . "\"")
+    ("^2" . "²")
+    ("^3" . "³")
+    ("$" . "​")  ;; zero-width space
+    (" ~ " . " ")))
 
 
 (defvar xenops-latex-prettify-symbols-string-replacements
-      '(("\\begin{definition*}" . "Definition.")
-        ("\\end{definition*}" . "┘")
+  '(("\\begin{definition*}" . "Definition.")
+    ("\\end{definition*}" . "┘")
 
-        ("\\begin{theorem*}" . "Theorem.")
-        ("\\end{theorem*}" . "┘")
+    ("\\begin{theorem*}" . "Theorem.")
+    ("\\end{theorem*}" . "┘")
 
-        ("\\begin{theorem}" . "Theorem.")
-        ("\\end{theorem}" . "┘")
+    ("\\begin{theorem}" . "Theorem.")
+    ("\\end{theorem}" . "┘")
 
-        ("\\begin{claim*}" . "Claim.")
-        ("\\end{claim*}" . "┘")
+    ("\\begin{claim*}" . "Claim.")
+    ("\\end{claim*}" . "┘")
 
-        ("\\begin{question*}" . "Question.")
-        ("\\end{question*}" . "┘")
+    ("\\begin{question*}" . "Question.")
+    ("\\end{question*}" . "┘")
 
-        ("\\begin{example*}" . "Example.")
-        ("\\end{example*}" . "┘")
+    ("\\begin{example*}" . "Example.")
+    ("\\end{example*}" . "┘")
 
-        ("\\begin{proof}" . "Proof.")
-        ("\\end{proof}" . "□")
+    ("\\begin{proof}" . "Proof.")
+    ("\\end{proof}" . "□")
 
-        ("\\begin{align*}" . "⚡")
-        ("\\end{align*}" . "⚡")
+    ("\\begin{align*}" . "⚡")
+    ("\\end{align*}" . "⚡")
 
-        ("\\begin{align}" . "⚡")
-        ("\\end{align}" . "⚡")
+    ("\\begin{align}" . "⚡")
+    ("\\end{align}" . "⚡")
 
-        ("#+begin_src" . "⚡")
-        ("#+end_src" . "⚡")
+    ("#+begin_src" . "⚡")
+    ("#+end_src" . "⚡")
 
-        ("\\begin{enumerate}" . "┐")
-        ("\\begin{enumerate}[label=(\alph*)]" . "┐")
-        ("\\end{enumerate}" . "┘")
+    ("\\begin{enumerate}" . "┐")
+    ("\\begin{enumerate}[label=(\alph*)]" . "┐")
+    ("\\end{enumerate}" . "┘")
 
-        ("\\begin{itemize}" . "┐")
-        ("\\end{itemize}" . "┘")
+    ("\\begin{itemize}" . "┐")
+    ("\\end{itemize}" . "┘")
 
-        ("\\begin{mdframed}" . "┐")
-        ("\\end{mdframed}" . "┘")
+    ("\\begin{mdframed}" . "┐")
+    ("\\end{mdframed}" . "┘")
 
-        ("\\end{minted}" . "┘")
-        ("\\end{verbatim}" . "┘")
-        ("\\end{tabular}" . "┘")
-        ("\\end{tabular*}" . "┘")
+    ("\\end{minted}" . "┘")
+    ("\\end{verbatim}" . "┘")
+    ("\\end{tabular}" . "┘")
+    ("\\end{tabular*}" . "┘")
 
-        ("\\begin{comment}  % latex-focus" .
-         "\\begin{comment}  % latex-focus ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯")
-        ("\\end{comment}  % latex-focus" .
-         "\\end{comment}  % latex-focus ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯")
+    ("\\begin{comment}  % latex-focus" .
+     "\\begin{comment}  % latex-focus ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯")
+    ("\\end{comment}  % latex-focus" .
+     "\\end{comment}  % latex-focus ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯")
 
-        ("\\newpage" .
-         "-------------------------------------------------------------------------------------------------------------------")
+    ("\\newpage" .
+     "-------------------------------------------------------------------------------------------------------------------")
 
-        ("\\begin{quote}" . "“")
-        ("\\end{quote}" . "”")
-        ("\\item" . "⁃")
-        ("\\section" . "§")
-        ("\\subsection" . "§§")
-        ("\\subsubsection" . "§§§")
+    ("\\begin{quote}" . "“")
+    ("\\end{quote}" . "”")
+    ("\\item" . "⁃")
+    ("\\section" . "§")
+    ("\\subsection" . "§§")
+    ("\\subsubsection" . "§§§")
 
-        ("\\correct" . "☑")
-        ("\\todo" . "TODO")
-        ("\\includegraphics" . "img")
+    ("\\correct" . "☑")
+    ("\\todo" . "TODO")
+    ("\\includegraphics" . "img")
 
-        ("\\vecMMM" . "\\vec")
-        ("\\bvecMMM" . "\\vec")
+    ("\\vecMMM" . "\\vec")
+    ("\\bvecMMM" . "\\vec")
 
-        ;; TODO: DNW?
-        ("\\Bigg[" . "[")
-        ("\\Bigg]" . "]")
-        ("\\Bigg(" . "(")
-        ("\\Bigg)" . ")")
+    ;; TODO: DNW?
+    ("\\Bigg[" . "[")
+    ("\\Bigg]" . "]")
+    ("\\Bigg(" . "(")
+    ("\\Bigg)" . ")")
 
-        ;; post-spacing is incorrect for these when using
-        ;; prettify-symbols-mode with the latex-unicode-math-mode
-        ;; symbols. So using a string replacement with explicit
-        ;; space.
-        ;; TODO: combine string and single-character replacements cleanly.
-        ("\\to " . "→ ")
-        ("\\in " . "∈ ")
+    ;; post-spacing is incorrect for these when using
+    ;; prettify-symbols-mode with the latex-unicode-math-mode
+    ;; symbols. So using a string replacement with explicit
+    ;; space.
+    ;; TODO: combine string and single-character replacements cleanly.
+    ("\\to " . "→ ")
+    ("\\in " . "∈ ")
 
-        ("&=" . "=")
-        ("\\dt" . "dt")
-        ("\\dx" . "dx")
-        ("\\dy" . "dy")
+    ("&=" . "=")
+    ("\\dt" . "dt")
+    ("\\dx" . "dx")
+    ("\\dy" . "dy")
 
-        ("\\d\\r" . "dr")
-        ;; TODO: dangerous?, will this clash with anything starting with \r?
-        ("\\r" . "r")
-        ("\\v" . "v")
-        ("\\F" . "F")))
+    ("\\d\\r" . "dr")
+    ;; TODO: dangerous?, will this clash with anything starting with \r?
+    ("\\r" . "r")
+    ("\\v" . "v")
+    ("\\F" . "F")))
 
 
 (defun xenops-latex-prettify-symbols-mode ()

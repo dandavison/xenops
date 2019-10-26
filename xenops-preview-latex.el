@@ -16,9 +16,9 @@
 (defun xenops-preview-latex-add-preview-at-point ()
   (interactive)
   (let ((coords (xenops-preview-latex-preview-at-point-coords)))
-       (when coords (progn
-                      (xenops-preview-latex-org-format-latex coords)
-                      (forward-line)))))
+    (when coords (progn
+                   (xenops-preview-latex-org-format-latex coords)
+                   (forward-line)))))
 
 
 (defun xenops-preview-latex-remove-previews-dwim ()
@@ -38,15 +38,15 @@
       (funcall move-point-command)
     (let ((was-in (xenops-preview-latex-preview-at-point-coords)))
       (funcall move-point-command)
-           (save-excursion
-             (let ((now-in (xenops-preview-latex-preview-at-point-coords)))
-               (let ((entered (and (not was-in) now-in))
-                     (exited (and was-in (not (equal now-in was-in)))))
-                 (cond
-                  (entered (if (org--list-latex-overlays (plist-get now-in :begin)
-                                                         (plist-get now-in :end))
-                               (xenops-preview-latex-remove-previews-dwim)))
-                  (exited (xenops-preview-latex-org-format-latex was-in)))))))))
+      (save-excursion
+        (let ((now-in (xenops-preview-latex-preview-at-point-coords)))
+          (let ((entered (and (not was-in) now-in))
+                (exited (and was-in (not (equal now-in was-in)))))
+            (cond
+             (entered (if (org--list-latex-overlays (plist-get now-in :begin)
+                                                    (plist-get now-in :end))
+                          (xenops-preview-latex-remove-previews-dwim)))
+             (exited (xenops-preview-latex-org-format-latex was-in)))))))))
 
 
 (defun xenops-preview-latex-add-previews ()
@@ -69,8 +69,8 @@
     (catch 'exit
       (while t
         (let ((delimiters (-min-by (lambda (pair1 pair2) (> (next-match-pos (car pair1))
-                                                        (next-match-pos (car pair2))))
-                                    xenops-preview-latex-delimiters))
+                                                       (next-match-pos (car pair2))))
+                                   xenops-preview-latex-delimiters))
               coords)
           (setq coords (plist-put coords :delimiters delimiters))
           (unless (re-search-forward (car delimiters) nil t)
@@ -93,9 +93,9 @@
         (-any #'identity (mapcar
                           (lambda (pair)
                             (xenops-preview-latex-org-between-regexps-p (car pair)
-                                                                     (cdr pair)
-                                                                     (point-min)
-                                                                     (point-max)))
+                                                                        (cdr pair)
+                                                                        (point-min)
+                                                                        (point-max)))
                           (cdr xenops-preview-latex-delimiters))))))
 
 (defun xenops-within-inline-block-p (delimiter)
@@ -140,13 +140,13 @@
                                 `(latex-fragment
                                   (:begin ,beg :end ,end :value ,(buffer-substring-no-properties beg end))))
            (clear-image-cache ()))
-            (condition-case nil
-                (org-format-latex "/tmp/preview-latex/"
-                                  beg end
-                                  default-directory
-                                  'overlays
-                                  nil
-                                  'forbuffer xenops-preview-latex-default-process)
-              (error nil)))))
+      (condition-case nil
+          (org-format-latex "/tmp/preview-latex/"
+                            beg end
+                            default-directory
+                            'overlays
+                            nil
+                            'forbuffer xenops-preview-latex-default-process)
+        (error nil)))))
 
 (provide 'xenops-preview-latex)
