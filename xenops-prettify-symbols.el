@@ -51,7 +51,11 @@
         ("\\begin{align}" . "⚡")
         ("\\end{align}" . "⚡")
 
+        ("#+begin_src" . "⚡")
+        ("#+end_src" . "⚡")
+
         ("\\begin{enumerate}" . "┐")
+        ("\\begin{enumerate}[label=(\alph*)]" . "┐")
         ("\\end{enumerate}" . "┘")
 
         ("\\begin{itemize}" . "┐")
@@ -72,9 +76,6 @@
 
         ("\\newpage" .
          "-------------------------------------------------------------------------------------------------------------------")
-
-        ("#+begin_src mathematica" . "mathematica")
-        ("#+end_src" . "┘")
 
         ("\\begin{quote}" . "“")
         ("\\end{quote}" . "”")
