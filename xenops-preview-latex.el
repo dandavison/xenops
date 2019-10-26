@@ -89,12 +89,7 @@
   "If point is in previewable block, return plist describing match"
   (let ((inline-delimiter (car xenops-preview-latex-delimiters)))
     (assert (xenops-preview-latex-delimiters-inline-p inline-delimiter))
-    (or (and (oddp (count-matches (car inline-delimiter) (point-at-bol)
-                                  (point)))
-             (xenops-preview-latex-org-between-regexps-p (car inline-delimiter)
-                                                      (cdr inline-delimiter)
-                                                      (point-at-bol)
-                                                      (point-at-eol)))
+    (or (xenops-within-inline-block-p (car inline-delimiter))
         (-any #'identity (mapcar
                           (lambda (pair)
                             (xenops-preview-latex-org-between-regexps-p (car pair)
@@ -102,6 +97,12 @@
                                                                      (point-min)
                                                                      (point-max)))
                           (cdr xenops-preview-latex-delimiters))))))
+
+(defun xenops-within-inline-block-p (delimiter)
+  "Is point within an inline block delimited by `delimiter'?"
+  (and (oddp (count-matches delimiter (point-at-bol) (point)))
+       (xenops-preview-latex-org-between-regexps-p delimiter delimiter (point-at-bol)
+                                                   (point-at-eol))))
 
 (defun xenops-preview-latex-delimiters-inline-p (delimiters)
   (equal delimiters '("\\$" . "\\$")))
