@@ -1,67 +1,65 @@
-(defvar xenops-preview-latex-default-process 'dvisvgm)
+(defvar xenops-display-math-process 'dvisvgm)
 
-(defvar xenops-preview-latex-delimiters
-  '(
-    ("\\$" . "\\$")
-    ("^[ \t]*\\\\begin{align\\*?}" . "^[ \t]*\\\\end{align\\*?}")))
+(defun xenops-display-math-activate ()
+  (define-key xenops-mode-map [(left)] (lambda () (interactive) (xenops-display-math-on-entry #'left-char)))
+  (define-key xenops-mode-map [(right)] (lambda () (interactive) (xenops-display-math-on-entry #'right-char)))
+  (define-key xenops-mode-map [(down)] (lambda () (interactive) (xenops-display-math-on-entry #'next-line)))
+  (define-key xenops-mode-map [(up)] (lambda () (interactive) (xenops-display-math-on-entry #'previous-line)))
+  ;; TODO: DNW
+  (add-to-list 'fill-nobreak-predicate (lambda () (xenops-display-math-in-inline-math-element-p "\\$"))))
 
-(defun xenops-preview-latex-add-previews-dwim ()
+(defun xenops-display-math-dwim ()
   (interactive)
   (save-window-excursion
     (save-excursion
-      (or (xenops-preview-latex-add-preview-at-point)
-          (xenops-preview-latex-add-previews)))))
+      (or (xenops-display-math-at-point)
+          (xenops-display-math-all)))))
 
-
-(defun xenops-preview-latex-add-preview-at-point ()
+(defun xenops-display-math-at-point ()
   (interactive)
-  (let ((coords (xenops-preview-latex-preview-at-point-coords)))
+  (let ((coords (xenops-display-math-parse-element-at-point)))
     (when coords (progn
-                   (xenops-preview-latex-org-format-latex coords)
+                   (xenops-display-math coords)
                    (forward-line)))))
 
-
-(defun xenops-preview-latex-remove-previews-dwim ()
+(defun xenops-display-math-hide ()
   (interactive)
   (let ((coords (or (and (use-region-p)
                          `(:begin ,(region-beginning) :end ,(region-end)))
-                    (xenops-preview-latex-preview-at-point-coords))))
+                    (xenops-display-math-parse-element-at-point))))
     (if coords (progn (org-remove-latex-fragment-image-overlays (plist-get coords :begin)
                                                                 (plist-get coords :end))
                       (when (use-region-p)
                         (deactivate-mark)))
       (org-remove-latex-fragment-image-overlays))))
 
-
-(defun xenops-preview-latex-toggle-on-entry (move-point-command)
+(defun xenops-display-math-on-entry (move-point-command)
   (if (region-active-p)
       (funcall move-point-command)
-    (let ((was-in (xenops-preview-latex-preview-at-point-coords)))
+    (let ((was-in (xenops-display-math-parse-element-at-point)))
       (funcall move-point-command)
       (save-excursion
-        (let ((now-in (xenops-preview-latex-preview-at-point-coords)))
+        (let ((now-in (xenops-display-math-parse-element-at-point)))
           (let ((entered (and (not was-in) now-in))
                 (exited (and was-in (not (equal now-in was-in)))))
             (cond
              (entered (if (org--list-latex-overlays (plist-get now-in :begin)
                                                     (plist-get now-in :end))
-                          (xenops-preview-latex-remove-previews-dwim)))
-             (exited (xenops-preview-latex-org-format-latex was-in)))))))))
+                          (xenops-display-math-hide)))
+             (exited (xenops-display-math was-in)))))))))
 
-
-(defun xenops-preview-latex-add-previews ()
+(defun xenops-display-math-all ()
+  "Display all math content in the buffer."
   (if (use-region-p)
       (progn
         (save-restriction (narrow-to-region (region-beginning)
                                             (region-end))
                           (goto-char (point-min))
-                          (xenops-preview-latex-add-previews-))
+                          (xenops-display-math-all-))
         (deactivate-mark))
-    (xenops-preview-latex-add-previews-)))
+    (xenops-display-math-all-)))
 
-
-(defun xenops-preview-latex-add-previews- ()
-  "Create all latex previews in buffer"
+(defun xenops-display-math-all- ()
   (cl-flet ((next-match-pos (regexp)
                             (save-excursion
                               (or (and (re-search-forward regexp nil t) (point))
@@ -70,7 +68,7 @@
       (while t
         (let ((delimiters (-min-by (lambda (pair1 pair2) (> (next-match-pos (car pair1))
                                                        (next-match-pos (car pair2))))
-                                   xenops-preview-latex-delimiters))
+                                   xenops-math-delimiters))
               coords)
           (setq coords (plist-put coords :delimiters delimiters))
           (unless (re-search-forward (car delimiters) nil t)
@@ -78,37 +76,35 @@
           (setq coords (plist-put coords :begin (match-beginning 0)))
           (re-search-forward (cdr delimiters))
           (setq coords (plist-put coords :end (match-end 0)))
-          (xenops-preview-latex-org-format-latex coords)
+          (xenops-display-math coords)
           ;; TODO: This shouldn't be necessary but currently it
           ;; sometimes gets stuck attempting to process the same
           ;; block repeatedly.
           (goto-char (plist-get coords :end)))))))
 
-
-(defun xenops-preview-latex-preview-at-point-coords ()
+(defun xenops-display-math-parse-element-at-point ()
   "If point is in previewable block, return plist describing match"
-  (let ((inline-delimiter (car xenops-preview-latex-delimiters)))
-    (assert (xenops-preview-latex-delimiters-inline-p inline-delimiter))
-    (or (xenops-within-inline-block-p (car inline-delimiter))
+  (let ((inline-delimiter (car xenops-math-delimiters)))
+    (assert (xenops-display-math-inline-delimiters-p inline-delimiter))
+    (or (xenops-display-math-in-inline-math-element-p (car inline-delimiter))
         (-any #'identity (mapcar
                           (lambda (pair)
-                            (xenops-preview-latex-org-between-regexps-p (car pair)
-                                                                        (cdr pair)
-                                                                        (point-min)
-                                                                        (point-max)))
-                          (cdr xenops-preview-latex-delimiters))))))
+                            (xenops-display-math-between-regexps-p (car pair)
+                                                                   (cdr pair)
+                                                                   (point-min)
+                                                                   (point-max)))
+                          (cdr xenops-math-delimiters))))))
 
-(defun xenops-within-inline-block-p (delimiter)
+(defun xenops-display-math-in-inline-math-element-p (delimiter)
   "Is point within an inline block delimited by `delimiter'?"
   (and (oddp (count-matches delimiter (point-at-bol) (point)))
-       (xenops-preview-latex-org-between-regexps-p delimiter delimiter (point-at-bol)
-                                                   (point-at-eol))))
+       (xenops-display-math-between-regexps-p delimiter delimiter (point-at-bol)
+                                              (point-at-eol))))
 
-(defun xenops-preview-latex-delimiters-inline-p (delimiters)
+(defun xenops-display-math-inline-delimiters-p (delimiters)
   (equal delimiters '("\\$" . "\\$")))
 
-
-(defun xenops-preview-latex-org-between-regexps-p (start-re end-re lim-up lim-down)
+(defun xenops-display-math-between-regexps-p (start-re end-re lim-up lim-down)
   "If point is between regexps, return plist describing match"
   (let ((coords (if (looking-at end-re)
                     ;; This function will return nil if point is between delimiters
@@ -118,9 +114,8 @@
                   (org-between-regexps-p start-re end-re lim-up lim-down))))
     (when coords `(:begin ,(car coords) :end ,(cdr coords) :delimiters (,start-re . ,end-re)))))
 
-
-(defun xenops-set-org-preview-latex-process-alist! (coords)
-  (let* ((inline-p (xenops-preview-latex-delimiters-inline-p (plist-get coords :delimiters)))
+(defun xenops-display-math-set-org-preview-latex-process-alist! (coords)
+  (let* ((inline-p (xenops-display-math-inline-delimiters-p (plist-get coords :delimiters)))
          (bounding-box (if inline-p "1" "10"))
          (dvisvgm-process-plist (cdr (assoc 'dvisvgm org-preview-latex-process-alist)))
          (dvisvgm-image-converter (car (plist-get dvisvgm-process-plist
@@ -132,9 +127,8 @@
                             :image-converter `(,(replace-match bounding-box t t
                                                                dvisvgm-image-converter 1)))))))
 
-
-(defun xenops-preview-latex-org-format-latex (coords)
-  (xenops-set-org-preview-latex-process-alist! coords)
+(defun xenops-display-math (coords)
+  (xenops-display-math-set-org-preview-latex-process-alist! coords)
   (let ((beg (plist-get coords :begin)) (end (plist-get coords :end)))
     (flet ((org-element-context ()
                                 `(latex-fragment
@@ -146,7 +140,7 @@
                             default-directory
                             'overlays
                             nil
-                            'forbuffer xenops-preview-latex-default-process)
+                            'forbuffer xenops-display-math-process)
         (error nil)))))
 
-(provide 'xenops-preview-latex)
+(provide 'xenops-display-math)
