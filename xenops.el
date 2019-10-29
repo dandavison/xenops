@@ -35,7 +35,7 @@
     ((equal arg '(16))
      (xenops-display-math-hide))
     ((equal arg '(4))
-     (xenops-display-math-regenerate))
+     (xenops-display-math-regenerate-math-at-point))
     (t (xenops-display-math-dwim))))
 
 (defun xenops-parse-element-at-point ()

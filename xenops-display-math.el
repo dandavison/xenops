@@ -22,6 +22,12 @@
                    (xenops-display-math coords)
                    (forward-line)))))
 
+(defun xenops-display-math-regenerate-math-at-point ()
+  (interactive)
+  (let ((cache-file (xenops-display-math-get-cache-file-at-point)))
+    (when cache-file (delete-file cache-file))
+    (xenops-display-math-at-point)))
+
 (defun xenops-display-math-hide ()
   (interactive)
   (let ((coords (or (and (use-region-p)
