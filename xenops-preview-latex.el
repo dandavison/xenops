@@ -141,7 +141,7 @@
                                   (:begin ,beg :end ,end :value ,(buffer-substring-no-properties beg end))))
            (clear-image-cache ()))
       (condition-case nil
-          (org-format-latex "/tmp/preview-latex/"
+          (org-format-latex xenops-cache-directory
                             beg end
                             default-directory
                             'overlays
