@@ -12,6 +12,15 @@
   '(("\\$" . "\\$")
     ("^[ \t]*\\\\begin{align\\*?}" . "^[ \t]*\\\\end{align\\*?}")))
 
+(defun xenops-dwim (&optional arg)
+  (interactive "P")
+  (cond
+    ((equal arg '(16))
+     (xenops-display-math-hide))
+    ((equal arg '(4))
+     (xenops-display-math-regenerate))
+    (t (xenops-display-math-dwim))))
+
 (defun xenops-parse-element-at-point ()
   (-any #'funcall '(xenops-display-image-parse-image-at-point)))
 
