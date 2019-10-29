@@ -1,6 +1,7 @@
 (require 'cl)
-(require 'org)
 (require 'dash)
+(require 'f)
+(require 'org)
 (require 'xenops-display-image)
 (require 'xenops-display-math)
 (require 'xenops-display-text)

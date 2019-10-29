@@ -129,18 +129,44 @@
 
 (defun xenops-display-math (coords)
   (xenops-display-math-set-org-preview-latex-process-alist! coords)
-  (let ((beg (plist-get coords :begin)) (end (plist-get coords :end)))
-    (flet ((org-element-context ()
-                                `(latex-fragment
-                                  (:begin ,beg :end ,end :value ,(buffer-substring-no-properties beg end))))
-           (clear-image-cache ()))
-      (condition-case nil
-          (org-format-latex xenops-cache-directory
-                            beg end
-                            default-directory
-                            'overlays
-                            nil
-                            'forbuffer xenops-display-math-process)
-        (error nil)))))
+  (let ((beg (plist-get coords :begin))
+        (end (plist-get coords :end)))
+    (goto-char beg)
+    (unless (eq (get-char-property (point) 'org-overlay-type)
+                'org-latex-overlay)
+      (let* ((latex (buffer-substring-no-properties beg end))
+             (image-type (plist-get (cdr (assq xenops-display-math-process
+                                               org-preview-latex-process-alist))
+                                    :image-output-type))
+             (cache-file (xenops-display-math-compute-file-name latex image-type)))
+        (unless (file-exists-p cache-file)
+          (message "xenops: creating image file: %s" cache-file)
+          (org-create-formula-image
+           latex cache-file org-format-latex-options 'forbuffer xenops-display-math-process))
+        (dolist (o (overlays-in beg end))
+          (when (eq (overlay-get o 'org-overlay-type)
+                    'org-latex-overlay)
+            (delete-overlay o)))
+        (org--format-latex-make-overlay beg end cache-file image-type)))))
+
+(defun xenops-display-math-get-cache-file-at-point ()
+  (let ((context (xenops-display-math-parse-element-at-point)))
+    (if context
+      (let* ((beg (plist-get context :begin))
+             (end (plist-get context :end))
+             (latex (buffer-substring-no-properties beg end))
+             (image-type (plist-get (cdr (assq xenops-display-math-process
+                                               org-preview-latex-process-alist))
+                                    :image-output-type)))
+        (xenops-display-math-compute-file-name latex image-type)))))
+
+(defun xenops-display-math-compute-file-name (latex image-type)
+  (let ((hash (sha1 (prin1-to-string
+                     (list org-format-latex-header
+                           org-latex-default-packages-alist
+                           org-latex-packages-alist
+                           org-format-latex-options
+                           latex)))))
+    (format "%s.%s" (f-join (f-expand xenops-cache-directory) hash) image-type)))
 
 (provide 'xenops-display-math)
