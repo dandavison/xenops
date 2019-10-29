@@ -1,24 +1,24 @@
-(defvar xenops-image-width 512)
+(defvar xenops-display-image-width 512)
 
-(defvar xenops-image-regexp
+(defvar xenops-display-image-regexp
   "[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}")
 
 (defun xenops-display-image-at-point ()
   (interactive)
-  (let ((context (xenops-element-context)))
+  (let ((context (xenops-parse-element-at-point)))
     (when (eq (car context) 'link)
       (flet ((org-element-context () context))
-        (xenops-org-display-inline-images context xenops-image-width nil nil ".")))))
+        (xenops-display-image context xenops-display-image-width nil nil ".")))))
 
 (defun xenops-hide-image-at-point ()
   (interactive)
   (org-remove-inline-images))
 
-(defun xenops-image-parse-image-at-point ()
-  (when (save-excursion (beginning-of-line) (looking-at xenops-image-regexp))
+(defun xenops-display-image-parse-image-at-point ()
+  (when (save-excursion (beginning-of-line) (looking-at xenops-display-image-regexp))
     `(link (:type "file" :begin ,(match-beginning 0) :end ,(match-end 0) :path ,(expand-file-name (match-string 2))))))
 
-(defun xenops-image-display-image (link width include-linked refresh file-extension-re)
+(defun xenops-display-image (link width include-linked refresh file-extension-re)
   ;; TODO: Hack: This is taken from `org-display-inline-images'.
   (when (and (equal "file" (org-element-property :type link))
              (or include-linked
@@ -54,4 +54,4 @@
                    (list 'org-display-inline-remove-overlay))
                   (push ov org-inline-image-overlays))))))))))
 
-(provide 'xenops-image)
+(provide 'xenops-display-image)
