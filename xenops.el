@@ -1,7 +1,7 @@
 (require 'cl)
 (require 'org)
 (require 'dash)
-(require 'xenops-prettify-symbols)
+(require 'xenops-display-text)
 (require 'xenops-preview-latex)
 (require 'xenops-image)
 

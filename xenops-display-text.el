@@ -1,4 +1,4 @@
-(defvar xenops-latex-prettify-symbols-alist-extra
+(defvar xenops-display-text-prettify-symbols
   '(("\\R" . "ℝ")
     ("\\N" . "ℕ")
     ("\\C" . "ℂ")
@@ -25,7 +25,7 @@
     (" ~ " . " ")))
 
 
-(defvar xenops-latex-prettify-symbols-string-replacements
+(defvar xenops-display-text-prettify-symbols-string-replacements
   '(("\\begin{definition*}" . "Definition.")
     ("\\end{definition*}" . "┘")
 
@@ -119,7 +119,7 @@
     ("\\F" . "F")))
 
 
-(defun xenops-latex-prettify-symbols-mode ()
+(defun xenops-display-text-prettify-symbols-mode ()
   (interactive)
 
   ;; TODO
@@ -132,23 +132,23 @@
 
     ;; Add custom single-character entries to default latex-mode entries.
     (setq prettify-symbols-alist
-          (-union prettify-symbols-alist xenops-latex-prettify-symbols-alist-extra))
+          (-union prettify-symbols-alist xenops-display-text-prettify-symbols))
 
     ;; Remove entries that will be overridden by string replacements
     (setq prettify-symbols-alist
           (-difference prettify-symbols-alist
-                       xenops-latex-prettify-symbols-string-replacements)))
+                       xenops-display-text-prettify-symbols-string-replacements)))
 
   ;; Add string replacements.
-  (mapc #'xenops-prettify-symbols-add-string-replacement
-        xenops-latex-prettify-symbols-string-replacements)
+  (mapc #'xenops-display-text-prettify-symbols-add-string-replacement
+        xenops-display-text-prettify-symbols-string-replacements)
 
   ;; Activate.
   (prettify-symbols-mode))
 
 
 ;; https://emacs.stackexchange.com/a/34882/9007
-(defun xenops-prettify-symbols-add-string-replacement (pair)
+(defun xenops-display-text-prettify-symbols-add-string-replacement (pair)
   "Make `prettify-symbols-mode' replace string FROM with string TO.
 
 Updates `prettify-symbols-alist'.  You may need to toggle
@@ -167,4 +167,4 @@ for more information."
         prettify-symbols-alist))
 
 
-(provide 'xenops-prettify-symbols)
+(provide 'xenops-display-text)
