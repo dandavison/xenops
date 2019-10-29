@@ -22,6 +22,7 @@
   (cond
    (xenops-mode
     (define-key xenops-mode-map "\C-c\C-c" 'xenops-dwim)
+    (xenops-display-image-activate)
     (xenops-display-math-activate)
     (xenops-display-text-activate))
    ;; TODO: deactivate

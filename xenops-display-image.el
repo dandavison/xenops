@@ -3,6 +3,19 @@
 (defvar xenops-display-image-regexp
   "[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}")
 
+(defvar xenops-display-image-pngpaste-executable "pngpaste")
+
+(defvar xenops-display-image-latex-template
+  "\\includegraphics[width=400pt]{%s}"
+  "LaTeX code for inclusion of a pasted image in the LaTeX
+  document. This must be a string of valid LaTeX code containing
+  a single %s placeholder, which will be replaced by the image
+  file path. Use a double backslash here to produce a single
+  backslash in the resulting LaTeX.")
+
+(defun xenops-display-image-activate ()
+  (define-key xenops-mode-map [(super v)] 'xenops-display-image-insert-image-from-clipboard))
+
 (defun xenops-display-image-at-point ()
   (interactive)
   (let ((context (xenops-parse-element-at-point)))
@@ -13,6 +26,25 @@
 (defun xenops-hide-image-at-point ()
   (interactive)
   (org-remove-inline-images))
+
+(defun xenops-display-image-insert-image-from-clipboard ()
+  (interactive)
+  (let ((output-file)
+        (temp-file (make-temp-file "xenops-image-from-clipboard-")))
+    (with-temp-buffer
+      ;; TODO: I think Emacs can do this natively without pngpaste
+      ;; See `gui-selection-value'.
+      (let ((exit-status (call-process xenops-display-image-pngpaste-executable nil `(:file ,temp-file) nil "-")))
+        (if (= exit-status 0)
+            (progn
+              (setq output-file
+                    (read-file-name "Save image as: " (format "%s/" default-directory)))
+              (when (file-exists-p output-file) (error "File exists: %s" output-file))
+              (copy-file temp-file output-file t)))))
+    (if output-file
+        (insert (format xenops-display-image-latex-template
+                        (file-relative-name output-file)))
+      (call-interactively 'yank))))
 
 (defun xenops-display-image-parse-image-at-point ()
   (when (save-excursion (beginning-of-line) (looking-at xenops-display-image-regexp))
