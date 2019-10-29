@@ -12,6 +12,21 @@
   '(("\\$" . "\\$")
     ("^[ \t]*\\\\begin{align\\*?}" . "^[ \t]*\\\\end{align\\*?}")))
 
+(defvar xenops-mode-map (make-sparse-keymap))
+
+(define-minor-mode xenops-mode
+  "A LaTeX editing environment.
+
+\\{xenops-mode-map}"
+  nil " xenops" nil
+  (cond
+   (xenops-mode
+    (define-key xenops-mode-map "\C-c\C-c" 'xenops-dwim)
+    (xenops-display-math-activate)
+    (xenops-display-text-activate))
+   ;; TODO: deactivate
+))
+
 (defun xenops-dwim (&optional arg)
   (interactive "P")
   (cond

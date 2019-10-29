@@ -119,9 +119,7 @@
     ("\\F" . "F")))
 
 
-(defun xenops-display-text-prettify-symbols-mode ()
-  (interactive)
-
+(defun xenops-display-text-activate ()
   ;; TODO
   ;;
   ;; - Can we make \Delta consume the post-space? So that "\Delta r"
