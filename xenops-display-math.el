@@ -1,5 +1,8 @@
 (defvar xenops-display-math-process 'dvisvgm)
 
+(defvar xenops-display-math-image-margin 20
+  "Number of pixels to be used as left margin for non-inline math images")
+
 (defun xenops-display-math-activate ()
   (define-key xenops-mode-map [(left)] (lambda () (interactive) (xenops-display-math-on-entry #'left-char)))
   (define-key xenops-mode-map [(right)] (lambda () (interactive) (xenops-display-math-on-entry #'right-char)))
@@ -91,6 +94,9 @@
              (image-type (plist-get (cdr (assq xenops-display-math-process
                                                org-preview-latex-process-alist))
                                     :image-output-type))
+             (margin (if (xenops-display-math-inline-delimiters-p (plist-get element :delimiters))
+                         0
+                       `(,xenops-display-math-image-margin . 0)))
              (cache-file (xenops-display-math-compute-file-name latex image-type)))
         (unless (file-exists-p cache-file)
           (message "xenops: creating file: %s" cache-file)
@@ -100,12 +106,12 @@
           (when (eq (overlay-get o 'org-overlay-type)
                     'org-latex-overlay)
             (delete-overlay o)))
-        (xenops-display-math-make-overlay beg end cache-file image-type)))))
+        (xenops-display-math-make-overlay beg end cache-file image-type margin)))))
 
-(defun xenops-display-math-make-overlay (beg end image &optional imagetype)
+(defun xenops-display-math-make-overlay (beg end image image-type margin)
   "Copied from org--format-latex-make-overlay"
   (let ((ov (make-overlay beg end))
-	(imagetype (or (intern imagetype) 'png)))
+	(image-type (intern image-type)))
     (overlay-put ov 'org-overlay-type 'org-latex-overlay)
     (overlay-put ov 'evaporate t)
     (overlay-put ov
@@ -114,7 +120,7 @@
 			 (delete-overlay o))))
     (overlay-put ov
 		 'display
-		 (list 'image :type imagetype :file image :ascent 'center))))
+		 (list 'image :type image-type :file image :ascent 'center :margin margin))))
 
 (defun xenops-display-math-get-cache-file (element)
   (let* ((beg (plist-get element :begin))
