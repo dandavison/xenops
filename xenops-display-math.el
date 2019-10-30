@@ -100,7 +100,21 @@
           (when (eq (overlay-get o 'org-overlay-type)
                     'org-latex-overlay)
             (delete-overlay o)))
-        (org--format-latex-make-overlay beg end cache-file image-type)))))
+        (xenops-display-math-make-overlay beg end cache-file image-type)))))
+
+(defun xenops-display-math-make-overlay (beg end image &optional imagetype)
+  "Copied from org--format-latex-make-overlay"
+  (let ((ov (make-overlay beg end))
+	(imagetype (or (intern imagetype) 'png)))
+    (overlay-put ov 'org-overlay-type 'org-latex-overlay)
+    (overlay-put ov 'evaporate t)
+    (overlay-put ov
+		 'modification-hooks
+		 (list (lambda (o _flag _beg _end &optional _l)
+			 (delete-overlay o))))
+    (overlay-put ov
+		 'display
+		 (list 'image :type imagetype :file image :ascent 'center))))
 
 (defun xenops-display-math-get-cache-file (element)
   (let* ((beg (plist-get element :begin))
