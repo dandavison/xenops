@@ -8,36 +8,16 @@
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-display-math-in-inline-math-element-p "\\$"))))
 
-(defun xenops-display-math-dwim ()
-  (interactive)
-  (save-window-excursion
-    (save-excursion
-      (or (xenops-display-math-at-point)
-          (xenops-display-math-all)))))
+(defun xenops-display-math-regenerate- (element)
+  (let ((cache-file (xenops-display-math-get-cache-file element)))
+    (when cache-file
+      (delete-file cache-file)
+      (message "xenops: deleted file: %s" cache-file))
+    (xenops-display-math- element)))
 
-(defun xenops-display-math-at-point ()
-  (interactive)
-  (let ((coords (xenops-display-math-parse-element-at-point)))
-    (when coords (progn
-                   (xenops-display-math coords)
-                   (forward-line)))))
-
-(defun xenops-display-math-regenerate-math-at-point ()
-  (interactive)
-  (let ((cache-file (xenops-display-math-get-cache-file-at-point)))
-    (when cache-file (delete-file cache-file))
-    (xenops-display-math-at-point)))
-
-(defun xenops-display-math-hide ()
-  (interactive)
-  (let ((coords (or (and (use-region-p)
-                         `(:begin ,(region-beginning) :end ,(region-end)))
-                    (xenops-display-math-parse-element-at-point))))
-    (if coords (progn (org-remove-latex-fragment-image-overlays (plist-get coords :begin)
-                                                                (plist-get coords :end))
-                      (when (use-region-p)
-                        (deactivate-mark)))
-      (org-remove-latex-fragment-image-overlays))))
+(defun xenops-display-math-hide- (element)
+  (org-remove-latex-fragment-image-overlays (plist-get element :begin)
+                                            (plist-get element :end)))
 
 (defun xenops-display-math-on-entry (move-point-command)
   (if (region-active-p)
@@ -51,46 +31,13 @@
             (cond
              (entered (if (org--list-latex-overlays (plist-get now-in :begin)
                                                     (plist-get now-in :end))
-                          (xenops-display-math-hide)))
-             (exited (xenops-display-math was-in)))))))))
-
-(defun xenops-display-math-all ()
-  "Display all math content in the buffer."
-  (if (use-region-p)
-      (progn
-        (save-restriction (narrow-to-region (region-beginning)
-                                            (region-end))
-                          (goto-char (point-min))
-                          (xenops-display-math-all-))
-        (deactivate-mark))
-    (xenops-display-math-all-)))
-
-(defun xenops-display-math-all- ()
-  (cl-flet ((next-match-pos (regexp)
-                            (save-excursion
-                              (or (and (re-search-forward regexp nil t) (point))
-                                  (point-max)))))
-    (catch 'exit
-      (while t
-        (let ((delimiters (-min-by (lambda (pair1 pair2) (> (next-match-pos (car pair1))
-                                                       (next-match-pos (car pair2))))
-                                   xenops-math-delimiters))
-              coords)
-          (setq coords (plist-put coords :delimiters delimiters))
-          (unless (re-search-forward (car delimiters) nil t)
-            (throw 'exit nil))
-          (setq coords (plist-put coords :begin (match-beginning 0)))
-          (re-search-forward (cdr delimiters))
-          (setq coords (plist-put coords :end (match-end 0)))
-          (xenops-display-math coords)
-          ;; TODO: This shouldn't be necessary but currently it
-          ;; sometimes gets stuck attempting to process the same
-          ;; block repeatedly.
-          (goto-char (plist-get coords :end)))))))
+                          (xenops-display-math-hide- now-in)))
+             (exited (xenops-display-math- was-in)))))))))
 
 (defun xenops-display-math-parse-element-at-point ()
   "If point is in previewable block, return plist describing match"
-  (let ((inline-delimiter (car xenops-math-delimiters)))
+  (let* ((math-delimiters (plist-get (cdr (assoc 'math xenops-ops)) :delimiters))
+         (inline-delimiter (car math-delimiters)))
     (assert (xenops-display-math-inline-delimiters-p inline-delimiter))
     (or (xenops-display-math-in-inline-math-element-p (car inline-delimiter))
         (-any #'identity (mapcar
@@ -99,7 +46,7 @@
                                                                    (cdr pair)
                                                                    (point-min)
                                                                    (point-max)))
-                          (cdr xenops-math-delimiters))))))
+                          (cdr math-delimiters))))))
 
 (defun xenops-display-math-in-inline-math-element-p (delimiter)
   "Is point within an inline block delimited by `delimiter'?"
@@ -133,10 +80,10 @@
                             :image-converter `(,(replace-match bounding-box t t
                                                                dvisvgm-image-converter 1)))))))
 
-(defun xenops-display-math (coords)
-  (xenops-display-math-set-org-preview-latex-process-alist! coords)
-  (let ((beg (plist-get coords :begin))
-        (end (plist-get coords :end)))
+(defun xenops-display-math- (element)
+  (xenops-display-math-set-org-preview-latex-process-alist! element)
+  (let ((beg (plist-get element :begin))
+        (end (plist-get element :end)))
     (goto-char beg)
     (unless (eq (get-char-property (point) 'org-overlay-type)
                 'org-latex-overlay)
@@ -146,7 +93,7 @@
                                     :image-output-type))
              (cache-file (xenops-display-math-compute-file-name latex image-type)))
         (unless (file-exists-p cache-file)
-          (message "xenops: creating image file: %s" cache-file)
+          (message "xenops: creating file: %s" cache-file)
           (org-create-formula-image
            latex cache-file org-format-latex-options 'forbuffer xenops-display-math-process))
         (dolist (o (overlays-in beg end))
@@ -155,16 +102,14 @@
             (delete-overlay o)))
         (org--format-latex-make-overlay beg end cache-file image-type)))))
 
-(defun xenops-display-math-get-cache-file-at-point ()
-  (let ((context (xenops-display-math-parse-element-at-point)))
-    (if context
-      (let* ((beg (plist-get context :begin))
-             (end (plist-get context :end))
-             (latex (buffer-substring-no-properties beg end))
-             (image-type (plist-get (cdr (assq xenops-display-math-process
-                                               org-preview-latex-process-alist))
-                                    :image-output-type)))
-        (xenops-display-math-compute-file-name latex image-type)))))
+(defun xenops-display-math-get-cache-file (element)
+  (let* ((beg (plist-get element :begin))
+         (end (plist-get element :end))
+         (latex (buffer-substring-no-properties beg end))
+         (image-type (plist-get (cdr (assq xenops-display-math-process
+                                           org-preview-latex-process-alist))
+                                :image-output-type)))
+    (xenops-display-math-compute-file-name latex image-type)))
 
 (defun xenops-display-math-compute-file-name (latex image-type)
   (let ((hash (sha1 (prin1-to-string

@@ -1,8 +1,5 @@
 (defvar xenops-display-image-width 512)
 
-(defvar xenops-display-image-regexp
-  "[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}")
-
 (defvar xenops-display-image-pngpaste-executable "pngpaste")
 
 (defvar xenops-display-image-latex-template
@@ -16,16 +13,18 @@
 (defun xenops-display-image-activate ()
   (define-key xenops-mode-map [(super v)] 'xenops-display-image-insert-image-from-clipboard))
 
-(defun xenops-display-image-at-point ()
-  (interactive)
-  (let ((context (xenops-parse-element-at-point)))
-    (when (eq (car context) 'link)
-      (flet ((org-element-context () context))
-        (xenops-display-image context xenops-display-image-width nil nil ".")))))
+(defun xenops-display-image- (element)
+  (let ((org-element (plist-put element :type "file")))
+   (xenops-display-image-- `(link ,org-element) xenops-display-image-width nil nil ".")))
 
-(defun xenops-hide-image-at-point ()
+(defun xenops-display-image-hide- (element)
   (interactive)
-  (org-remove-inline-images))
+  ;; TODO: improve
+  (save-restriction
+    (narrow-to-region (plist-get element :begin)
+                      (plist-get element :end))
+    (org-remove-inline-images)
+    (widen)))
 
 (defun xenops-display-image-insert-image-from-clipboard ()
   (interactive)
@@ -46,11 +45,7 @@
                         (file-relative-name output-file)))
       (call-interactively 'yank))))
 
-(defun xenops-display-image-parse-image-at-point ()
-  (when (save-excursion (beginning-of-line) (looking-at xenops-display-image-regexp))
-    `(link (:type "file" :begin ,(match-beginning 0) :end ,(match-end 0) :path ,(expand-file-name (match-string 2))))))
-
-(defun xenops-display-image (link width include-linked refresh file-extension-re)
+(defun xenops-display-image-- (link width include-linked refresh file-extension-re)
   ;; TODO: Hack: This is taken from `org-display-inline-images'.
   (when (and (equal "file" (org-element-property :type link))
              (or include-linked

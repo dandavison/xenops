@@ -5,13 +5,10 @@
 (require 'xenops-display-image)
 (require 'xenops-display-math)
 (require 'xenops-display-text)
+(require 'xenops-process)
 
 (defvar xenops-cache-directory "/tmp/xenops-cache/"
   "Path to a directory in which xenops can save files.")
-
-(defvar xenops-math-delimiters
-  '(("\\$" . "\\$")
-    ("^[ \t]*\\\\begin{align\\*?}" . "^[ \t]*\\\\end{align\\*?}")))
 
 (defvar xenops-mode-map (make-sparse-keymap))
 
@@ -22,23 +19,48 @@
   nil " xenops" nil
   (cond
    (xenops-mode
-    (define-key xenops-mode-map "\C-c\C-c" 'xenops-dwim)
+    (define-key xenops-mode-map "\C-c\C-c" 'xenops)
     (xenops-display-image-activate)
     (xenops-display-math-activate)
     (xenops-display-text-activate))
    ;; TODO: deactivate
 ))
 
-(defun xenops-dwim (&optional arg)
+(defun xenops (&optional arg)
   (interactive "P")
   (cond
     ((equal arg '(16))
-     (xenops-display-math-hide))
+     (xenops-hide))
     ((equal arg '(4))
-     (xenops-display-math-regenerate-math-at-point))
-    (t (xenops-display-math-dwim))))
+     (xenops-regenerate))
+    (t (xenops-display))))
 
-(defun xenops-parse-element-at-point ()
-  (-any #'funcall '(xenops-display-image-parse-image-at-point)))
+(defvar xenops-ops
+  '((math . (:ops
+             (xenops-display-math-
+              xenops-display-math-regenerate-
+              xenops-display-math-hide-)
+             :delimiters
+             (("\\$" .
+               "\\$")
+              ("^[ \t]*\\\\begin{align\\*?}" .
+               "^[ \t]*\\\\end{align\\*?}"))))
+    (image . (:ops
+              (xenops-display-image-
+               xenops-display-image-hide-)
+              :delimiters
+              (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))))))
+
+(defun xenops-display ()
+  (interactive)
+  (xenops-process '(xenops-display-math- xenops-display-image-)))
+
+(defun xenops-regenerate ()
+  (interactive)
+  (xenops-process '(xenops-display-math-regenerate-)))
+
+(defun xenops-hide ()
+  (interactive)
+  (xenops-process '(xenops-display-math-hide- xenops-display-image-hide-)))
 
 (provide 'xenops)
