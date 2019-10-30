@@ -1,29 +1,10 @@
 (defvar xenops-display-text-prettify-symbols
-  '(("\\R" . "ℝ")
-    ("\\N" . "ℕ")
-    ("\\C" . "ℂ")
-    ("\\Q" . "ℚ")
-    ("\\grad" . "∇")
-    ("\\sqrt" . "√")
-    ;; https://unicode-table.com/en/0307/
-    ;; U+0307 Combining Dot Above
-    ("\\ddot{\\r}" . "r̈")
-    ("\\dot{\\r}" . "ṙ")
-    ("\\dot{\\v}" . "v̇")
-    ("\\dot{x}" . "ẋ")
-    ("\\dot{y}" . "ẏ")
-    ("\\xdot" . "ẋ")
-    ("\\ydot" . "ẏ")
+  '(("\\grad" . "∇")
     ("\\implies" . "⟹")
-    ("\\\\" . "")  ;; "⏎"
-    ("``" . "\"")
-    ("''" . "\"")
+    ("\\sqrt" . "√")
     ("^2" . "²")
     ("^3" . "³")
-    ("$" . "​")  ;; zero-width space
-    ("^n" . "ⁿ")
-    (" ~ " . " ")))
-
+    ("^n" . "ⁿ")))
 
 (defvar xenops-display-text-prettify-symbols-string-replacements
   '(("\\begin{definition*}" . "Definition.")
@@ -34,15 +15,6 @@
 
     ("\\begin{theorem}" . "Theorem.")
     ("\\end{theorem}" . "┘")
-
-    ("\\begin{claim*}" . "Claim.")
-    ("\\end{claim*}" . "┘")
-
-    ("\\begin{question*}" . "Question.")
-    ("\\end{question*}" . "┘")
-
-    ("\\begin{example*}" . "Example.")
-    ("\\end{example*}" . "┘")
 
     ("\\begin{proof}" . "Proof.")
     ("\\end{proof}" . "□")
@@ -57,7 +29,6 @@
     ("#+end_src" . "⚡")
 
     ("\\begin{enumerate}" . "┐")
-    ("\\begin{enumerate}[label=(\alph*)]" . "┐")
     ("\\end{enumerate}" . "┘")
 
     ("\\begin{itemize}" . "┐")
@@ -71,33 +42,18 @@
     ("\\end{tabular}" . "┘")
     ("\\end{tabular*}" . "┘")
 
-    ("\\begin{comment}  % latex-focus" .
-     "\\begin{comment}  % latex-focus ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯")
-    ("\\end{comment}  % latex-focus" .
-     "\\end{comment}  % latex-focus ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯")
-
     ("\\newpage" .
      "-------------------------------------------------------------------------------------------------------------------")
 
     ("\\begin{quote}" . "“")
     ("\\end{quote}" . "”")
+
     ("\\item" . "⁃")
     ("\\section" . "§")
     ("\\subsection" . "§§")
     ("\\subsubsection" . "§§§")
 
-    ("\\correct" . "☑")
-    ("\\todo" . "TODO")
     ("\\includegraphics" . "img")
-
-    ("\\vecMMM" . "\\vec")
-    ("\\bvecMMM" . "\\vec")
-
-    ;; TODO: DNW?
-    ("\\Bigg[" . "[")
-    ("\\Bigg]" . "]")
-    ("\\Bigg(" . "(")
-    ("\\Bigg)" . ")")
 
     ;; post-spacing is incorrect for these when using
     ;; prettify-symbols-mode with the latex-unicode-math-mode
@@ -105,18 +61,7 @@
     ;; space.
     ;; TODO: combine string and single-character replacements cleanly.
     ("\\to " . "→ ")
-    ("\\in " . "∈ ")
-
-    ("&=" . "=")
-    ("\\dt" . "dt")
-    ("\\dx" . "dx")
-    ("\\dy" . "dy")
-
-    ("\\d\\r" . "dr")
-    ;; TODO: dangerous?, will this clash with anything starting with \r?
-    ("\\r" . "r")
-    ("\\v" . "v")
-    ("\\F" . "F")))
+    ("\\in " . "∈ ")))
 
 
 (defun xenops-display-text-activate ()
