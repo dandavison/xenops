@@ -11,6 +11,31 @@
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-display-math-in-inline-math-element-p "\\$"))))
 
+(defun xenops-display-math- (element)
+  (xenops-display-math-set-org-preview-latex-process-alist! element)
+  (let ((beg (plist-get element :begin))
+        (end (plist-get element :end)))
+    (goto-char beg)
+    (unless (eq (get-char-property (point) 'org-overlay-type)
+                'org-latex-overlay)
+      (let* ((latex (buffer-substring-no-properties beg end))
+             (image-type (plist-get (cdr (assq xenops-display-math-process
+                                               org-preview-latex-process-alist))
+                                    :image-output-type))
+             (margin (if (xenops-display-math-inline-delimiters-p (plist-get element :delimiters))
+                         0
+                       `(,xenops-display-math-image-margin . 0)))
+             (cache-file (xenops-display-math-compute-file-name latex image-type)))
+        (unless (file-exists-p cache-file)
+          (message "xenops: creating file: %s" cache-file)
+          (org-create-formula-image
+           latex cache-file org-format-latex-options 'forbuffer xenops-display-math-process))
+        (dolist (o (overlays-in beg end))
+          (when (eq (overlay-get o 'org-overlay-type)
+                    'org-latex-overlay)
+            (delete-overlay o)))
+        (xenops-display-math-make-overlay beg end cache-file image-type margin)))))
+
 (defun xenops-display-math-regenerate- (element)
   (let ((cache-file (xenops-display-math-get-cache-file element)))
     (when cache-file
@@ -82,31 +107,6 @@
                  (plist-put dvisvgm-process-plist
                             :image-converter `(,(replace-match bounding-box t t
                                                                dvisvgm-image-converter 1)))))))
-
-(defun xenops-display-math- (element)
-  (xenops-display-math-set-org-preview-latex-process-alist! element)
-  (let ((beg (plist-get element :begin))
-        (end (plist-get element :end)))
-    (goto-char beg)
-    (unless (eq (get-char-property (point) 'org-overlay-type)
-                'org-latex-overlay)
-      (let* ((latex (buffer-substring-no-properties beg end))
-             (image-type (plist-get (cdr (assq xenops-display-math-process
-                                               org-preview-latex-process-alist))
-                                    :image-output-type))
-             (margin (if (xenops-display-math-inline-delimiters-p (plist-get element :delimiters))
-                         0
-                       `(,xenops-display-math-image-margin . 0)))
-             (cache-file (xenops-display-math-compute-file-name latex image-type)))
-        (unless (file-exists-p cache-file)
-          (message "xenops: creating file: %s" cache-file)
-          (org-create-formula-image
-           latex cache-file org-format-latex-options 'forbuffer xenops-display-math-process))
-        (dolist (o (overlays-in beg end))
-          (when (eq (overlay-get o 'org-overlay-type)
-                    'org-latex-overlay)
-            (delete-overlay o)))
-        (xenops-display-math-make-overlay beg end cache-file image-type margin)))))
 
 (defun xenops-display-math-make-overlay (beg end image image-type margin)
   "Copied from org--format-latex-make-overlay"
