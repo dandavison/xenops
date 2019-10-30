@@ -4,13 +4,27 @@ Xenops is a LaTeX editing environment for Emacs. Xenops alters the visual appear
 
 Xenops is an extension of LaTeX editing features already present in Emacs ([auctex](https://www.gnu.org/software/auctex/) and [org-mode](https://orgmode.org/manual/Previewing-LaTeX-fragments.html)). It does the following:
 
-- LaTeX math content is rendered by an external process and displayed inline as SVG. (Like [preview-latex](https://www.gnu.org/software/auctex/manual/preview-latex.html) but using SVG.)
-- When the cursor enters the SVG image, display switches to editable LaTeX code.
-- LaTeX math content is automatically re-rendered when the markup changes.
-- When viewed as editable LaTeX code, math markup (`\int`, `\alpha`, etc) is replaced by unicode equivalents (This is auctex `prettify-symbols-mode`, with some additional replacements).
-- Images (e.g. `\includegraphics`) are displayed inline automatically.
-- Images pasted from system clipboard (e.g. screenshots) are written to disk, captured as LaTeX (e.g. `\includegraphics`), and displayed inline.
-- Opinionated alterations are made to clean up the visual appearance of common LaTeX markup: (`\begin{*}...\end{*}` blocks, `\section`,  etc).
-- `org-babel` code blocks can be executed from within the LaTeX buffer (e.g. within a `verbatim` or `comment` environment).
+- LaTeX math content is rendered by an external process and displayed inline as SVG.<sup>1</sup>
+- When the cursor enters a math image, display switches to editable LaTeX code.
+- When the cursor exits LaTeX math code, the image is regenerated if necessary, and display switches to the image.
+- While LaTeX math code is displayed, math markup is replaced by unicode equivalents<sup>2</sup>
+- Images (`\includegraphics`) are displayed inline automatically.
+- Images pasted from system clipboard (e.g. screenshots) are written to disk, captured as LaTeX (`\includegraphics`), and displayed inline.
+- Opinionated alterations are made to clean up the visual appearance of common LaTeX markup: (`\begin{*}...\end{*}` environments, `\section`,  etc).
+- Source code in many languages can be executed from within the LaTeX buffer using [org-babel](https://orgmode.org/manual/Working-with-source-code.html).<sup>3</sup>
+- SVG bounding boxes and image positioning are set appropriately for inline vs. display math.
 
 <sub>Streaked Xenops (_Xenops rutilans_) image by [Dubi Shapiro](https://conservationtours.rockjumperbirding.com/dt_gallery/gallery-tours-brazils-atlantic-rainforest/streaked-xenops-by-dubi-shapiro-001).</sub>
+
+----------------------------------------------------------------------------------------------------
+
+<sub><sup>1</sup>This is like auctex's [preview-latex](https://www.gnu.org/software/auctex/manual/preview-latex.html), but using SVG.</sub>
+
+<sub><sup>2</sup>This is auctex's `prettify-symbols-mode`, with some additional replacements.</sub>
+
+<sub><sup>3</sup> To execute mathematica code, use something like</sub>
+  ```emacs-lisp
+  (use-package ob-mathematica
+    :load-path "~/path/to/org-mode/contrib/lisp")
+  ```
+  <sub>Org-mode code blocks can be placed within a `verbatim` or `comment` environment.</sub>
