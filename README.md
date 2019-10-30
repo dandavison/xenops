@@ -11,5 +11,6 @@ Xenops is an extension of LaTeX editing features already present in Emacs ([auct
 - Images (e.g. `\includegraphics`) are displayed inline automatically.
 - Images pasted from system clipboard (e.g. screenshots) are written to disk, captured as LaTeX (e.g. `\includegraphics`), and displayed inline.
 - Opinionated alterations are made to clean up the visual appearance of common LaTeX markup: (`\begin{*}...\end{*}` blocks, `\section`,  etc).
+- `org-babel` code blocks can be executed from within the LaTeX buffer (e.g. within a `verbatim` or `comment` environment).
 
 <sub>Streaked Xenops (_Xenops rutilans_) image by [Dubi Shapiro](https://conservationtours.rockjumperbirding.com/dt_gallery/gallery-tours-brazils-atlantic-rainforest/streaked-xenops-by-dubi-shapiro-001).</sub>
