@@ -15,7 +15,7 @@
 
 (defun xenops-display-image- (element)
   (let ((org-element (plist-put element :type "file")))
-   (xenops-display-image-- `(link ,org-element) xenops-display-image-width nil nil ".")))
+    (xenops-display-image-- `(link ,org-element) xenops-display-image-width nil nil ".")))
 
 (defun xenops-display-image-hide- (element)
   (interactive)

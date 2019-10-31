@@ -25,16 +25,16 @@
     (xenops-display-math-activate)
     (xenops-display-text-activate))
    ;; TODO: deactivate
-))
+   ))
 
 (defun xenops (&optional arg)
   (interactive "P")
   (cond
-    ((equal arg '(16))
-     (xenops-hide))
-    ((equal arg '(4))
-     (xenops-regenerate))
-    (t (xenops-display))))
+   ((equal arg '(16))
+    (xenops-hide))
+   ((equal arg '(4))
+    (xenops-regenerate))
+   (t (xenops-display))))
 
 (defvar xenops-ops
   '((math . (:ops
@@ -87,9 +87,9 @@
 
 (defun xenops-avy-do-at-math ()
   (avy-jump
-     (format "\\(%s\\)"
-             (s-join "\\|"
-                     (-remove (lambda (el) (equal el "\\$")) ;; not inline math for now
-                              (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters)))))))
+   (format "\\(%s\\)"
+           (s-join "\\|"
+                   (-remove (lambda (el) (equal el "\\$")) ;; not inline math for now
+                            (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters)))))))
 
 (provide 'xenops)

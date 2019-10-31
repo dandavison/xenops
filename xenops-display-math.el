@@ -111,16 +111,16 @@
 (defun xenops-display-math-make-overlay (beg end image image-type margin)
   "Copied from org--format-latex-make-overlay"
   (let ((ov (make-overlay beg end))
-	(image-type (intern image-type)))
+        (image-type (intern image-type)))
     (overlay-put ov 'org-overlay-type 'org-latex-overlay)
     (overlay-put ov 'evaporate t)
     (overlay-put ov
-		 'modification-hooks
-		 (list (lambda (o _flag _beg _end &optional _l)
-			 (delete-overlay o))))
+                 'modification-hooks
+                 (list (lambda (o _flag _beg _end &optional _l)
+                         (delete-overlay o))))
     (overlay-put ov
-		 'display
-		 (list 'image :type image-type :file image :ascent 'center :margin margin))))
+                 'display
+                 (list 'image :type image-type :file image :ascent 'center :margin margin))))
 
 (defun xenops-display-math-get-cache-file (element)
   (let* ((beg (plist-get element :begin))
