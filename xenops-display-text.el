@@ -60,7 +60,7 @@
     ;; symbols. So using a string replacement with explicit
     ;; space.
     ;; TODO: combine string and single-character replacements cleanly.
-    ("\\to " . "→ ")
+    ("\\to " . "⟶ ")
     ("\\in " . "∈ ")))
 
 
