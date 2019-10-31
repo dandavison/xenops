@@ -11,6 +11,8 @@ Xenops is an extension of LaTeX editing features already present in Emacs ([auct
 - Images (`\includegraphics`) are displayed inline automatically.
 - Images pasted from system clipboard (e.g. screenshots) are written to disk, captured as LaTeX (`\includegraphics`), and displayed inline.
 - Opinionated alterations are made to clean up the visual appearance of common LaTeX markup: (`\begin{*}...\end{*}` environments, `\section`,  etc).
+- `xenops-avy-goto-math` to jump to math blocks using [avy](https://github.com/abo-abo/avy).
+- `xenops-avy-copy-math` to use a previous math block as the starting point for a new one.
 - Source code in many languages can be executed from within the LaTeX buffer using [org-babel](https://orgmode.org/manual/Working-with-source-code.html).<sup>3</sup>
 - SVG bounding boxes and image positioning are set appropriately for inline vs. display math.
 

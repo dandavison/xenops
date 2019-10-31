@@ -2,6 +2,7 @@
 (require 'dash)
 (require 'f)
 (require 'org)
+(require 's)
 (require 'xenops-display-image)
 (require 'xenops-display-math)
 (require 'xenops-display-text)
@@ -62,5 +63,31 @@
 (defun xenops-hide ()
   (interactive)
   (xenops-process '(xenops-display-math-hide- xenops-display-image-hide-)))
+
+(defun xenops-avy-goto-math ()
+  (interactive)
+  (let (avy-action) (xenops-avy-do-at-math)))
+
+(defun xenops-avy-copy-math ()
+  (interactive)
+  (let ((avy-action
+         (lambda (pt)
+           (when
+               (save-excursion
+                 (goto-char pt)
+                 (-if-let (element (xenops-display-math-parse-element-at-point))
+                     (progn
+                       (copy-region-as-kill (plist-get element :begin)
+                                            (plist-get element :end))
+                       t)))
+             (save-excursion (yank))))))
+    (xenops-avy-do-at-math)))
+
+(defun xenops-avy-do-at-math ()
+  (avy-jump
+     (format "\\(%s\\)"
+             (s-join "\\|"
+                     (-remove (lambda (el) (equal el "\\$")) ;; not inline math for now
+                              (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters)))))))
 
 (provide 'xenops)
