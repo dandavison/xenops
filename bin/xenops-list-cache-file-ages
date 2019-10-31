@@ -1,0 +1,16 @@
+#!/usr/bin/env emacs --script
+(load-file "~/.emacs.d/init.el")
+(require 'dash)
+
+(defun counts (groups)
+  (-map (lambda (pair) `(,(car pair) . ,(length (cdr pair))))
+        (-sort (lambda (pair1 pair2) (< (car pair1) (car pair2))) groups)))
+
+(defun xenops-cache-tabulate-days-since-file-last-accessed ()
+  (counts
+   (-group-by (-compose #'round #'time-to-number-of-days #'time-since #'file-attribute-modification-time)
+              (directory-files-and-attributes xenops-cache-directory nil "^[^.]"))))
+
+(princ "DaysSinceLastAccessed NumberOfFiles\n")
+(dolist (row (xenops-cache-tabulate-days-since-file-last-accessed))
+  (princ (format "%s %s\n" (car row) (cdr row))))
