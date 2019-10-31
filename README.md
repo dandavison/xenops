@@ -8,6 +8,7 @@ Xenops is an extension of LaTeX editing features already present in Emacs ([auct
 - When the cursor enters a math image, display switches to editable LaTeX code.
 - When the cursor exits LaTeX math code, the image is regenerated if necessary, and display switches to the image.
 - While LaTeX math code is displayed, math markup is replaced by unicode equivalents<sup>2</sup>
+- LaTeX tables are processed the same as math.
 - Images (`\includegraphics`) are displayed inline automatically.
 - Images pasted from system clipboard (e.g. screenshots) are written to disk, captured as LaTeX (`\includegraphics`), and displayed inline.
 - Opinionated alterations are made to clean up the visual appearance of common LaTeX markup: (`\begin{*}...\end{*}` environments, `\section`,  etc).

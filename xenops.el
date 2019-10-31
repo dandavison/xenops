@@ -45,7 +45,9 @@
              (("\\$" .
                "\\$")
               ("^[ \t]*\\\\begin{align\\*?}" .
-               "^[ \t]*\\\\end{align\\*?}"))))
+               "^[ \t]*\\\\end{align\\*?}")
+              ("^[ \t]*\\\\begin{tabular}" .
+               "^[ \t]*\\\\end{tabular}"))))
     (image . (:ops
               (xenops-display-image-
                xenops-display-image-hide-)
