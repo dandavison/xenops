@@ -8,6 +8,8 @@
   (define-key xenops-mode-map [(right)] (lambda () (interactive) (xenops-display-math-toggle-on-transition #'right-char)))
   (define-key xenops-mode-map [(down)] (lambda () (interactive) (xenops-display-math-toggle-on-transition #'next-line)))
   (define-key xenops-mode-map [(up)] (lambda () (interactive) (xenops-display-math-toggle-on-transition #'previous-line)))
+  (define-key xenops-mode-map [(mouse-1)] #'xenops-display-math-handle-click)
+  (define-key xenops-mode-map [(down-mouse-1)] (lambda () (interactive)))
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-display-math-in-inline-math-element-p "\\$"))))
 
@@ -62,13 +64,45 @@
       (funcall move-point-command)
       (save-excursion
         (let ((now-in (xenops-display-math-parse-element-at-point)))
-          (let ((entered (and (not was-in) now-in))
-                (exited (and was-in (not (equal now-in was-in)))))
+          (let ((entered (and now-in (not (equal now-in was-in))))
+                (exited (and was-in (not (equal was-in now-in)))))
             (cond
              (entered (if (org--list-latex-overlays (plist-get now-in :begin)
                                                     (plist-get now-in :end))
                           (xenops-display-math-hide- now-in)))
              (exited (xenops-display-math- was-in)))))))))
+
+(defun xenops-display-math-handle-click (event)
+  (interactive "e")
+  (message "xenops-display-math-handle-click: %s %s" (event-modifiers event) (memq 'double (event-modifiers event)))
+  (cond
+   ((memq 'double (event-modifiers event))
+    (xenops-display-math-handle-second-click event))
+   (t (xenops-display-math-handle-first-click event))))
+
+(defun xenops-display-math-handle-first-click (event)
+  (message "xenops-display-math-handle-first-click")
+  (let ((was-in (xenops-display-math-parse-element-at-point-hack)))
+    (mouse-set-point event)
+    (save-excursion
+      (let ((now-in (xenops-display-math-parse-element-at-point-hack)))
+        (when (and was-in (not (equal was-in now-in)))
+          (xenops-display-math- was-in))
+        ;; if now-in and image at point, move to start
+        ))))
+
+(defun xenops-display-math-handle-second-click (event)
+  (message "xenops-display-math-handle-second-click")
+  (-if-let (now-in (xenops-display-math-parse-element-at-point-hack))
+      (xenops-display-math-hide- now-in)))
+
+(defun xenops-display-math-parse-element-at-point-hack ()
+  (save-excursion
+    ;; TODO: hack: Inline math elements are not
+    ;; recognized when point is on match for first
+    ;; delimiter
+    (forward-char)
+    (xenops-display-math-parse-element-at-point)))
 
 (defun xenops-display-math-parse-element-at-point ()
   "If point is in previewable block, return plist describing match"
