@@ -81,8 +81,8 @@
                  (goto-char pt)
                  (-if-let (element (xenops-display-math-parse-element-at-point))
                      (progn
-                       (copy-region-as-kill (plist-get element :begin)
-                                            (plist-get element :end))
+                       (copy-region-as-kill (plist-get element :begin-math)
+                                            (plist-get element :end-math))
                        t)))
              (save-excursion (yank))))))
     (xenops-avy-do-at-math)))
