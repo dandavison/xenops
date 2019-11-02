@@ -78,7 +78,11 @@
          (lambda (pt)
            (when
                (save-excursion
-                 (goto-char pt)
+                 (goto-char
+                  ;; TODO: hack: This should be just `pt`, but inline
+                  ;; math elements are not recognized when point is on
+                  ;; match for first delimiter.
+                  (1+ pt))
                  (-if-let (element (xenops-display-math-parse-element-at-point))
                      (progn
                        (copy-region-as-kill (plist-get element :begin-math)
@@ -91,7 +95,6 @@
   (avy-jump
    (format "\\(%s\\)"
            (s-join "\\|"
-                   (-remove (lambda (el) (equal el "\\$")) ;; not inline math for now
-                            (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters)))))))
+                   (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters))))))
 
 (provide 'xenops)
