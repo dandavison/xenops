@@ -4,10 +4,10 @@
   "Number of pixels to be used as left margin for non-inline math images")
 
 (defun xenops-display-math-activate ()
-  (define-key xenops-mode-map [(left)] (lambda () (interactive) (xenops-display-math-on-entry #'left-char)))
-  (define-key xenops-mode-map [(right)] (lambda () (interactive) (xenops-display-math-on-entry #'right-char)))
-  (define-key xenops-mode-map [(down)] (lambda () (interactive) (xenops-display-math-on-entry #'next-line)))
-  (define-key xenops-mode-map [(up)] (lambda () (interactive) (xenops-display-math-on-entry #'previous-line)))
+  (define-key xenops-mode-map [(left)] (lambda () (interactive) (xenops-display-math-toggle-on-transition #'left-char)))
+  (define-key xenops-mode-map [(right)] (lambda () (interactive) (xenops-display-math-toggle-on-transition #'right-char)))
+  (define-key xenops-mode-map [(down)] (lambda () (interactive) (xenops-display-math-toggle-on-transition #'next-line)))
+  (define-key xenops-mode-map [(up)] (lambda () (interactive) (xenops-display-math-toggle-on-transition #'previous-line)))
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-display-math-in-inline-math-element-p "\\$"))))
 
@@ -54,7 +54,8 @@
                 'org-latex-overlay)
         (delete-overlay o)))))
 
-(defun xenops-display-math-on-entry (move-point-command)
+(defun xenops-display-math-toggle-on-transition (move-point-command)
+  "Display LaTeX on entry to a math element; display image on exit."
   (if (region-active-p)
       (funcall move-point-command)
     (let ((was-in (xenops-display-math-parse-element-at-point)))
