@@ -30,22 +30,29 @@
           (message "xenops: creating file: %s" cache-file)
           (org-create-formula-image
            latex cache-file org-format-latex-options 'forbuffer xenops-display-math-process))
-        (dolist (o (overlays-in beg end))
-          (when (eq (overlay-get o 'org-overlay-type)
-                    'org-latex-overlay)
-            (delete-overlay o)))
+        (xenops-display-math-delete-overlays element)
         (xenops-display-math-make-overlay beg end cache-file image-type margin)))))
 
 (defun xenops-display-math-regenerate- (element)
   (let ((cache-file (xenops-display-math-get-cache-file element)))
     (when cache-file
       (delete-file cache-file)
+      (clear-image-cache cache-file)
       (message "xenops: deleted file: %s" cache-file))
+    (xenops-display-math-delete-overlays element)
     (xenops-display-math- element)))
 
 (defun xenops-display-math-hide- (element)
   (org-remove-latex-fragment-image-overlays (plist-get element :begin)
                                             (plist-get element :end)))
+
+(defun xenops-display-math-delete-overlays (element)
+  (let ((beg (plist-get element :begin))
+        (end (plist-get element :end)))
+    (dolist (o (overlays-in beg end))
+      (when (eq (overlay-get o 'org-overlay-type)
+                'org-latex-overlay)
+        (delete-overlay o)))))
 
 (defun xenops-display-math-on-entry (move-point-command)
   (if (region-active-p)
