@@ -77,30 +77,53 @@
     (or (xenops-display-math-in-inline-math-element-p (car inline-delimiter))
         (-any #'identity (mapcar
                           (lambda (pair)
-                            (xenops-display-math-between-regexps-p (car pair)
-                                                                   (cdr pair)
-                                                                   (point-min)
-                                                                   (point-max)))
+                            (xenops-display-math-parse-element-at-point-matching-delimiters
+                             (car pair)
+                             (cdr pair)
+                             (point-min)
+                             (point-max)))
                           (cdr math-delimiters))))))
 
 (defun xenops-display-math-in-inline-math-element-p (delimiter)
   "Is point within an inline block delimited by `delimiter'?"
   (and (oddp (count-matches delimiter (point-at-bol) (point)))
-       (xenops-display-math-between-regexps-p delimiter delimiter (point-at-bol)
-                                              (point-at-eol))))
+       (xenops-display-math-parse-element-at-point-matching-delimiters
+        delimiter delimiter (point-at-bol) (point-at-eol))))
 
 (defun xenops-display-math-inline-delimiters-p (delimiters)
   (equal delimiters '("\\$" . "\\$")))
 
-(defun xenops-display-math-between-regexps-p (start-re end-re lim-up lim-down)
+(defun xenops-display-math-parse-element-at-point-matching-delimiters (start-re end-re lim-up lim-down)
   "If point is between regexps, return plist describing match"
-  (let ((coords (if (looking-at end-re)
-                    ;; This function will return nil if point is between delimiters
-                    ;; separated by zero characters.
-                    (save-excursion (left-char)
-                                    (org-between-regexps-p start-re end-re lim-up lim-down))
-                  (org-between-regexps-p start-re end-re lim-up lim-down))))
-    (when coords `(:begin ,(car coords) :end ,(cdr coords) :delimiters (,start-re . ,end-re)))))
+  (let ((element (if (looking-at end-re)
+                     ;; This function will return nil if point is between delimiters
+                     ;; separated by zero characters.
+                     (save-excursion (left-char)
+                                     (xenops-display-math-parse-element-at-point-matching-delimiters-
+                                      start-re end-re lim-up lim-down))
+                   (xenops-display-math-parse-element-at-point-matching-delimiters-
+                    start-re end-re lim-up lim-down))))
+    (when element (plist-put element :delimiters (cons start-re end-re)))))
+
+(defun xenops-display-math-parse-element-at-point-matching-delimiters- (start-re end-re &optional lim-up lim-down)
+  "`org-between-regexps-p' modified to return more match coordinates"
+  (save-match-data
+    (let ((pos (point))
+          (limit-up (or lim-up (save-excursion (outline-previous-heading))))
+          (limit-down (or lim-down (save-excursion (outline-next-heading))))
+          beg-beg beg-end end-beg end-end)
+      (save-excursion
+        (and (or (org-in-regexp start-re)
+                 (re-search-backward start-re limit-up t))
+             (setq beg-beg (match-beginning 0)
+                   beg-end (match-end 0))
+             (goto-char beg-end)
+             (re-search-forward end-re limit-down t)
+             (setq end-beg (match-beginning 0))
+             (> (setq end-end (match-end 0)) pos)
+             (goto-char end-beg)
+             (not (re-search-backward start-re (1+ beg-beg) t))
+             `(:begin ,beg-beg :begin-math ,beg-end :end-math ,end-beg :end ,end-end))))))
 
 (defun xenops-display-math-set-org-preview-latex-process-alist! (coords)
   (let* ((inline-p (xenops-display-math-inline-delimiters-p (plist-get coords :delimiters)))
