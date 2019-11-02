@@ -1,3 +1,4 @@
+(require 'avy)
 (require 'cl)
 (require 'dash)
 (require 'f)
