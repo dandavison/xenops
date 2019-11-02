@@ -15,3 +15,5 @@
       (delete-char (length heading)))
     (widen)
     (funcall mode)))
+
+(provide 'xenops-execute)

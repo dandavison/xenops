@@ -6,6 +6,7 @@
 (require 'xenops-display-image)
 (require 'xenops-display-math)
 (require 'xenops-display-text)
+(require 'xenops-execute)
 (require 'xenops-process)
 
 (defvar xenops-cache-directory "/tmp/xenops-cache/"
