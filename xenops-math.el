@@ -46,7 +46,8 @@
 
 (defun xenops-math-hide-image (element)
   (org-remove-latex-fragment-image-overlays (plist-get element :begin)
-                                            (plist-get element :end)))
+                                            (plist-get element :end))
+  (goto-char (plist-get element :begin-math)))
 
 (defun xenops-math-delete-overlays (element)
   (let ((beg (plist-get element :begin))
