@@ -1,4 +1,4 @@
-(defvar xenops-display-text-prettify-symbols
+(defvar xenops-text-prettify-symbols
   '(("\\grad" . "∇")
     ("\\implies" . "⟹")
     ("\\sqrt" . "√")
@@ -6,7 +6,7 @@
     ("^3" . "³")
     ("^n" . "ⁿ")))
 
-(defvar xenops-display-text-prettify-symbols-string-replacements
+(defvar xenops-text-prettify-symbols-string-replacements
   '(("\\begin{definition*}" . "Definition.")
     ("\\end{definition*}" . "┘")
 
@@ -64,7 +64,7 @@
     ("\\in " . "∈ ")))
 
 
-(defun xenops-display-text-activate ()
+(defun xenops-text-activate ()
   ;; TODO
   ;;
   ;; - Can we make \Delta consume the post-space? So that "\Delta r"
@@ -75,23 +75,23 @@
 
     ;; Add custom single-character entries to default latex-mode entries.
     (setq prettify-symbols-alist
-          (-union prettify-symbols-alist xenops-display-text-prettify-symbols))
+          (-union prettify-symbols-alist xenops-text-prettify-symbols))
 
     ;; Remove entries that will be overridden by string replacements
     (setq prettify-symbols-alist
           (-difference prettify-symbols-alist
-                       xenops-display-text-prettify-symbols-string-replacements)))
+                       xenops-text-prettify-symbols-string-replacements)))
 
   ;; Add string replacements.
-  (mapc #'xenops-display-text-prettify-symbols-add-string-replacement
-        xenops-display-text-prettify-symbols-string-replacements)
+  (mapc #'xenops-text-prettify-symbols-add-string-replacement
+        xenops-text-prettify-symbols-string-replacements)
 
   ;; Activate.
   (prettify-symbols-mode))
 
 
 ;; https://emacs.stackexchange.com/a/34882/9007
-(defun xenops-display-text-prettify-symbols-add-string-replacement (pair)
+(defun xenops-text-prettify-symbols-add-string-replacement (pair)
   "Make `prettify-symbols-mode' replace string FROM with string TO.
 
 Updates `prettify-symbols-alist'.  You may need to toggle
@@ -110,4 +110,4 @@ for more information."
         prettify-symbols-alist))
 
 
-(provide 'xenops-display-text)
+(provide 'xenops-text)

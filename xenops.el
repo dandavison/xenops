@@ -4,9 +4,9 @@
 (require 'f)
 (require 'org)
 (require 's)
-(require 'xenops-display-image)
-(require 'xenops-display-math)
-(require 'xenops-display-text)
+(require 'xenops-image)
+(require 'xenops-math)
+(require 'xenops-text)
 (require 'xenops-execute)
 (require 'xenops-process)
 
@@ -23,9 +23,9 @@
   (cond
    (xenops-mode
     (define-key xenops-mode-map "\C-c\C-c" 'xenops)
-    (xenops-display-image-activate)
-    (xenops-display-math-activate)
-    (xenops-display-text-activate))
+    (xenops-image-activate)
+    (xenops-math-activate)
+    (xenops-text-activate))
    ;; TODO: deactivate
    ))
 
@@ -33,16 +33,16 @@
   (interactive "P")
   (cond
    ((equal arg '(16))
-    (xenops-hide))
+    (xenops-hide-images))
    ((equal arg '(4))
-    (xenops-regenerate))
-   (t (xenops-display))))
+    (xenops-regenerate-images))
+   (t (xenops-display-images))))
 
 (defvar xenops-ops
   '((math . (:ops
-             (xenops-display-math-
-              xenops-display-math-regenerate-
-              xenops-display-math-hide-)
+             (xenops-math-display-image
+              xenops-math-regenerate-image
+              xenops-math-hide-image)
              :delimiters
              (("\\$" .
                "\\$")
@@ -51,22 +51,24 @@
               ("^[ \t]*\\\\begin{tabular}" .
                "^[ \t]*\\\\end{tabular}"))))
     (image . (:ops
-              (xenops-display-image-
-               xenops-display-image-hide-)
+              (xenops-image-display-image
+               xenops-image-hide-image)
               :delimiters
               (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))))))
 
-(defun xenops-display ()
+(defun xenops-display-images ()
   (interactive)
-  (xenops-process '(xenops-display-math- xenops-display-image-)))
+  (xenops-process '(xenops-math-display-image
+                    xenops-image-display-image)))
 
-(defun xenops-regenerate ()
+(defun xenops-regenerate-images ()
   (interactive)
-  (xenops-process '(xenops-display-math-regenerate-)))
+  (xenops-process '(xenops-math-regenerate-image)))
 
-(defun xenops-hide ()
+(defun xenops-hide-images ()
   (interactive)
-  (xenops-process '(xenops-display-math-hide- xenops-display-image-hide-)))
+  (xenops-process '(xenops-math-hide-image
+                    xenops-image-hide-image)))
 
 (defun xenops-avy-goto-math ()
   (interactive)
@@ -83,7 +85,7 @@
                   ;; math elements are not recognized when point is on
                   ;; match for first delimiter.
                   (1+ pt))
-                 (-if-let (element (xenops-display-math-parse-element-at-point))
+                 (-if-let (element (xenops-math-parse-element-at-point))
                      (progn
                        (copy-region-as-kill (plist-get element :begin-math)
                                             (plist-get element :end-math))
