@@ -117,6 +117,25 @@
   (or (xenops-math-handle-paste)
       (xenops-image-handle-paste)))
 
+(defun xenops-display-images-async ()
+  "Run `xenops-display-images' on the current buffer's file, asynchronously."
+  (interactive)
+  (message "xenops: processing images asynchronously")
+  (async-start `(lambda ()
+                  (package-initialize)
+                  (add-to-list 'load-path
+                               ,(file-name-directory (find-library-name "xenops")))
+                  (require 'xenops)
+                  (find-file ,(buffer-file-name))
+                  (xenops-mode)
+                  (cl-letf (((symbol-function 'xenops-math-file-name-static-hash-data)
+                             (lambda () ',(xenops-math-file-name-static-hash-data))))
+                    (xenops-display-images-headlessly)))
+               (lambda (result)
+                 (run-with-idle-timer 0 nil
+                                      (lambda () (save-excursion (goto-char (point-min))
+                                                            (xenops-display-images)))))))
+
 (defun xenops-display-images-headlessly ()
   "Run `xenops-display-images' in a headless emacs process."
   (cl-letf (((symbol-function 'org--get-display-dpi) (lambda () 129))
