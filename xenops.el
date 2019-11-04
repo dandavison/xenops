@@ -22,7 +22,7 @@
   nil " xenops" nil
   (cond
    (xenops-mode
-    (define-key xenops-mode-map "\C-c\C-c" 'xenops)
+    (define-key xenops-mode-map "\C-c\C-c" #'xenops)
     (xenops-image-activate)
     (xenops-math-activate)
     (xenops-text-activate))
