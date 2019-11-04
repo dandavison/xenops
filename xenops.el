@@ -70,6 +70,18 @@
   (xenops-process '(xenops-math-hide-image
                     xenops-image-hide-image)))
 
+
+(defun xenops-display-images-headlessly ()
+  "Run `xenops-display-images' in a headless emacs process."
+  (cl-letf (((symbol-function 'org--get-display-dpi) (lambda () 129))
+            ((symbol-function 'org-latex-color)
+             (lambda (attr)
+               (case attr
+                 (:foreground "0,0,0")
+                 (:background "1,1,1")
+                 (t (error "Unexpected input: %s" attr))))))
+    (xenops-display-images)))
+
 (defun xenops-avy-goto-math ()
   (interactive)
   (let (avy-action) (xenops-avy-do-at-math)))
