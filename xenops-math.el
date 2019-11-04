@@ -11,7 +11,7 @@
   (define-key xenops-mode-map [(mouse-1)] #'xenops-math-handle-mouse-1)
   (define-key xenops-mode-map [(down-mouse-1)] #'xenops-math-handle-down-mouse-1)
   (define-key xenops-mode-map [(drag-mouse-1)] #'xenops-math-handle-drag-mouse-1)
-  (define-key xenops-mode-map [(return)] #'xenops-math-handle-return)
+  (xenops-define-key-with-fallback [(return)] #'xenops-math-handle-return)
 
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-math-in-inline-math-element-p "\\$"))))
@@ -52,12 +52,9 @@
   (goto-char (plist-get element :begin-math)))
 
 (defun xenops-math-handle-return ()
-  (interactive)
-  (if (xenops-math-image-at-point?)
-      (-if-let (element (xenops-math-parse-element-at-point))
-          (xenops-math-hide-image element))
-    (let (xenops-mode)
-      (execute-kbd-macro [(return)]))))
+  (when (xenops-math-image-at-point?)
+    (-if-let (element (xenops-math-parse-element-at-point))
+        (xenops-math-hide-image element))))
 
 (defun xenops-math-image-at-point? ()
   (eq (get-char-property (point) 'org-overlay-type)

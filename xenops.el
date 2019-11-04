@@ -111,4 +111,12 @@
            (s-join "\\|"
                    (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters))))))
 
+(defmacro xenops-define-key-with-fallback (key handler)
+  `(define-key xenops-mode-map ,key
+     (lambda ()
+       (interactive)
+       (unless (funcall ,handler)
+         (let (xenops-mode)
+           (execute-kbd-macro ,key))))))
+
 (provide 'xenops)
