@@ -12,6 +12,8 @@
   (define-key xenops-mode-map [(down-mouse-1)] #'xenops-math-handle-down-mouse-1)
   (define-key xenops-mode-map [(drag-mouse-1)] #'xenops-math-handle-drag-mouse-1)
   (xenops-define-key-with-fallback [(return)] #'xenops-math-handle-return)
+  (xenops-define-key-with-fallback "\M-w" #'xenops-math-handle-copy)
+  (xenops-define-key-with-fallback [(super c)] #'xenops-math-handle-copy)
 
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-math-in-inline-math-element-p "\\$"))))
@@ -55,6 +57,11 @@
   (when (xenops-math-image-at-point?)
     (-if-let (element (xenops-math-parse-element-at-point))
         (xenops-math-hide-image element))))
+
+(defun xenops-math-handle-copy ()
+  (when (xenops-math-image-at-point?)
+    (-if-let (element (xenops-math-parse-element-at-point))
+        (xenops-math-copy element))))
 
 (defun xenops-math-copy (element)
   (copy-region-as-kill (plist-get element :begin-math)
