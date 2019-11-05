@@ -55,13 +55,15 @@
 
 (defun xenops-math-handle-return ()
   (when (xenops-math-image-at-point?)
-    (-if-let (element (xenops-math-parse-element-at-point))
-        (xenops-math-hide-image element))))
+    (-when-let (element (xenops-math-parse-element-at-point))
+      (xenops-math-hide-image element)
+      t)))
 
 (defun xenops-math-handle-copy ()
   (when (xenops-math-image-at-point?)
-    (-if-let (element (xenops-math-parse-element-at-point))
-        (xenops-math-copy element))))
+    (-when-let (element (xenops-math-parse-element-at-point))
+      (xenops-math-copy element)
+      t)))
 
 (defun xenops-math-copy (element)
   (copy-region-as-kill (plist-get element :begin-math)
