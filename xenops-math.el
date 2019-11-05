@@ -66,11 +66,22 @@
       t)))
 
 (defun xenops-math-copy (element)
-  (copy-region-as-kill (plist-get element :begin-math)
-                       (plist-get element :end-math)))
+  (copy-region-as-kill (plist-get element :begin)
+                       (plist-get element :end)))
 
 (defun xenops-math-paste ()
-  (yank))
+  (let ((element-string (current-kill)))
+    (insert-for-yank
+     (-if-let (xenops-math-parse-element-at-point)
+         (xenops-math-strip-delimiters element-string)
+       element-string))))
+
+(defun xenops-math-strip-delimiters (element-string)
+  (with-temp-buffer
+    (save-excursion (insert element-string))
+    (let ((element (xenops-math-parse-element-at-point)))
+      (buffer-substring (plist-get element :begin-math)
+                        (plist-get element :end-math)))))
 
 (defun xenops-math-image-at-point? ()
   (eq (get-char-property (point) 'org-overlay-type)
