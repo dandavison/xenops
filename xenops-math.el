@@ -56,6 +56,13 @@
     (-if-let (element (xenops-math-parse-element-at-point))
         (xenops-math-hide-image element))))
 
+(defun xenops-math-copy (element)
+  (copy-region-as-kill (plist-get element :begin-math)
+                       (plist-get element :end-math)))
+
+(defun xenops-math-paste ()
+  (yank))
+
 (defun xenops-math-image-at-point? ()
   (eq (get-char-property (point) 'org-overlay-type)
       'org-latex-overlay))

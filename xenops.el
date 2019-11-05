@@ -99,10 +99,9 @@
                   (1+ pt))
                  (-if-let (element (xenops-math-parse-element-at-point))
                      (progn
-                       (copy-region-as-kill (plist-get element :begin-math)
-                                            (plist-get element :end-math))
+                       (xenops-math-copy element)
                        t)))
-             (save-excursion (yank))))))
+             (save-excursion (xenops-math-paste))))))
     (xenops-avy-do-at-math)))
 
 (defun xenops-avy-do-at-math ()
