@@ -18,7 +18,6 @@
     (xenops-image-- `(link ,org-element) xenops-image-width nil nil ".")))
 
 (defun xenops-image-hide-image (element)
-  (interactive)
   ;; TODO: improve
   (save-restriction
     (narrow-to-region (plist-get element :begin)
