@@ -86,7 +86,7 @@
   (interactive)
   (let (avy-action) (xenops-avy-do-at-math)))
 
-(defun xenops-avy-copy-math ()
+(defun xenops-avy-copy-math-and-paste ()
   (interactive)
   (let ((avy-action
          (lambda (pt)
