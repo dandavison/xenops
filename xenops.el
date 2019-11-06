@@ -23,6 +23,9 @@
   (cond
    (xenops-mode
     (define-key xenops-mode-map "\C-c\C-c" #'xenops)
+    (xenops-define-key-with-fallback "\C-y" #'xenops-handle-paste)
+    (xenops-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
+
     (xenops-image-activate)
     (xenops-math-activate)
     (xenops-text-activate))
@@ -70,6 +73,10 @@
   (xenops-process '(xenops-math-hide-image
                     xenops-image-hide-image)))
 
+(defun xenops-handle-paste ()
+  (interactive)
+  (or (xenops-math-handle-paste)
+      (xenops-image-handle-paste)))
 
 (defun xenops-display-images-headlessly ()
   "Run `xenops-display-images' in a headless emacs process."
@@ -109,12 +116,13 @@
            (s-join "\\|"
                    (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters))))))
 
-(defmacro xenops-define-key-with-fallback (key handler)
+(defmacro xenops-define-key-with-fallback (key handler &optional fallback-key)
   `(define-key xenops-mode-map ,key
      (lambda ()
        (interactive)
        (unless (funcall ,handler)
          (let (xenops-mode)
-           (execute-kbd-macro ,key))))))
+           (execute-kbd-macro ,(or fallback-key key)))))))
 
 (provide 'xenops)
+

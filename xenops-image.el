@@ -11,7 +11,7 @@
   backslash in the resulting LaTeX.")
 
 (defun xenops-image-activate ()
-  (define-key xenops-mode-map [(super v)] 'xenops-image-insert-image-from-clipboard))
+  (define-key xenops-mode-map [(super v)] 'xenops-image-handle-paste))
 
 (defun xenops-image-display-image (element)
   (let ((org-element (plist-put element :type "file")))
@@ -35,7 +35,7 @@
                           :end ,(match-end 0)
                           :path ,(expand-file-name (match-string 2)))))
 
-(defun xenops-image-insert-image-from-clipboard ()
+(defun xenops-image-handle-paste ()
   (interactive)
   (let ((output-file)
         (temp-file (make-temp-file "xenops-image-from-clipboard-")))
@@ -49,10 +49,10 @@
                     (read-file-name "Save image as: " (format "%s/" default-directory)))
               (when (file-exists-p output-file) (error "File exists: %s" output-file))
               (copy-file temp-file output-file t)))))
-    (if output-file
-        (insert (format xenops-image-latex-template
-                        (file-relative-name output-file)))
-      (call-interactively 'yank))))
+    (when output-file
+      (insert (format xenops-image-latex-template
+                      (file-relative-name output-file)))
+      t)))
 
 (defun xenops-image-- (link width include-linked refresh file-extension-re)
   ;; TODO: Hack: This is taken from `org-display-inline-images'.
