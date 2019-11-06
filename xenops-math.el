@@ -14,6 +14,8 @@
   (xenops-define-key-with-fallback [(return)] #'xenops-math-handle-return)
   (xenops-define-key-with-fallback "\M-w" #'xenops-math-handle-copy)
   (xenops-define-key-with-fallback [(super c)] #'xenops-math-handle-copy)
+  (xenops-define-key-with-fallback "\C-y" #'xenops-math-handle-paste)
+  (xenops-define-key-with-fallback [(super v)] #'xenops-math-handle-paste)
 
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-math-in-inline-math-element-p "\\$"))))
@@ -65,23 +67,35 @@
       (xenops-math-copy element)
       t)))
 
+(defun xenops-math-handle-paste ()
+  "If the text to be pasted is a math element and we are in a
+  math element, then handle the paste, with stripping of the
+  delimiters."
+  (let ((copied-text (current-kill 0 'do-not-rotate)))
+    (-when-let (element (xenops-math-parse-element-from-string copied-text))
+      (when (xenops-math-parse-element-at-point)
+        (insert-for-yank
+         (substring copied-text
+                    (plist-get element :begin-math)
+                    (plist-get element :end-math)))
+        (rotate-yank-pointer 1)
+        t))))
+
 (defun xenops-math-copy (element)
   (copy-region-as-kill (plist-get element :begin)
                        (plist-get element :end)))
 
 (defun xenops-math-paste ()
-  (let ((element-string (current-kill)))
-    (insert-for-yank
-     (-if-let (xenops-math-parse-element-at-point)
-         (xenops-math-strip-delimiters element-string)
-       element-string))))
+  (or (xenops-math-handle-paste) (yank)))
 
-(defun xenops-math-strip-delimiters (element-string)
+(defun xenops-math-parse-element-from-string (element-string)
   (with-temp-buffer
     (save-excursion (insert element-string))
-    (let ((element (xenops-math-parse-element-at-point)))
-      (buffer-substring (plist-get element :begin-math)
-                        (plist-get element :end-math)))))
+    (-when-let (element (xenops-math-parse-element-at-point-hack))
+      (when (eq (- (plist-get element :end)
+                   (plist-get element :begin))
+                (length element-string))
+        element))))
 
 (defun xenops-math-image-at-point? ()
   (eq (get-char-property (point) 'org-overlay-type)

@@ -88,19 +88,18 @@
 
 (defun xenops-avy-copy-math-and-paste ()
   (interactive)
-  (let ((avy-action
+  (let ((element)
+        (avy-action
          (lambda (pt)
-           (when
-               (save-excursion
-                 (goto-char
-                  ;; TODO: hack: This should be just `pt`, but inline
-                  ;; math elements are not recognized when point is on
-                  ;; match for first delimiter.
-                  (1+ pt))
-                 (-if-let (element (xenops-math-parse-element-at-point))
-                     (progn
-                       (xenops-math-copy element)
-                       t)))
+           (save-excursion
+             (goto-char
+              ;; TODO: hack: This should be just `pt`, but inline
+              ;; math elements are not recognized when point is on
+              ;; match for first delimiter.
+              (1+ pt))
+             (setq element (xenops-math-parse-element-at-point))
+             (when element (xenops-math-copy element)))
+           (when element
              (save-excursion (xenops-math-paste))))))
     (xenops-avy-do-at-math)))
 
