@@ -1,6 +1,7 @@
 (defvar xenops-text-prettify-symbols
   '(("\\grad" . "∇")
     ("\\implies" . "⟹")
+    ("\\iff" . "⟺")
     ("\\sqrt" . "√")
     ("^2" . "²")
     ("^3" . "³")
