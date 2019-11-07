@@ -75,7 +75,7 @@
 
     ;; Add custom single-character entries to default latex-mode entries.
     (setq prettify-symbols-alist
-          (-union prettify-symbols-alist xenops-text-prettify-symbols))
+          (-union xenops-text-prettify-symbols prettify-symbols-alist))
 
     ;; Remove entries that will be overridden by string replacements
     (setq prettify-symbols-alist
