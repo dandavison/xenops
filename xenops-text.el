@@ -65,6 +65,14 @@
     ("\\in " . "∈ ")))
 
 
+(defvar xenops-text-prettify-symbols-regexp-replacements
+  ;; TODO Use an alist like the others.
+  (format
+   "\\(%s\\)"
+   (s-join
+    "\\|"
+    '("\\\\emph{\\([^}]+\\)}"))))
+
 (defun xenops-text-activate ()
   ;; TODO
   ;;
@@ -87,16 +95,45 @@
   (mapc #'xenops-text-prettify-symbols-add-string-replacement
         xenops-text-prettify-symbols-string-replacements)
 
-  ;; Activate.
   (prettify-symbols-mode)
-  ;; TODO: I think this is causing the very long regexp to be matched twice during fontification.
-  ;; Can this be done by modifying the existing prettify-symbols entry?
+
+  ;; Prettify-symbols replacements using captured text
   (font-lock-add-keywords
    nil
-   `((,(caar prettify-symbols--keywords)
+   `((,xenops-text-prettify-symbols-regexp-replacements
+      (0
+       (xenops-text-prettify-regexp-replacement)))))
+
+  ;; Add tooltips to prettify replacements
+  ;; TODO: I think this is causing the very long regexp to be matched twice during fontification.
+  ;; Can this be done by modifying the existing prettify-symbols entry?
+  (xenops-text-add-tooltips (caar prettify-symbols--keywords))
+  (xenops-text-add-tooltips xenops-text-prettify-symbols-regexp-replacements))
+
+
+(defun xenops-text-add-tooltips (regexp)
+  (font-lock-add-keywords
+   nil
+   `((,regexp
       0 `(face font-lock-keyword-face
                help-echo ,(match-string 0))))))
 
+(defun xenops-text-prettify-regexp-replacement ()
+  (let ((string (match-string 2)))
+    (xenops-text-prettify-symbols-compose
+     (xenops-text-make-composition string)))
+  nil)
+
+(defun xenops-text-prettify-symbols-compose (components)
+  "Taken from `prettify-symbols--compose-symbol'"
+  ;; TODO: look at defensive measures in that function.
+  (let ((start (match-beginning 0))
+        (end (match-end 0)))
+    (with-silent-modifications
+      (compose-region start end components)
+      (add-text-properties
+       start end
+       `(prettify-symbols-start ,start prettify-symbols-end ,end)))))
 
 ;; https://emacs.stackexchange.com/a/34882/9007
 (defun xenops-text-prettify-symbols-add-string-replacement (pair)
