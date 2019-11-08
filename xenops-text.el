@@ -88,7 +88,14 @@
         xenops-text-prettify-symbols-string-replacements)
 
   ;; Activate.
-  (prettify-symbols-mode))
+  (prettify-symbols-mode)
+  ;; TODO: I think this is causing the very long regexp to be matched twice during fontification.
+  ;; Can this be done by modifying the existing prettify-symbols entry?
+  (font-lock-add-keywords
+   nil
+   `((,(caar prettify-symbols--keywords)
+      0 `(face font-lock-keyword-face
+               help-echo ,(match-string 0))))))
 
 
 ;; https://emacs.stackexchange.com/a/34882/9007
