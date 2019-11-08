@@ -110,12 +110,14 @@ such that base-left of the character is aligned with base-right
 of the preceding character.  Refer to `reference-point-alist'
 for more information."
   (push (cons (car pair)
-              (let ((composition nil))
-                (dolist (char (string-to-list (cdr pair))
-                              (nreverse (cdr composition)))
-                  (push char composition)
-                  (push '(Br . Bl) composition))))
+              (xenops-text-make-composition (cdr pair)))
         prettify-symbols-alist))
 
+(defun xenops-text-make-composition (string)
+  (let ((composition nil))
+    (dolist (char (string-to-list string)
+                  (nreverse (cdr composition)))
+      (push char composition)
+      (push '(Br . Bl) composition))))
 
 (provide 'xenops-text)
