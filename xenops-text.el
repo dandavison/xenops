@@ -119,7 +119,7 @@
                help-echo ,(match-string 0))))))
 
 (defun xenops-text-prettify-regexp-replacement ()
-  (let ((string (match-string 2)))
+  (let ((string (save-match-data (s-join " " (split-string (match-string 2))))))
     (xenops-text-prettify-symbols-compose
      (xenops-text-make-composition string)))
   nil)
