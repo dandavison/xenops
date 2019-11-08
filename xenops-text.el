@@ -73,6 +73,8 @@
     "\\|"
     '("\\\\emph{\\([^}]+\\)}"))))
 
+(defvar xenops-tooltip-delay 0.2)
+
 (defun xenops-text-activate ()
   ;; TODO
   ;;
@@ -108,7 +110,8 @@
   ;; TODO: I think this is causing the very long regexp to be matched twice during fontification.
   ;; Can this be done by modifying the existing prettify-symbols entry?
   (xenops-text-add-tooltips (caar prettify-symbols--keywords))
-  (xenops-text-add-tooltips xenops-text-prettify-symbols-regexp-replacements))
+  (xenops-text-add-tooltips xenops-text-prettify-symbols-regexp-replacements)
+  (set (make-variable-buffer-local 'tooltip-delay) xenops-tooltip-delay))
 
 
 (defun xenops-text-add-tooltips (regexp)
