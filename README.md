@@ -10,7 +10,7 @@ Xenops is an extension of LaTeX editing features already present in Emacs ([auct
 - You can use the mouse to drag an existing math image to a new location, to use it as the starting point for a new one, or you can use `xenops-avy-copy-math` to do this.
 - `xenops-avy-goto-math` to jump to math blocks using [avy](https://github.com/abo-abo/avy).
 - While LaTeX math code is displayed, math markup is replaced by unicode equivalents<sup>2</sup>
-- LaTeX tables are processed the same as math.
+- LaTeX tables are displayed as SVGs, in the same way as LaTeX math content.
 - Images (`\includegraphics`) are displayed inline automatically.
 - Images pasted from system clipboard (e.g. screenshots) are written to disk, captured as LaTeX (`\includegraphics`), and displayed inline.
 - Opinionated alterations are made to clean up the visual appearance of common LaTeX markup: (`\begin{*}...\end{*}` environments, `\section`,  etc).
