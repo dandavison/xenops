@@ -71,7 +71,11 @@
    "\\(%s\\)"
    (s-join
     "\\|"
-    '("\\\\emph{\\([^}]+\\)}"))))
+    '("\\\\emph{\\([^}]+\\)}"
+      "\\\\textbf{\\([^}]+\\)}"
+      "\\\\textit{\\([^}]+\\)}"
+      "{\\\\bf +\\([^}]+\\)}"
+      "{\\\\it +\\([^}]+\\)}"))))
 
 (defvar xenops-tooltip-delay 0.2)
 
@@ -121,10 +125,35 @@
       0 `(face default help-echo ,(match-string 0))))))
 
 (defun xenops-text-prettify-regexp-replacement ()
-  (let ((string (save-match-data (s-join " " (split-string (match-string 2))))))
+  (let* ((string
+          (save-match-data
+            (s-join " " (split-string (xenops-text-prettify-regexp-get-match-capture))))))
     (xenops-text-prettify-symbols-compose
      (xenops-text-make-composition string)))
   nil)
+
+(defun xenops-text-prettify-regexp-get-match-capture ()
+  "A match for a regexp capture replacement has just been made.
+Return the replacement text."
+  ;; The regexp is like (option_1(captured)|option_2(captured)|...).
+  ;; Note that there is an "outer union expression" followed by N "options", each of which has its
+  ;; own capture group.
+  ;; So the indices of match-data contain the following:
+  ;;
+  ;; 0 . whole string beg (match-string 0)
+  ;; 1 . whole string end
+  ;; 2 . outer union beg (match-string 1)
+  ;; 3 . outer union end
+  ;; 4 0 option_1 beg (match-string 2)
+  ;; 5 1 option_1 end
+  ;; 6 2 option_2 beg (match-string 3)
+  ;; 7 3 option_2 end
+  ;;
+  ;; We ignore the first 4 indices and start counting at index 4.  Then, we find the first `beg`
+  ;; index that is non-nil. Suppose this is i. Then (i + 4)/2 is the corresponding match-string
+  ;; index.
+  ;; TODO: The implementation of -find-index looks inefficient; implement with short-circuiting.
+  (match-string (/ (+ (-find-index #'identity (-drop 4 (match-data 'integers))) 4) 2)))
 
 (defun xenops-text-prettify-symbols-compose (components)
   "Taken from `prettify-symbols--compose-symbol'"
