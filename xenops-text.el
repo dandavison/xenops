@@ -118,8 +118,7 @@
   (font-lock-add-keywords
    nil
    `((,regexp
-      0 `(face font-lock-keyword-face
-               help-echo ,(match-string 0))))))
+      0 `(face default help-echo ,(match-string 0))))))
 
 (defun xenops-text-prettify-regexp-replacement ()
   (let ((string (save-match-data (s-join " " (split-string (match-string 2))))))
