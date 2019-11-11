@@ -125,16 +125,20 @@
       0 `(face default help-echo ,(match-string 0))))))
 
 (defun xenops-text-prettify-regexp-replacement ()
-  (let* ((string
-          (save-match-data
-            (s-join " " (split-string (xenops-text-prettify-regexp-get-match-capture))))))
-    (xenops-text-prettify-symbols-compose
-     (xenops-text-make-composition string)))
+  "A match for a regexp capture replacement has just been made.
+Return the replacement text to be displayed, with any text properties."
+  (let* ((beg (match-beginning 0))
+         (end (match-end 0))
+         (match (match-string 0))
+         (capture (s-join " " (split-string (xenops-text-prettify-regexp-get-match-capture))))
+         (composition (xenops-text-make-composition capture))
+         (properties (xenops-text-prettify-regexp-get-text-properties match)))
+    (xenops-text-prettify-symbols-compose composition properties beg end))
   nil)
 
 (defun xenops-text-prettify-regexp-get-match-capture ()
   "A match for a regexp capture replacement has just been made.
-Return the replacement text."
+Return the captured text."
   ;; The regexp is like (option_1(captured)|option_2(captured)|...).
   ;; Note that there is an "outer union expression" followed by N "options", each of which has its
   ;; own capture group.
@@ -155,16 +159,26 @@ Return the replacement text."
   ;; TODO: The implementation of -find-index looks inefficient; implement with short-circuiting.
   (match-string (/ (+ (-find-index #'identity (-drop 4 (match-data 'integers))) 4) 2)))
 
-(defun xenops-text-prettify-symbols-compose (components)
+(defun xenops-text-prettify-regexp-get-text-properties (match)
+  "Return plist of text properties for match.
+E.g. if `match' looks like \textbf{something}, then return text
+properties that will apply a bold face to the replacement
+text."
+  (cond
+   ((string-match "\\(\\\\textbf{\\|{\\\\bf \\)" match)
+    '(face bold))
+   ((string-match "\\(\\\\textit{\\|\\\\emph{\\|{\\\\it \\)" match)
+    '(face italic))))
+
+(defun xenops-text-prettify-symbols-compose (composition properties beg end)
   "Taken from `prettify-symbols--compose-symbol'"
   ;; TODO: look at defensive measures in that function.
-  (let ((start (match-beginning 0))
-        (end (match-end 0)))
-    (with-silent-modifications
-      (compose-region start end components)
-      (add-text-properties
-       start end
-       `(prettify-symbols-start ,start prettify-symbols-end ,end)))))
+  (with-silent-modifications
+    (compose-region beg end composition)
+    (add-text-properties
+     beg end
+     (append properties
+             `(prettify-symbols-start ,beg prettify-symbols-end ,end)))))
 
 ;; https://emacs.stackexchange.com/a/34882/9007
 (defun xenops-text-prettify-symbols-add-string-replacement (pair)
