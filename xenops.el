@@ -4,11 +4,12 @@
 (require 'f)
 (require 'org)
 (require 's)
+(require 'xenops-execute)
 (require 'xenops-image)
 (require 'xenops-math)
-(require 'xenops-text)
-(require 'xenops-execute)
 (require 'xenops-process)
+(require 'xenops-text)
+(require 'xenops-util)
 
 (defvar xenops-cache-directory "/tmp/xenops-cache/"
   "Path to a directory in which xenops can save files.")
@@ -23,8 +24,8 @@
   (cond
    (xenops-mode
     (define-key xenops-mode-map "\C-c\C-c" #'xenops)
-    (xenops-define-key-with-fallback "\C-y" #'xenops-handle-paste)
-    (xenops-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
+    (xenops-util-define-key-with-fallback "\C-y" #'xenops-handle-paste)
+    (xenops-util-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
 
     (xenops-image-activate)
     (xenops-math-activate)
@@ -115,26 +116,6 @@
    (format "\\(%s\\)"
            (s-join "\\|"
                    (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters))))))
-
-(defmacro xenops-define-key-with-fallback (key handler &optional fallback-key)
-  "Bind `handler' to `key' in `xenops-mode-map' such that if
-`handler' returns `nil', then the function is called that would
-have been bound to `key' were `xenops-mode' not active."
-  `(define-key xenops-mode-map ,key
-     (lambda ()
-       (interactive)
-       (unless (funcall ,handler)
-         (let (xenops-mode)
-           (execute-kbd-macro ,(or fallback-key key)))))))
-
-(defun xenops-first-index (list)
-  "Return smallest index for which the corresponding element is
-non-nil, or nil if no such index exists."
-  (catch :index
-    (let ((i 0))
-      (dolist (el list)
-        (and el (throw :index i))
-        (setq i (1+ i))))))
 
 (provide 'xenops)
 

@@ -11,9 +11,9 @@
   (define-key xenops-mode-map [(mouse-1)] #'xenops-math-handle-mouse-1)
   (define-key xenops-mode-map [(down-mouse-1)] #'xenops-math-handle-down-mouse-1)
   (define-key xenops-mode-map [(drag-mouse-1)] #'xenops-math-handle-drag-mouse-1)
-  (xenops-define-key-with-fallback [(return)] #'xenops-math-handle-return)
-  (xenops-define-key-with-fallback "\M-w" #'xenops-math-handle-copy)
-  (xenops-define-key-with-fallback [(super c)] #'xenops-math-handle-copy "\M-w")
+  (xenops-util-define-key-with-fallback [(return)] #'xenops-math-handle-return)
+  (xenops-util-define-key-with-fallback "\M-w" #'xenops-math-handle-copy)
+  (xenops-util-define-key-with-fallback [(super c)] #'xenops-math-handle-copy "\M-w")
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-math-in-inline-math-element-p "\\$"))))
 
