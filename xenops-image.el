@@ -15,7 +15,7 @@
 
 (defun xenops-image-display-image (element)
   (let ((org-element (plist-put element :type "file")))
-    (xenops-image-- `(link ,org-element) xenops-image-width nil nil ".")))
+    (xenops-image-display-image- `(link ,org-element) xenops-image-width nil nil ".")))
 
 (defun xenops-image-hide-image (element)
   ;; TODO: improve
@@ -54,7 +54,7 @@
                       (file-relative-name output-file)))
       t)))
 
-(defun xenops-image-- (link width include-linked refresh file-extension-re)
+(defun xenops-image-display-image- (link width include-linked refresh file-extension-re)
   ;; TODO: Hack: This is taken from `org-display-inline-images'.
   (when (and (equal "file" (org-element-property :type link))
              (or include-linked
