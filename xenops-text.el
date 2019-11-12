@@ -122,7 +122,8 @@
   (font-lock-add-keywords
    nil
    `((,regexp
-      0 `(face default help-echo ,(match-string 0))))))
+      0 `(face font-lock-keyword-face
+               help-echo ,(match-string 0))))))
 
 (defun xenops-text-prettify-regexp-replacement ()
   "A match for a regexp capture replacement has just been made.
