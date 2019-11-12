@@ -127,5 +127,14 @@ have been bound to `key' were `xenops-mode' not active."
          (let (xenops-mode)
            (execute-kbd-macro ,(or fallback-key key)))))))
 
+(defun xenops-first-index (list)
+  "Return smallest index for which the corresponding element is
+non-nil, or nil if no such index exists."
+  (catch :index
+    (let ((i 0))
+      (dolist (el list)
+        (and el (throw :index i))
+        (setq i (1+ i))))))
+
 (provide 'xenops)
 

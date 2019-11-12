@@ -156,8 +156,7 @@ Return the captured text."
   ;; We ignore the first 4 indices and start counting at index 4.  Then, we find the first `beg`
   ;; index that is non-nil. Suppose this is i. Then (i + 4)/2 is the corresponding match-string
   ;; index.
-  ;; TODO: The implementation of -find-index looks inefficient; implement with short-circuiting.
-  (match-string (/ (+ (-find-index #'identity (-drop 4 (match-data 'integers))) 4) 2)))
+  (match-string (/ (+ (xenops-first-index (-drop 4 (match-data 'integers))) 4) 2)))
 
 (defun xenops-text-prettify-regexp-get-text-properties (match)
   "Return plist of text properties for match.
