@@ -117,6 +117,9 @@
                    (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters))))))
 
 (defmacro xenops-define-key-with-fallback (key handler &optional fallback-key)
+  "Bind `handler' to `key' in `xenops-mode-map' such that if
+`handler' returns `nil', then the function is called that would
+have been bound to `key' were `xenops-mode' not active."
   `(define-key xenops-mode-map ,key
      (lambda ()
        (interactive)
