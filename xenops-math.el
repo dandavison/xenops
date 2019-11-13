@@ -113,14 +113,13 @@
     (let ((was-in (xenops-math-parse-element-at-point)))
       (funcall move-point-command)
       (save-excursion
-        (let ((now-in (xenops-math-parse-element-at-point)))
-          (let ((entered (and now-in (not (equal now-in was-in))))
-                (exited (and was-in (not (equal was-in now-in)))))
-            (cond
-             (entered (if (org--list-latex-overlays (plist-get now-in :begin)
-                                                    (plist-get now-in :end))
-                          (xenops-math-hide-image now-in)))
-             (exited (xenops-math-display-image was-in)))))))))
+        (let* ((now-in (xenops-math-parse-element-at-point))
+               (entered (and now-in (not (equal now-in was-in))))
+               (exited (and was-in (not (equal was-in now-in)))))
+          (and entered (org--list-latex-overlays (plist-get now-in :begin)
+                                                 (plist-get now-in :end))
+               (xenops-math-hide-image now-in))
+          (and exited (xenops-math-display-image was-in)))))))
 
 (defun xenops-math-handle-mouse-1 (event)
   (interactive "e")
