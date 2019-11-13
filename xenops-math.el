@@ -10,6 +10,7 @@
   (define-key xenops-mode-map [(up)] (lambda () (interactive) (xenops-math-toggle-on-transition #'previous-line)))
   (define-key xenops-mode-map [(mouse-1)] #'xenops-math-handle-mouse-1)
   (xenops-util-define-key-with-fallback [(return)] #'xenops-math-handle-return)
+  (xenops-util-define-key-with-fallback [(backspace)] #'xenops-math-handle-delete)
   (xenops-util-define-key-with-fallback "\M-w" #'xenops-math-handle-copy)
   (xenops-util-define-key-with-fallback [(super c)] #'xenops-math-handle-copy "\M-w")
   (setq mouse-drag-and-drop-region t)
@@ -59,6 +60,12 @@
   (when (xenops-math-image-at-point?)
     (-when-let (element (xenops-math-parse-element-at-point))
       (xenops-math-hide-image element)
+      t)))
+
+(defun xenops-math-handle-delete ()
+  (when (xenops-math-image-at-point?)
+    (-when-let (element (xenops-math-parse-element-at-point))
+      (kill-region (plist-get element :begin) (plist-get element :end))
       t)))
 
 (defun xenops-math-handle-copy ()
