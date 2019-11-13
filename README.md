@@ -1,8 +1,15 @@
 <p align="center"><img width=512px src="xenops.jpg" alt="" /></p>
 
-Xenops is a LaTeX editing environment for Emacs. Xenops alters the visual appearance of a LaTeX document as displayed by Emacs, but it does not change the LaTeX code that is written to disk. It is an Emacs minor-mode: the major-mode of the document is still your normal Emacs LaTeX editing mode (`latex-mode`).
+Xenops is a LaTeX editing environment for Emacs. Xenops alters the visual appearance of a LaTeX document as displayed by Emacs, but it does not change the LaTeX code that is written to disk.
 
-Xenops is an extension of LaTeX editing features already present in Emacs ([auctex](https://www.gnu.org/software/auctex/) and [org-mode](https://orgmode.org/manual/Previewing-LaTeX-fragments.html)). It does the following:
+Xenops has the following aims:
+
+1. While writing, you should not have to keep regenerating the PDF to check the final appearance of the document.
+   The Emacs LaTeX buffer itself should faithfully render math and tables, and it should be clean and pleasant to look at.
+2. Mathematical content, and tables, should always be displayed as images, unless they are currently being edited.
+3. Any LaTeX markup that is hidden by Xenops can be easily revealed.
+
+Xenops is an Emacs minor-mode: the major-mode of the document is still your normal Emacs LaTeX editing mode (`latex-mode`). It is an extension of LaTeX editing features already present in Emacs ([auctex](https://www.gnu.org/software/auctex/) and [org-mode](https://orgmode.org/manual/Previewing-LaTeX-fragments.html)). It does the following:
 
 - LaTeX math content is rendered by an external process and displayed inline as SVG.<sup>1</sup>
 - When the cursor enters a math image, the underlying LaTeX code is revealed for editing, and when the cursor exits that code, the image is regenerated if necessary, and display switches to show the image.
