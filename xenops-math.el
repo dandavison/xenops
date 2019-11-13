@@ -113,12 +113,17 @@
   "Display LaTeX on entry to a math element; display image on exit."
   (if (region-active-p)
       (funcall move-point-command)
-    (let ((was-in (xenops-math-parse-element-at-point)))
+    (let ((was-in (xenops-math-parse-element-at-point))
+          exited)
       (funcall move-point-command)
       (save-excursion
-        (let* ((now-in (xenops-math-parse-element-at-point))
-               (exited (and was-in (not (equal was-in now-in)))))
-          (and exited (xenops-math-display-image was-in)))))))
+        (let* ((now-in (xenops-math-parse-element-at-point)))
+          (setq exited (and was-in (not (equal was-in now-in))))
+          (if exited (xenops-math-display-image was-in))))
+      (and exited (eq move-point-command #'next-line)
+           ;; Hack: with a single (next-line), point ends up to the right of the image; we want it
+           ;; on the line below.
+           (next-line)))))
 
 (defun xenops-math-handle-mouse-1 (event)
   (interactive "e")
