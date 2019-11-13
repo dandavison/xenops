@@ -9,8 +9,6 @@
   (define-key xenops-mode-map [(down)] (lambda () (interactive) (xenops-math-toggle-on-transition #'next-line)))
   (define-key xenops-mode-map [(up)] (lambda () (interactive) (xenops-math-toggle-on-transition #'previous-line)))
   (define-key xenops-mode-map [(mouse-1)] #'xenops-math-handle-mouse-1)
-  (define-key xenops-mode-map [(down-mouse-1)] #'xenops-math-handle-down-mouse-1)
-  (define-key xenops-mode-map [(drag-mouse-1)] #'xenops-math-handle-drag-mouse-1)
   (xenops-util-define-key-with-fallback [(return)] #'xenops-math-handle-return)
   (xenops-util-define-key-with-fallback "\M-w" #'xenops-math-handle-copy)
   (xenops-util-define-key-with-fallback [(super c)] #'xenops-math-handle-copy "\M-w")
@@ -128,11 +126,8 @@
     (xenops-math-handle-second-click event))
    (t (xenops-math-handle-first-click event))))
 
-(defvar xenops/math-last-down-mouse-1-math nil)
-
 (defun xenops-math-handle-first-click (event)
   (let ((was-in (xenops-math-parse-element-at-point-hack)))
-    (setq xenops/math-last-down-mouse-1-math was-in)
     (mouse-set-point event)
     (save-excursion
       (let ((now-in (xenops-math-parse-element-at-point-hack)))
@@ -142,22 +137,6 @@
 (defun xenops-math-handle-second-click (event)
   (-if-let (now-in (xenops-math-parse-element-at-point-hack))
       (xenops-math-hide-image now-in)))
-
-(defun xenops-math-handle-down-mouse-1 (event)
-  (interactive "e")
-  (unless (memq 'double (event-modifiers event))
-    (setq xenops/math-last-down-mouse-1-math (save-excursion (mouse-set-point event)
-                                                             (xenops-math-parse-element-at-point-hack)))))
-
-(defun xenops-math-handle-drag-mouse-1 (event)
-  (interactive "e")
-  (-when-let (was-in xenops/math-last-down-mouse-1-math)
-    (mouse-set-point event)
-    (insert (buffer-substring (plist-get was-in :begin)
-                              (plist-get was-in :end)))
-    (re-search-backward (cdr (plist-get was-in :delimiters)))
-    (xenops-math-display-image (xenops-math-parse-element-at-point))
-    (setq xenops/math-last-down-mouse-1-math nil)))
 
 (defun xenops-math-parse-match (element)
   (xenops-math-parse-match- element
