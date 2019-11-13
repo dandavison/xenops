@@ -30,8 +30,9 @@
     (xenops-image-activate)
     (xenops-math-activate)
     (xenops-text-activate))
-   ;; TODO: deactivate
-   ))
+   ;; Deactivate
+   (t
+    (xenops-math-deactivate))))
 
 (defun xenops (&optional arg)
   (interactive "P")

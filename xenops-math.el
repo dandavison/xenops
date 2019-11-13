@@ -12,8 +12,13 @@
   (xenops-util-define-key-with-fallback [(return)] #'xenops-math-handle-return)
   (xenops-util-define-key-with-fallback "\M-w" #'xenops-math-handle-copy)
   (xenops-util-define-key-with-fallback [(super c)] #'xenops-math-handle-copy "\M-w")
+  (setq mouse-drag-and-drop-region t)
+  (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-advice)
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-math-in-inline-math-element-p "\\$"))))
+
+(defun xenops-math-deactivate ()
+  (advice-remove #'mouse-drag-and-drop-region #'xenops-math-mouse-drag-region-advice))
 
 (defun xenops-math-display-image (element)
   (xenops-math-set-org-preview-latex-process-alist! element)
@@ -138,11 +143,37 @@
   (-if-let (now-in (xenops-math-parse-element-at-point-hack))
       (xenops-math-hide-image now-in)))
 
+(defun xenops-math-mouse-drag-region-advice (mouse-drag-region-fn start-event)
+  "If point is in a math element, then cause mouse drag to appear to drag the associated image:
+1. Select the math element as the currently active region.
+2. Temporarily alter tooltip-show so that it displays the image."
+  (-if-let (element (xenops-math-parse-element-at (posn-point (event-start start-event))))
+      (progn
+        (push-mark (plist-get element :begin))
+        (goto-char (plist-get element :end))
+        (let ((tooltip-show-fn (symbol-function 'tooltip-show))
+              (image-tooltip (propertize " "
+                                         'display
+                                         ;; TODO: the file path should be stored somewhere, not recomputed.
+                                         `(image . (:file ,(xenops-math-get-cache-file element) :type svg)))))
+          (cl-letf (((symbol-function 'mouse-posn-property)
+                     (lambda (&rest args) 'region))
+                    ((symbol-function 'tooltip-show)
+                     (lambda (text &rest args)
+                       (apply tooltip-show-fn image-tooltip args))))
+            (funcall mouse-drag-region-fn start-event))))
+    (funcall mouse-drag-region-fn start-event)))
+
 (defun xenops-math-parse-match (element)
   (xenops-math-parse-match- element
                             (plist-get element :delimiters)
                             (point-max)
                             (match-beginning 0)))
+
+(defun xenops-math-parse-element-at (pos)
+  (save-excursion
+    (goto-char pos)
+    (xenops-math-parse-element-at-point-hack)))
 
 (defun xenops-math-parse-element-at-point-hack ()
   (save-excursion
