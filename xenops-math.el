@@ -58,13 +58,13 @@
 
 (defun xenops-math-handle-return ()
   (when (xenops-math-image-at-point?)
-    (-when-let (element (xenops-math-parse-element-at-point))
+    (-when-let (element (xenops-math-parse-element-at-point-hack))
       (xenops-math-hide-image element)
       t)))
 
 (defun xenops-math-handle-delete ()
   (when (xenops-math-image-at-point?)
-    (-when-let (element (xenops-math-parse-element-at-point))
+    (-when-let (element (xenops-math-parse-element-at-point-hack))
       (kill-region (plist-get element :begin) (plist-get element :end))
       t)))
 
