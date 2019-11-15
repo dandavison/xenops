@@ -15,6 +15,11 @@
   (xenops-util-define-key-with-fallback [(super c)] #'xenops-math-handle-copy "\M-w")
   (setq mouse-drag-and-drop-region t)
   (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-advice)
+
+  (save-excursion
+    (goto-char (point-min))
+    (xenops-display-images-if-cached))
+
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-math-in-inline-math-element-p "\\$"))))
 
