@@ -113,10 +113,7 @@
     (xenops-avy-do-at-math)))
 
 (defun xenops-avy-do-at-math ()
-  (avy-jump
-   (format "\\(%s\\)"
-           (s-join "\\|"
-                   (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters))))))
+  (avy-jump (xenops-math-get-math-element-begin-regexp)))
 
 (provide 'xenops)
 

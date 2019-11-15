@@ -56,6 +56,11 @@
                                             (plist-get element :end))
   (goto-char (plist-get element :begin-math)))
 
+(defun xenops-math-get-math-element-begin-regexp ()
+  (format "\\(%s\\)"
+          (s-join "\\|"
+                  (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters)))))
+
 (defun xenops-math-handle-return ()
   (when (xenops-math-image-at-point?)
     (-when-let (element (xenops-math-parse-element-at-point-hack))
