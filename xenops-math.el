@@ -31,7 +31,7 @@
   (let ((beg (plist-get element :begin))
         (end (plist-get element :end)))
     (goto-char beg)
-    (unless (xenops-math-image-at-point?)
+    (unless (xenops-math-get-image-at-point)
       (let* ((latex (buffer-substring-no-properties beg end))
              (image-type (plist-get (cdr (assq xenops-math-process
                                                org-preview-latex-process-alist))
@@ -69,19 +69,19 @@
                   (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters)))))
 
 (defun xenops-math-handle-return ()
-  (when (xenops-math-image-at-point?)
+  (when (xenops-math-get-image-at-point)
     (-when-let (element (xenops-math-parse-element-at-point-hack))
       (xenops-math-hide-image element)
       t)))
 
 (defun xenops-math-handle-delete ()
-  (when (xenops-math-image-at-point?)
+  (when (xenops-math-get-image-at-point)
     (-when-let (element (xenops-math-parse-element-at-point-hack))
       (kill-region (plist-get element :begin) (plist-get element :end))
       t)))
 
 (defun xenops-math-handle-copy ()
-  (when (xenops-math-image-at-point?)
+  (when (xenops-math-get-image-at-point)
     (-when-let (element (xenops-math-parse-element-at-point))
       (xenops-math-copy element)
       t)))
@@ -116,9 +116,9 @@
                 (length element-string))
         element))))
 
-(defun xenops-math-image-at-point? ()
-  (eq (get-char-property (point) 'org-overlay-type)
-      'org-latex-overlay))
+(defun xenops-math-get-image-at-point ()
+  (let ((display (get-char-property (point) 'display )))
+    (and (eq (car display) 'image) display)))
 
 (defun xenops-math-delete-overlays (element)
   (let ((beg (plist-get element :begin))
