@@ -17,6 +17,12 @@
     ("\\begin{theorem}" . "Theorem.")
     ("\\end{theorem}" . "┘")
 
+    ("\\begin{lemma*}" . "Lemma.")
+    ("\\end{lemma*}" . "┘")
+
+    ("\\begin{lemma}" . "Lemma.")
+    ("\\end{lemma}" . "┘")
+
     ("\\begin{proof}" . "Proof.")
     ("\\end{proof}" . "□")
 
