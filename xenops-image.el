@@ -58,8 +58,10 @@ pasted from the system clipboard.")
               (when (file-exists-p output-file) (error "File exists: %s" output-file))
               (copy-file temp-file output-file t)))))
     (when output-file
-      (insert (format xenops-image-latex-template
-                      (file-relative-name output-file)))
+      (save-excursion
+        (insert (format xenops-image-latex-template
+                        (file-relative-name output-file))))
+      (xenops-image-display-image (xenops-next-element (point-max)))
       t)))
 
 (defun xenops-image-get-file-name-suggestion (extension)
