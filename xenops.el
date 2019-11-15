@@ -122,4 +122,3 @@
   (avy-jump (xenops-math-get-math-element-begin-regexp)))
 
 (provide 'xenops)
-

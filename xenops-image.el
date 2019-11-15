@@ -41,11 +41,13 @@
     (with-temp-buffer
       ;; TODO: I think Emacs can do this natively without pngpaste
       ;; See `gui-selection-value'.
-      (let ((exit-status (call-process xenops-image-pngpaste-executable nil `(:file ,temp-file) nil "-")))
+      (let ((exit-status
+             (call-process xenops-image-pngpaste-executable nil `(:file ,temp-file) nil "-")))
         (if (= exit-status 0)
             (progn
               (setq output-file
-                    (read-file-name "Save image as: " (format "%s/" default-directory)))
+                    (read-file-name "Save image as: "
+                                    (format "%s/" default-directory)))
               (when (file-exists-p output-file) (error "File exists: %s" output-file))
               (copy-file temp-file output-file t)))))
     (when output-file
