@@ -81,6 +81,9 @@
   (xenops-process '(xenops-math-hide-image
                     xenops-image-hide-image)))
 
+(defun xenops-parse-element-at-point ()
+  (xenops-math-parse-element-at-point-hack))
+
 (defun xenops-handle-paste ()
   (interactive)
   (or (xenops-math-handle-paste)
