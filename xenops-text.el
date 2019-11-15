@@ -32,6 +32,9 @@
     ("\\begin{align}" . "⚡")
     ("\\end{align}" . "⚡")
 
+    ("\\begin{cases}" . "cases:")
+    ("\\end{cases}" . "┘")
+
     ("#+begin_src" . "⚡")
     ("#+end_src" . "⚡")
 
