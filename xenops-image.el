@@ -10,8 +10,7 @@
   file path. Use a double backslash here to produce a single
   backslash in the resulting LaTeX.")
 
-(defun xenops-image-activate ()
-  (define-key xenops-mode-map [(super v)] 'xenops-image-handle-paste))
+(defun xenops-image-activate ())
 
 (defun xenops-image-display-image (element)
   (let ((org-element (plist-put element :type "file")))
