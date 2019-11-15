@@ -1,5 +1,9 @@
 (defvar xenops-image-width 512)
 
+(defvar xenops-image-directory nil
+  "The directory in which Xenops should offer to save images when
+pasted from the system clipboard.")
+
 (defvar xenops-image-pngpaste-executable "pngpaste")
 
 (defvar xenops-image-latex-template
@@ -37,7 +41,9 @@
 (defun xenops-image-handle-paste ()
   (interactive)
   (let ((output-file)
-        (temp-file (make-temp-file "xenops-image-from-clipboard-")))
+        (temp-file (make-temp-file "xenops-image-from-clipboard-"))
+        (file-name-suggestion (xenops-image-get-file-name-suggestion "png"))
+        (ido-read-file-name-non-ido '(read-file-name)))
     (with-temp-buffer
       ;; TODO: I think Emacs can do this natively without pngpaste
       ;; See `gui-selection-value'.
@@ -47,13 +53,27 @@
             (progn
               (setq output-file
                     (read-file-name "Save image as: "
-                                    (format "%s/" default-directory)))
+                                    (or xenops-image-directory default-directory)
+                                    nil nil file-name-suggestion))
               (when (file-exists-p output-file) (error "File exists: %s" output-file))
               (copy-file temp-file output-file t)))))
     (when output-file
       (insert (format xenops-image-latex-template
                       (file-relative-name output-file)))
       t)))
+
+(defun xenops-image-get-file-name-suggestion (extension)
+  (save-excursion
+    (let ((outline-regexp "\\\\\\(sub\\)*section{\\([^}]*\\)}")
+          pos headings)
+      (ignore-errors (outline-back-to-heading))
+      (setq pos (1+ (point-max)))
+      (while (and (< (point) pos) (outline-on-heading-p))
+        (setq headings (push (substring-no-properties (match-string 2)) headings))
+        (setq pos (point))
+        (outline-up-heading 1))
+      (format "%s--%s.%s" (f-base (buffer-file-name)) (s-join "--" headings) extension))))
+
 
 (defun xenops-image-display-image- (link width include-linked refresh file-extension-re)
   ;; TODO: Hack: This is taken from `org-display-inline-images'.
