@@ -1,5 +1,7 @@
 (defvar xenops-math-process 'dvisvgm)
 
+(defvar xenops-math-image-change-size-factor 1.1)
+
 (defvar xenops-math-image-margin 20
   "Number of pixels to be used as left margin for non-inline math images")
 
@@ -63,6 +65,21 @@
                                             (plist-get element :end))
   (goto-char (plist-get element :begin-math)))
 
+(defun xenops-math-image-increase-size (element)
+  (xenops-math-image-change-size element xenops-math-image-change-size-factor))
+
+(defun xenops-math-image-decrease-size (element)
+  (xenops-math-image-change-size element (/ 1 xenops-math-image-change-size-factor)))
+
+(defun xenops-math-image-change-size (element factor)
+  (-when-let (image (xenops-math-get-image element))
+    (when (eq (image-property image :type) 'svg)
+      (image-flush image)
+      (let ((svg-data (or (image-property image :data)
+                          (f-read-text (image-property image :file)))))
+        (setf (image-property image :data)
+              (xenops-util-svg-resize svg-data factor))))))
+
 (defun xenops-math-get-math-element-begin-regexp ()
   (format "\\(%s\\)"
           (s-join "\\|"
@@ -119,6 +136,11 @@
 (defun xenops-math-get-image-at-point ()
   (let ((display (get-char-property (point) 'display )))
     (and (eq (car display) 'image) display)))
+
+(defun xenops-math-get-image (element)
+  (save-excursion
+    (goto-char (plist-get element :begin))
+    (xenops-math-get-image-at-point)))
 
 (defun xenops-math-delete-overlays (element)
   (let ((beg (plist-get element :begin))
@@ -274,7 +296,7 @@
                             :image-converter `(,(replace-match bounding-box t t
                                                                dvisvgm-image-converter 1)))))))
 
-(defun xenops-math-make-overlay (beg end image image-type margin help-echo)
+(defun xenops-math-make-overlay (beg end image-file image-type margin help-echo)
   "Copied from org--format-latex-make-overlay"
   (let ((ov (make-overlay beg end))
         (image-type (intern image-type)))
@@ -286,7 +308,7 @@
                          (delete-overlay o))))
     (overlay-put ov
                  'display
-                 (list 'image :type image-type :file image :ascent 'center :margin margin))
+                 (list 'image :type image-type :data (f-read-text image-file) :ascent 'center :margin margin))
     (overlay-put ov 'help-echo help-echo)))
 
 (defun xenops-math-get-cache-file (element)

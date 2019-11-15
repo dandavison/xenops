@@ -26,6 +26,10 @@
     (define-key xenops-mode-map "\C-c\C-c" #'xenops)
     (xenops-util-define-key-with-fallback "\C-y" #'xenops-handle-paste)
     (xenops-util-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
+    (xenops-util-define-key-with-fallback (kbd "s-+") #'xenops-image-increase-size)
+    (xenops-util-define-key-with-fallback (kbd "s-=") #'xenops-image-increase-size)
+    (xenops-util-define-key-with-fallback (kbd "s--") #'xenops-image-decrease-size)
+    (xenops-util-define-key-with-fallback (kbd "s-_") #'xenops-image-decrease-size)
 
     (xenops-image-activate)
     (xenops-math-activate)
@@ -47,7 +51,9 @@
   '((math . (:ops
              (xenops-math-display-image
               xenops-math-regenerate-image
-              xenops-math-hide-image)
+              xenops-math-hide-image
+              xenops-math-image-increase-size
+              xenops-math-image-decrease-size)
              :delimiters
              (("\\$" .
                "\\$")
@@ -80,6 +86,14 @@
   (interactive)
   (xenops-process '(xenops-math-hide-image
                     xenops-image-hide-image)))
+
+(defun xenops-image-increase-size ()
+  (interactive)
+  (xenops-process '(xenops-math-image-increase-size)))
+
+(defun xenops-image-decrease-size ()
+  (interactive)
+  (xenops-process '(xenops-math-image-decrease-size)))
 
 (defun xenops-parse-element-at-point ()
   (xenops-math-parse-element-at-point-hack))
