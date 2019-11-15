@@ -21,7 +21,7 @@
 (defun xenops-math-deactivate ()
   (advice-remove #'mouse-drag-and-drop-region #'xenops-math-mouse-drag-region-advice))
 
-(defun xenops-math-display-image (element)
+(defun xenops-math-display-image (element &optional cached-only)
   (xenops-math-set-org-preview-latex-process-alist! element)
   (let ((beg (plist-get element :begin))
         (end (plist-get element :end)))
@@ -34,13 +34,15 @@
              (margin (if (xenops-math-inline-delimiters-p (plist-get element :delimiters))
                          0
                        `(,xenops-math-image-margin . 0)))
-             (cache-file (xenops-math-compute-file-name latex image-type)))
-        (unless (file-exists-p cache-file)
-          (message "xenops: creating file: %s" cache-file)
-          (org-create-formula-image
-           latex cache-file org-format-latex-options 'forbuffer xenops-math-process))
-        (xenops-math-delete-overlays element)
-        (xenops-math-make-overlay beg end cache-file image-type margin)))))
+             (cache-file (xenops-math-compute-file-name latex image-type))
+             (cache-file-exists? (file-exists-p cache-file)))
+        (when (or cache-file-exists? (not cached-only))
+          (unless cache-file-exists?
+            (message "xenops: creating file: %s" cache-file)
+            (org-create-formula-image
+             latex cache-file org-format-latex-options 'forbuffer xenops-math-process))
+          (xenops-math-delete-overlays element)
+          (xenops-math-make-overlay beg end cache-file image-type margin))))))
 
 (defun xenops-math-regenerate-image (element)
   (let ((cache-file (xenops-math-get-cache-file element)))
