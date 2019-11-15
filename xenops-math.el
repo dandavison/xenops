@@ -47,7 +47,7 @@
             (org-create-formula-image
              latex cache-file org-format-latex-options 'forbuffer xenops-math-process))
           (xenops-math-delete-overlays element)
-          (xenops-math-make-overlay beg end cache-file image-type margin))))))
+          (xenops-math-make-overlay beg end cache-file image-type margin latex))))))
 
 (defun xenops-math-regenerate-image (element)
   (let ((cache-file (xenops-math-get-cache-file element)))
@@ -274,7 +274,7 @@
                             :image-converter `(,(replace-match bounding-box t t
                                                                dvisvgm-image-converter 1)))))))
 
-(defun xenops-math-make-overlay (beg end image image-type margin)
+(defun xenops-math-make-overlay (beg end image image-type margin help-echo)
   "Copied from org--format-latex-make-overlay"
   (let ((ov (make-overlay beg end))
         (image-type (intern image-type)))
@@ -286,7 +286,8 @@
                          (delete-overlay o))))
     (overlay-put ov
                  'display
-                 (list 'image :type image-type :file image :ascent 'center :margin margin))))
+                 (list 'image :type image-type :file image :ascent 'center :margin margin))
+    (overlay-put ov 'help-echo help-echo)))
 
 (defun xenops-math-get-cache-file (element)
   (let* ((beg (plist-get element :begin))
