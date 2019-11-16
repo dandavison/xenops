@@ -103,22 +103,24 @@
 
 (defun xenops-math-handle-copy ()
   (when (xenops-math-get-image-at-point)
-    (-when-let (element (xenops-math-parse-element-at-point))
+    (-when-let (element (xenops-math-parse-element-at-point-hack))
       (xenops-math-copy element)
       t)))
 
 (defun xenops-math-handle-paste ()
-  "If the text to be pasted is a math element and we are in a
-  math element, then handle the paste, with stripping of the
-  delimiters."
+  "If the text to be pasted is a math element then handle the paste.
+If we are in a math element, then paste without the delimiters"
   (let ((copied-text (current-kill 0 'do-not-rotate)))
     (-when-let (element (xenops-math-parse-element-from-string copied-text))
-      (when (xenops-math-parse-element-at-point)
-        (insert-for-yank
-         (substring copied-text
-                    (plist-get element :begin-math)
-                    (plist-get element :end-math)))
-        (rotate-yank-pointer 1)
+      (if (xenops-math-parse-element-at-point)
+          (progn
+            (insert-for-yank
+             (substring copied-text
+                        (plist-get element :begin-math)
+                        (plist-get element :end-math)))
+            (rotate-yank-pointer 1))
+        (save-excursion (yank))
+        (xenops-math-display-image (xenops-math-parse-element-at-point-hack))
         t))))
 
 (defun xenops-math-copy (element)
