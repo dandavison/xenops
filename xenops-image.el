@@ -48,7 +48,9 @@ pasted from the system clipboard.")
       (let ((exit-status
              (call-process xenops-image-pngpaste-executable nil `(:file ,temp-file) nil "-")))
         (if (= exit-status 0)
-            (let ((file-name-suggestion (xenops-image-get-file-name-suggestion "png")))
+            (let ((file-name-suggestion (xenops-image-get-file-name-suggestion
+                                         (substring (sha1 (f-read-bytes temp-file)) 0 4)
+                                         "png")))
               (setq output-file
                     (read-file-name "Save image as: "
                                     (or xenops-image-directory default-directory)
@@ -62,17 +64,23 @@ pasted from the system clipboard.")
       (xenops-image-display-image (xenops-next-element (point-max)))
       t)))
 
-(defun xenops-image-get-file-name-suggestion (extension)
+(defun xenops-image-get-file-name-suggestion (identifier extension)
   (save-excursion
     (let ((outline-regexp "\\\\\\(sub\\)*section{\\([^}]*\\)}")
           pos headings)
       (ignore-errors (outline-back-to-heading))
       (setq pos (1+ (point-max)))
       (while (and (< (point) pos) (outline-on-heading-p))
-        (setq headings (push (substring-no-properties (match-string 2)) headings))
+        (setq headings
+              (push (s-downcase (s-replace-regexp "[ :/]+" "-" (match-string 2)))
+                    headings))
         (setq pos (point))
         (outline-up-heading 1))
-      (format "%s--%s.%s" (f-base (buffer-file-name)) (s-join "--" headings) extension))))
+      (format "%s--%s--%s.%s"
+              (f-base (buffer-file-name))
+              (s-join "--" headings)
+              identifier
+              extension))))
 
 
 (defun xenops-image-display-image- (link width include-linked refresh file-extension-re)

@@ -4,14 +4,14 @@
       (insert "
 \\section{sec1}
 
-\\subsection{subsec1}
+\\subsection{sub sec 1}
 
-\\subsection{subsec2}
+\\subsection{subsec: 2}
 
-\\subsubsection{subsubsec1}
+\\subsubsection{SubSubsec1}
 
-\\subsubsection{subsubsec2}
+\\subsubsection{SubSubsec2}
 hello
 ")
-      (should (equal (xenops-image-get-file-name-suggestion "png")
-                     "my-file--sec1--subsec2--subsubsec2.png")))))
+      (should (equal (xenops-image-get-file-name-suggestion "hash" "png")
+                     "my-file--sec1--subsec-2--subsubsec2--hash.png")))))
