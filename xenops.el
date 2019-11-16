@@ -30,6 +30,7 @@
     (xenops-util-define-key-with-fallback (kbd "s-=") #'xenops-image-increase-size)
     (xenops-util-define-key-with-fallback (kbd "s--") #'xenops-image-decrease-size)
     (xenops-util-define-key-with-fallback (kbd "s-_") #'xenops-image-decrease-size)
+    (xenops-util-define-key-with-fallback (kbd "s-0") #'xenops-image-reset)
 
     (xenops-image-activate)
     (xenops-math-activate)
@@ -53,7 +54,8 @@
               xenops-math-regenerate-image
               xenops-math-hide-image
               xenops-math-image-increase-size
-              xenops-math-image-decrease-size)
+              xenops-math-image-decrease-size
+              xenops-math-image-reset)
              :delimiters
              (("\\$" .
                "\\$")
@@ -94,6 +96,10 @@
 (defun xenops-image-decrease-size ()
   (interactive)
   (xenops-process '(xenops-math-image-decrease-size)))
+
+(defun xenops-image-reset ()
+  (interactive)
+  (xenops-process '(xenops-math-image-reset)))
 
 (defun xenops-parse-element-at-point ()
   (xenops-math-parse-element-at-point-hack))

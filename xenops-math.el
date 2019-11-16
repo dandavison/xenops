@@ -80,6 +80,10 @@
         (setf (image-property image :data)
               (xenops-util-svg-resize svg-data factor))))))
 
+(defun xenops-math-image-reset (element)
+  (xenops-math-hide-image element)
+  (xenops-math-display-image element))
+
 (defun xenops-math-get-math-element-begin-regexp ()
   (format "\\(%s\\)"
           (s-join "\\|"
