@@ -13,7 +13,9 @@
           (let (el)
             (while (setq el (xenops-next-element end))
               (process el))))
-        (when region-active (deactivate-mark))))))
+        (and region-active (not (-intersection ops '(xenops-math-image-increase-size
+                                                     xenops-math-image-decrease-size)))
+             (deactivate-mark))))))
 
 (defun xenops-next-element (end)
   "If there is another element, return it and leave point after it.
