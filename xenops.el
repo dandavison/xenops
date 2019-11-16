@@ -102,7 +102,7 @@
   (xenops-process '(xenops-math-image-reset)))
 
 (defun xenops-parse-element-at-point ()
-  (xenops-math-parse-element-at-point-hack))
+  (xenops-math-parse-element-at-point))
 
 (defun xenops-handle-paste ()
   (interactive)

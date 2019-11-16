@@ -93,19 +93,19 @@
 
 (defun xenops-math-handle-return ()
   (when (xenops-math-get-image-at-point)
-    (-when-let (element (xenops-math-parse-element-at-point-hack))
+    (-when-let (element (xenops-math-parse-element-at-point))
       (xenops-math-hide-image element)
       t)))
 
 (defun xenops-math-handle-delete ()
   (when (xenops-math-get-image-at-point)
-    (-when-let (element (xenops-math-parse-element-at-point-hack))
+    (-when-let (element (xenops-math-parse-element-at-point))
       (kill-region (plist-get element :begin) (plist-get element :end))
       t)))
 
 (defun xenops-math-handle-copy ()
   (when (xenops-math-get-image-at-point)
-    (-when-let (element (xenops-math-parse-element-at-point-hack))
+    (-when-let (element (xenops-math-parse-element-at-point))
       (xenops-math-copy element)
       t)))
 
@@ -122,7 +122,7 @@ If we are in a math element, then paste without the delimiters"
                         (plist-get element :end-math)))
             (rotate-yank-pointer 1))
         (save-excursion (yank))
-        (xenops-math-display-image (xenops-math-parse-element-at-point-hack))
+        (xenops-math-display-image (xenops-math-parse-element-at-point))
         t))))
 
 (defun xenops-math-copy (element)
@@ -135,7 +135,7 @@ If we are in a math element, then paste without the delimiters"
 (defun xenops-math-parse-element-from-string (element-string)
   (with-temp-buffer
     (save-excursion (insert element-string))
-    (-when-let (element (xenops-math-parse-element-at-point-hack))
+    (-when-let (element (xenops-math-parse-element-at-point))
       (when (eq (- (plist-get element :end)
                    (plist-get element :begin))
                 (length element-string))
@@ -182,15 +182,15 @@ If we are in a math element, then paste without the delimiters"
    (t (xenops-math-handle-first-click event))))
 
 (defun xenops-math-handle-first-click (event)
-  (let ((was-in (xenops-math-parse-element-at-point-hack)))
+  (let ((was-in (xenops-math-parse-element-at-point)))
     (mouse-set-point event)
     (save-excursion
-      (let ((now-in (xenops-math-parse-element-at-point-hack)))
+      (let ((now-in (xenops-math-parse-element-at-point)))
         (and was-in (not (equal was-in now-in))
              (xenops-math-display-image was-in))))))
 
 (defun xenops-math-handle-second-click (event)
-  (-if-let (now-in (xenops-math-parse-element-at-point-hack))
+  (-if-let (now-in (xenops-math-parse-element-at-point))
       (xenops-math-hide-image now-in)))
 
 (defun xenops-math-mouse-drag-region-advice (mouse-drag-region-fn start-event)
@@ -223,14 +223,6 @@ If we are in a math element, then paste without the delimiters"
 (defun xenops-math-parse-element-at (pos)
   (save-excursion
     (goto-char pos)
-    (xenops-math-parse-element-at-point-hack)))
-
-(defun xenops-math-parse-element-at-point-hack ()
-  (save-excursion
-    ;; TODO: hack: Inline math elements are not
-    ;; recognized when point is on match for first
-    ;; delimiter
-    (forward-char)
     (xenops-math-parse-element-at-point)))
 
 (defun xenops-math-parse-element-at-point ()
@@ -249,9 +241,12 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-in-inline-math-element-p (delimiter)
   "Is point within an inline block delimited by `delimiter'?"
-  (and (oddp (count-matches delimiter (point-at-bol) (point)))
-       (xenops-math-parse-element-at-point-matching-delimiters
-        (cons delimiter delimiter) (point-at-bol) (point-at-eol))))
+  (save-excursion
+    (if (looking-at (car xenops-math-inline-math-delimiters))
+        (forward-char))
+    (and (oddp (count-matches delimiter (point-at-bol) (point)))
+         (xenops-math-parse-element-at-point-matching-delimiters
+          (cons delimiter delimiter) (point-at-bol) (point-at-eol)))))
 
 (defun xenops-math-inline-delimiters-p (delimiters)
   (equal delimiters xenops-math-inline-math-delimiters))
