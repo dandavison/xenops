@@ -20,7 +20,7 @@
   "A LaTeX editing environment.
 
 \\{xenops-mode-map}"
-  nil " xenops" nil
+  nil " Xenops" nil
   (cond
    (xenops-mode
     (define-key xenops-mode-map "\C-c\C-c" #'xenops)
