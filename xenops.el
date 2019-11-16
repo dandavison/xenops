@@ -75,10 +75,10 @@
                     xenops-image-display-image)))
 
 (defun xenops-display-images-if-cached ()
-  (let (fn (symbol-function 'xenops-math-display-image))
-    (cl-letf (((symbol-function 'xenops-display-images)
-               (lambda (element) (funcall fn 'cached-only)))))
-    (xenops-display-images)))
+  (let ((fn (symbol-function 'xenops-math-display-image)))
+    (cl-letf (((symbol-function 'xenops-math-display-image)
+               (lambda (element) (funcall fn element 'cached-only))))
+      (xenops-display-images))))
 
 (defun xenops-regenerate-images ()
   (interactive)
