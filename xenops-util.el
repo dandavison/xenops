@@ -18,4 +18,27 @@ non-nil, or nil if no such index exists."
         (and el (throw :index i))
         (setq i (1+ i))))))
 
+(defun xenops-util-svg-resize (svg scale)
+  "Return SVG data with height and width scaled by `scale'"
+  (cl-flet ((resize (match)
+                    (destructuring-bind (size . units)
+                        (xenops-util-svg-parse-length-or-percent (match-string 1 match))
+                      (format "%f%s" (* scale size) units))))
+    ;; We could parse as XML, but this is tempting.
+    (setq svg (replace-regexp-in-string "width='\\([^']+\\)'.*" #'resize svg nil nil 1))
+    (setq svg (replace-regexp-in-string "height='\\([^']+\\)'.*" #'resize svg nil nil 1))
+    svg))
+
+(defun xenops-util-svg-parse-length-or-percent (string)
+  "Parse a string like '1.5pt' or '50.5%'"
+  (let* ((n (length string))
+         (unit-specifier (if (s-ends-with? "%" string)
+                             "%"
+                           (substring string (- n 2) n))))
+    (cons (string-to-number (substring string 0 (- n (length unit-specifier))))
+          unit-specifier)))
+
 (provide 'xenops-util)
+
+
+(replace-regexp-in-string "width='\\([^']+\\)'.*" "XXXXpt" "32.409891' width='2.5pt' width='2.5pt' xmlns='http" nil nil 1)
