@@ -40,17 +40,15 @@ pasted from the system clipboard.")
 
 (defun xenops-image-handle-paste ()
   (interactive)
-  (let ((output-file)
-        (temp-file (make-temp-file "xenops-image-from-clipboard-"))
-        (file-name-suggestion (xenops-image-get-file-name-suggestion "png"))
-        (ido-read-file-name-non-ido '(read-file-name)))
+  (let ((temp-file (make-temp-file "xenops-image-from-clipboard-"))
+        (output-file))
     (with-temp-buffer
       ;; TODO: I think Emacs can do this natively without pngpaste
       ;; See `gui-selection-value'.
       (let ((exit-status
              (call-process xenops-image-pngpaste-executable nil `(:file ,temp-file) nil "-")))
         (if (= exit-status 0)
-            (progn
+            (let ((file-name-suggestion (xenops-image-get-file-name-suggestion "png")))
               (setq output-file
                     (read-file-name "Save image as: "
                                     (or xenops-image-directory default-directory)
