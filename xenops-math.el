@@ -5,6 +5,8 @@
 (defvar xenops-math-image-margin 20
   "Number of pixels to be used as left margin for non-inline math images")
 
+(setq xenops-math-inline-math-delimiters '("\\$" . "\\$"))
+
 (defun xenops-math-activate ()
   (define-key xenops-mode-map [(left)] (lambda () (interactive) (xenops-math-toggle-on-transition #'left-char)))
   (define-key xenops-mode-map [(right)] (lambda () (interactive) (xenops-math-toggle-on-transition #'right-char)))
@@ -252,7 +254,7 @@ If we are in a math element, then paste without the delimiters"
         (cons delimiter delimiter) (point-at-bol) (point-at-eol))))
 
 (defun xenops-math-inline-delimiters-p (delimiters)
-  (equal delimiters '("\\$" . "\\$")))
+  (equal delimiters xenops-math-inline-math-delimiters))
 
 (defun xenops-math-parse-element-at-point-matching-delimiters (delimiters lim-up lim-down)
   "If point is between regexps, return plist describing match"
