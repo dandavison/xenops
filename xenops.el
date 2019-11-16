@@ -16,11 +16,14 @@
 
 (defvar xenops-mode-map (make-sparse-keymap))
 
+(defvar xenops-tooltip-delay 0.2
+  "`tooltip-delay' when xenops-mode is active.")
+
 (define-minor-mode xenops-mode
   "A LaTeX editing environment.
 
 \\{xenops-mode-map}"
-  nil " Xenops" nil
+  :lighter " Xenops"
   (cond
    (xenops-mode
     (define-key xenops-mode-map "\C-c\C-c" #'xenops)
@@ -32,12 +35,17 @@
     (xenops-util-define-key-with-fallback (kbd "s-_") #'xenops-image-decrease-size)
     (xenops-util-define-key-with-fallback (kbd "s-0") #'xenops-image-reset)
 
-    (xenops-image-activate)
     (xenops-math-activate)
     (xenops-text-activate))
    ;; Deactivate
    (t
-    (xenops-math-deactivate))))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char (point-min))
+        (xenops-hide-images)))
+    (xenops-math-deactivate)
+    (xenops-text-deactivate))))
 
 (defun xenops (&optional arg)
   (interactive "P")

@@ -14,8 +14,6 @@ pasted from the system clipboard.")
   file path. Use a double backslash here to produce a single
   backslash in the resulting LaTeX.")
 
-(defun xenops-image-activate ())
-
 (defun xenops-image-display-image (element)
   (let ((org-element (plist-put element :type "file")))
     (xenops-image-display-image- `(link ,org-element) xenops-image-width nil nil ".")))

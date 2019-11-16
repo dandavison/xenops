@@ -70,7 +70,6 @@
     ("\\to " . "⟶ ")
     ("\\in " . "∈ ")))
 
-
 (defvar xenops-text-prettify-symbols-regexp-replacements
   ;; TODO Use an alist like the others.
   (format
@@ -83,53 +82,60 @@
       "{\\\\bf +\\([^}]+\\)}"
       "{\\\\it +\\([^}]+\\)}"))))
 
-(defvar xenops-tooltip-delay 0.2)
+(setq xenops-text-tooltip-delay-orig nil)
+
+;; Prettify-symbols replacements using captured text
+(setq xenops-text-prettify-symbols-font-lock-keywords
+      `((,xenops-text-prettify-symbols-regexp-replacements
+         (0
+          (xenops-text-prettify-regexp-replacement)))))
 
 (defun xenops-text-activate ()
-  ;; TODO
-  ;;
-  ;; - Can we make \Delta consume the post-space? So that "\Delta r"
-  ;;   has no space between them?
-  ;; - Order of precedence? Sort longest (most specific) first?
+  (font-lock-add-keywords nil xenops-text-prettify-symbols-font-lock-keywords)
+  (xenops-text-prettify-symbols-mode)
+  (xenops-text-configure-tooltips))
 
-  (let ((-compare-fn (lambda (pair1 pair2) (equal (car pair1) (car pair2)))))
+(defun xenops-text-deactivate ()
+  (font-lock-remove-keywords nil xenops-text-prettify-symbols-font-lock-keywords)
+  (xenops-text-configure-tooltips 'deactivate)
+  (xenops-text-prettify-symbols-mode 'deactivate)
+  (org-restart-font-lock))
 
-    ;; Add custom single-character entries to default latex-mode entries.
-    (setq prettify-symbols-alist
-          (-union xenops-text-prettify-symbols prettify-symbols-alist))
+(defun xenops-text-prettify-symbols-mode (&optional deactivate)
+  (if deactivate (prettify-symbols-mode -1)
+    (let ((prettify-symbols-alist prettify-symbols-alist)
+          (-compare-fn (lambda (pair1 pair2) (equal (car pair1) (car pair2)))))
 
-    ;; Remove entries that will be overridden by string replacements
-    (setq prettify-symbols-alist
-          (-difference prettify-symbols-alist
-                       xenops-text-prettify-symbols-string-replacements)))
+      ;; Add custom single-character entries to default latex-mode entries.
+      (setq prettify-symbols-alist
+            (-union xenops-text-prettify-symbols prettify-symbols-alist))
 
-  ;; Add string replacements.
-  (mapc #'xenops-text-prettify-symbols-add-string-replacement
-        xenops-text-prettify-symbols-string-replacements)
+      ;; Remove entries that will be overridden by string replacements
+      (setq prettify-symbols-alist
+            (-difference prettify-symbols-alist
+                         xenops-text-prettify-symbols-string-replacements))
 
-  (prettify-symbols-mode)
+      ;; Add string replacements.
+      (mapc #'xenops-text-prettify-symbols-add-string-replacement
+            xenops-text-prettify-symbols-string-replacements)
 
-  ;; Prettify-symbols replacements using captured text
-  (font-lock-add-keywords
-   nil
-   `((,xenops-text-prettify-symbols-regexp-replacements
-      (0
-       (xenops-text-prettify-regexp-replacement)))))
+      (prettify-symbols-mode))))
 
+(defun xenops-text-configure-tooltips (&optional deactivate)
   ;; Add tooltips to prettify replacements
   ;; TODO: I think this is causing the very long regexp to be matched twice during fontification.
   ;; Can this be done by modifying the existing prettify-symbols entry?
-  (xenops-text-add-tooltips (caar prettify-symbols--keywords))
-  (xenops-text-add-tooltips xenops-text-prettify-symbols-regexp-replacements)
-  (set (make-variable-buffer-local 'tooltip-delay) xenops-tooltip-delay))
-
-
-(defun xenops-text-add-tooltips (regexp)
-  (font-lock-add-keywords
-   nil
-   `((,regexp
-      0 `(face font-lock-keyword-face
-               help-echo ,(match-string 0))))))
+  (dolist (regexp (list (caar prettify-symbols--keywords)
+                        xenops-text-prettify-symbols-regexp-replacements))
+    (funcall
+     (if deactivate 'font-lock-remove-keywords 'font-lock-add-keywords)
+     nil
+     `((,regexp
+        0 `(face font-lock-keyword-face
+                 help-echo ,(match-string 0))))))
+  (if deactivate
+      (setq tooltip-delay xenops-text-tooltip-delay-orig)
+    (setq xenops-text-tooltip-delay-orig tooltip-delay)))
 
 (defun xenops-text-prettify-regexp-replacement ()
   "A match for a regexp capture replacement has just been made.
