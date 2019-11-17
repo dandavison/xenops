@@ -7,7 +7,7 @@
 (require 'xenops-execute)
 (require 'xenops-image)
 (require 'xenops-math)
-(require 'xenops-process)
+(require 'xenops-apply)
 (require 'xenops-text)
 (require 'xenops-util)
 
@@ -79,8 +79,8 @@
 
 (defun xenops-display-images ()
   (interactive)
-  (xenops-process '(xenops-math-display-image
-                    xenops-image-display-image)))
+  (xenops-apply '(xenops-math-display-image
+                  xenops-image-display-image)))
 
 (defun xenops-display-images-if-cached ()
   (let ((fn (symbol-function 'xenops-math-display-image)))
@@ -90,24 +90,24 @@
 
 (defun xenops-regenerate-images ()
   (interactive)
-  (xenops-process '(xenops-math-regenerate-image)))
+  (xenops-apply '(xenops-math-regenerate-image)))
 
 (defun xenops-hide-images ()
   (interactive)
-  (xenops-process '(xenops-math-hide-image
-                    xenops-image-hide-image)))
+  (xenops-apply '(xenops-math-hide-image
+                  xenops-image-hide-image)))
 
 (defun xenops-image-increase-size ()
   (interactive)
-  (xenops-process '(xenops-math-image-increase-size)))
+  (xenops-apply '(xenops-math-image-increase-size)))
 
 (defun xenops-image-decrease-size ()
   (interactive)
-  (xenops-process '(xenops-math-image-decrease-size)))
+  (xenops-apply '(xenops-math-image-decrease-size)))
 
 (defun xenops-image-reset ()
   (interactive)
-  (xenops-process '(xenops-math-image-reset)))
+  (xenops-apply '(xenops-math-image-reset)))
 
 (defun xenops-parse-element-at-point ()
   (xenops-math-parse-element-at-point))

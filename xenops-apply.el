@@ -1,4 +1,4 @@
-(defun xenops-process (ops)
+(defun xenops-apply (ops)
   (cl-flet ((process (lambda (el)
                        (-if-let (op (xenops-get-op-for-element el ops))
                            (save-excursion (funcall op el))))))
@@ -54,4 +54,4 @@ section of the buffer that xenops can do something to."
     (append (get-delimiters 'math)
             (get-delimiters 'image))))
 
-(provide 'xenops-process)
+(provide 'xenops-apply)
