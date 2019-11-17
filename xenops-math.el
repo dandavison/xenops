@@ -79,10 +79,10 @@
   (-when-let (image (xenops-math-get-image element))
     (when (eq (image-property image :type) 'svg)
       (image-flush image)
-      (let ((svg-data (or (image-property image :data)
-                          (f-read-text (image-property image :file)))))
-        (setf (image-property image :data)
-              (xenops-util-svg-resize svg-data factor))))))
+      (let* ((data (or (eval (image-property image :data))
+                       (prog1 (f-read-text (image-property image :file))
+                         (setf (image-property image :file) nil)))))
+        (setf (image-property image :data) (xenops-util-svg-resize data factor))))))
 
 (defun xenops-math-image-reset (element)
   (xenops-math-hide-image element)
@@ -313,7 +313,7 @@ If we are in a math element, then paste without the delimiters"
                          (delete-overlay o))))
     (overlay-put ov
                  'display
-                 (list 'image :type image-type :data (f-read-text image-file) :ascent 'center :margin margin))
+                 (list 'image :type image-type :file image-file :ascent 'center :margin margin))
     (overlay-put ov 'help-echo help-echo)))
 
 (defun xenops-math-get-cache-file (element)
