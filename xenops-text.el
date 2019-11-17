@@ -35,9 +35,6 @@
     ("\\begin{cases}" . "cases:")
     ("\\end{cases}" . "┘")
 
-    ("#+begin_src" . "⚡")
-    ("#+end_src" . "⚡")
-
     ("\\begin{enumerate}" . "┐")
     ("\\end{enumerate}" . "┘")
 
