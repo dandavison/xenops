@@ -36,7 +36,14 @@
     (xenops-util-define-key-with-fallback (kbd "s-0") #'xenops-image-reset)
 
     (xenops-math-activate)
-    (xenops-text-activate))
+    (xenops-text-activate)
+
+    ;; Display math and tables as images
+    (xenops-display-images-async)
+    (save-excursion
+      (goto-char (point-min))
+      (xenops-display-images-if-cached)))
+
    ;; Deactivate
    (t
     (save-excursion
@@ -134,7 +141,8 @@
                (lambda (result)
                  (run-with-idle-timer 0 nil
                                       (lambda () (save-excursion (goto-char (point-min))
-                                                            (xenops-display-images)))))))
+                                                            (xenops-display-images-if-cached)
+                                                            (message "xenops: done")))))))
 
 (defun xenops-display-images-headlessly ()
   "Run `xenops-display-images' in a headless emacs process."
