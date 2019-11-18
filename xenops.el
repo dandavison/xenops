@@ -127,7 +127,7 @@
 (defun xenops-display-images-async ()
   "Run `xenops-display-images' on the current buffer's file, asynchronously."
   (interactive)
-  (message "xenops: processing images asynchronously")
+  (message "Xenops: processing images asynchronously")
   (async-start `(lambda ()
                   (package-initialize)
                   (add-to-list 'load-path
@@ -142,7 +142,7 @@
                  (run-with-idle-timer 0 nil
                                       (lambda () (save-excursion (goto-char (point-min))
                                                             (xenops-display-images-if-cached)
-                                                            (message "xenops: done")))))))
+                                                            (message "Xenops: done")))))))
 
 (defun xenops-display-images-headlessly ()
   "Run `xenops-display-images' in a headless emacs process."

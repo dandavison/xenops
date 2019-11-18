@@ -45,7 +45,7 @@
              (cache-file-exists? (file-exists-p cache-file)))
         (when (or cache-file-exists? (not cached-only))
           (unless cache-file-exists?
-            (message "xenops: creating file: %s" cache-file)
+            (message "Xenops: creating file: %s" cache-file)
             (org-create-formula-image
              latex cache-file org-format-latex-options 'forbuffer xenops-math-process))
           (xenops-math-delete-overlays element)
@@ -56,7 +56,7 @@
     (when cache-file
       (delete-file cache-file)
       (clear-image-cache cache-file)
-      (message "xenops: deleted file: %s" cache-file))
+      (message "Xenops: deleted file: %s" cache-file))
     (xenops-math-delete-overlays element)
     (xenops-math-display-image element)))
 
