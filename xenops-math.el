@@ -325,12 +325,14 @@ If we are in a math element, then paste without the delimiters"
                                 :image-output-type)))
     (xenops-math-compute-file-name latex image-type)))
 
+(defun xenops-math-file-name-static-hash-data ()
+  (list org-format-latex-header
+        org-latex-default-packages-alist
+        org-latex-packages-alist
+        org-format-latex-options))
+
 (defun xenops-math-compute-file-name (latex image-type)
-  (let* ((data (list org-format-latex-header
-                     org-latex-default-packages-alist
-                     org-latex-packages-alist
-                     org-format-latex-options
-                     latex))
+  (let* ((data (append (xenops-math-file-name-static-hash-data) (list latex)))
          (hash (sha1 (prin1-to-string data))))
     (format "%s.%s" (f-join (f-expand xenops-cache-directory) hash) image-type)))
 
