@@ -137,15 +137,16 @@
                   (xenops-mode)
                   (cl-letf (((symbol-function 'xenops-math-file-name-static-hash-data)
                              (lambda () ',(xenops-math-file-name-static-hash-data))))
-                    (xenops-display-images-headlessly)))
+                    (xenops-generate-images-in-headless-process)))
                (lambda (result)
                  (run-with-idle-timer 0 nil
                                       (lambda () (save-excursion (goto-char (point-min))
                                                             (xenops-display-images-if-cached)
                                                             (message "Xenops: done")))))))
 
-(defun xenops-display-images-headlessly ()
-  "Run `xenops-display-images' in a headless emacs process."
+(defun xenops-generate-images-in-headless-process ()
+  "Generate cached images on disk for all math elements in
+buffer, when running in a headless emacs process."
   (cl-letf (((symbol-function 'org--get-display-dpi) (lambda () 129))
             ((symbol-function 'org-latex-color)
              (lambda (attr)

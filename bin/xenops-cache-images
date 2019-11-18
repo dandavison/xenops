@@ -2,6 +2,6 @@
 (load-file "~/.emacs.d/init.el")
 (assert (car argv) "usage: xenops-cache-images <filename>")
 (find-file (car argv))
-(xenops-display-images-headlessly)
+(xenops-generate-images-in-headless-process)
 
 
