@@ -9,14 +9,14 @@
 
 (defun xenops-math-activate ()
   (setq mouse-drag-and-drop-region t)
-  (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-advice)
+  (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-around-advice)
 
   (advice-add fill-paragraph-function :after #'xenops-math-fill-paragraph-after-advice)
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-math-in-inline-math-element-p "\\$"))))
 
 (defun xenops-math-deactivate ()
-  (advice-remove #'mouse-drag-and-drop-region #'xenops-math-mouse-drag-region-advice)
+  (advice-remove #'mouse-drag-and-drop-region #'xenops-math-mouse-drag-region-around-advice)
   (advice-remove fill-paragraph-function #'xenops-math-fill-paragraph-after-advice))
 
 (defun xenops-math-display-image (element &optional cached-only)
@@ -198,7 +198,7 @@ If we are in a math element, then paste without the delimiters"
   (-if-let (now-in (xenops-math-parse-element-at-point))
       (xenops-math-hide-image now-in)))
 
-(defun xenops-math-mouse-drag-region-advice (mouse-drag-region-fn start-event)
+(defun xenops-math-mouse-drag-region-around-advice (mouse-drag-region-fn start-event)
   "If point is in a math element, then cause mouse drag to appear to drag the associated image:
 1. Select the math element as the currently active region.
 2. Temporarily alter tooltip-show so that it displays the image."
