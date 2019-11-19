@@ -93,34 +93,34 @@
 
 (defun xenops-text-activate ()
   (font-lock-add-keywords nil xenops-text-prettify-symbols-font-lock-keywords)
-  (xenops-text-prettify-symbols-mode)
+  (xenops-text-prettify-symbols-mode +1)
   (xenops-text-configure-tooltips))
 
 (defun xenops-text-deactivate ()
   (font-lock-remove-keywords nil xenops-text-prettify-symbols-font-lock-keywords)
   (xenops-text-configure-tooltips 'deactivate)
-  (xenops-text-prettify-symbols-mode 'deactivate)
+  (xenops-text-prettify-symbols-mode -1)
   (org-restart-font-lock))
 
-(defun xenops-text-prettify-symbols-mode (&optional deactivate)
-  (if deactivate (prettify-symbols-mode -1)
-    (let ((prettify-symbols-alist prettify-symbols-alist)
-          (-compare-fn (lambda (pair1 pair2) (equal (car pair1) (car pair2)))))
+(defun xenops-text-prettify-symbols-mode (&optional arg)
+  (interactive)
+  (let ((prettify-symbols-alist prettify-symbols-alist)
+        (-compare-fn (lambda (pair1 pair2) (equal (car pair1) (car pair2)))))
 
-      ;; Add custom single-character entries to default latex-mode entries.
-      (setq prettify-symbols-alist
-            (-union xenops-text-prettify-symbols prettify-symbols-alist))
+    ;; Add custom single-character entries to default latex-mode entries.
+    (setq prettify-symbols-alist
+          (-union xenops-text-prettify-symbols prettify-symbols-alist))
 
-      ;; Remove entries that will be overridden by string replacements
-      (setq prettify-symbols-alist
-            (-difference prettify-symbols-alist
-                         xenops-text-prettify-symbols-string-replacements))
+    ;; Remove entries that will be overridden by string replacements
+    (setq prettify-symbols-alist
+          (-difference prettify-symbols-alist
+                       xenops-text-prettify-symbols-string-replacements))
 
-      ;; Add string replacements.
-      (mapc #'xenops-text-prettify-symbols-add-string-replacement
-            xenops-text-prettify-symbols-string-replacements)
+    ;; Add string replacements.
+    (mapc #'xenops-text-prettify-symbols-add-string-replacement
+          xenops-text-prettify-symbols-string-replacements)
 
-      (prettify-symbols-mode))))
+    (prettify-symbols-mode (or arg 'toggle))))
 
 (defun xenops-text-configure-tooltips (&optional deactivate)
   ;; Add tooltips to prettify replacements
