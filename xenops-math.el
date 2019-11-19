@@ -240,11 +240,13 @@ If we are in a math element, then paste without the delimiters"
 (defun xenops-math-in-inline-math-element-p (delimiter)
   "Is point within an inline block delimited by `delimiter'?"
   (save-excursion
-    (if (looking-at (car xenops-math-inline-math-delimiters))
-        (forward-char))
-    (and (oddp (count-matches delimiter (point-at-bol) (point)))
-         (xenops-math-parse-element-at-point-matching-delimiters
-          (cons delimiter delimiter) (point-at-bol) (point-at-eol)))))
+    (let ((odd-count (oddp (count-matches delimiter (point-at-bol) (point)))))
+      (when (and (not odd-count) (looking-at (car xenops-math-inline-math-delimiters)))
+        (forward-char)
+        (setq odd-count t))
+      (and odd-count
+           (xenops-math-parse-element-at-point-matching-delimiters
+            (cons delimiter delimiter) (point-at-bol) (point-at-eol))))))
 
 (defun xenops-math-inline-delimiters-p (delimiters)
   (equal delimiters xenops-math-inline-math-delimiters))
