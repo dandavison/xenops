@@ -11,11 +11,13 @@
   (setq mouse-drag-and-drop-region t)
   (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-advice)
 
+  (advice-add fill-paragraph-function :after #'xenops-math-fill-paragraph-after-advice)
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-math-in-inline-math-element-p "\\$"))))
 
 (defun xenops-math-deactivate ()
-  (advice-remove #'mouse-drag-and-drop-region #'xenops-math-mouse-drag-region-advice))
+  (advice-remove #'mouse-drag-and-drop-region #'xenops-math-mouse-drag-region-advice)
+  (advice-remove fill-paragraph-function #'xenops-math-fill-paragraph-after-advice))
 
 (defun xenops-math-display-image (element &optional cached-only)
   (xenops-math-set-org-preview-latex-process-alist! element)
@@ -118,6 +120,22 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-paste ()
   (or (xenops-math-handle-paste) (yank)))
+
+(defun xenops-math-fill-paragraph-after-advice (&rest args)
+  (let ((forward-paragraph-fn (if (fboundp 'LaTeX-forward-paragraph)
+                                  'LaTeX-forward-paragraph
+                                'forward-paragraph))
+        (backward-paragraph-fn (if (fboundp 'LaTeX-backward-paragraph)
+                                   'LaTeX-backward-paragraph
+                                 'backward-paragraph)))
+    (save-excursion
+      ;; If point is at the start of a paragraph, LaTeX-fill-paragraph fills the paragraph
+      ;; ahead. Therefore we move to the end before going back to locate the beginning.
+      (funcall forward-paragraph-fn)
+      (push-mark (point) t t)
+      (funcall backward-paragraph-fn)
+      (if (region-active-p)
+          (xenops-display-images-if-cached)))))
 
 (defun xenops-math-parse-element-from-string (element-string)
   (with-temp-buffer
