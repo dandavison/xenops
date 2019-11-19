@@ -5,7 +5,8 @@
     ("\\sqrt" . "√")
     ("^2" . "²")
     ("^3" . "³")
-    ("^n" . "ⁿ")))
+    ("^n" . "ⁿ")
+    ("\\&" . "&")))
 
 (defvar xenops-text-prettify-symbols-string-replacements
   '(("\\begin{definition*}" . "Definition.")
