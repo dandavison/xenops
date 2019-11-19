@@ -45,6 +45,7 @@
     (xenops-util-define-key-with-fallback [(return)] #'xenops-math-handle-return)
     (xenops-util-define-key-with-fallback [(super c)] #'xenops-math-handle-copy "\M-w")
     (xenops-util-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
+    (xenops-util-define-key-with-fallback [(super x)] #'xenops-math-handle-delete)
 
     (xenops-math-activate)
     (xenops-text-activate)
