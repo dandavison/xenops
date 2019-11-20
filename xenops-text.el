@@ -6,7 +6,9 @@
     ("^2" . "²")
     ("^3" . "³")
     ("^n" . "ⁿ")
-    ("\\&" . "&")))
+    ("\\&" . "&")
+    ("\\pm" . "±")
+    ("\\mp" . "∓")))
 
 (defvar xenops-text-prettify-symbols-string-replacements
   '(("\\begin{definition*}" . "Definition.")
