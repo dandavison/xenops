@@ -73,6 +73,26 @@
     ("\\to " . "⟶ ")
     ("\\in " . "∈ ")))
 
+;; A brace-delimited multiline expression supporting 1 level of nesting: i.e. it can contain other
+;; brace-delimited expressions, as long as these have no children.
+(setq xenops-text-brace-delimited-multiline-expression-regexp
+      (let ((xenops-text-brace-delimited-atom-regexp
+             (concat
+              "\\("
+              "{"
+              "[^{}]*"
+              "}"
+              "\\)")))
+        (concat
+         "{"
+         "\\("
+         "[^{}]*"
+         xenops-text-brace-delimited-atom-regexp
+         "\\)"
+         "*"
+         "[^{}]*"
+         "}")))
+
 (defvar xenops-text-prettify-symbols-regexp-replacements
   ;; TODO Use an alist like the others.
   (format
