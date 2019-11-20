@@ -23,8 +23,7 @@ An element is a plist containing data about a regexp match for a
 section of the buffer that xenops can do something to."
   (cl-flet ((next-match-pos (regexp)
                             (save-excursion
-                              (or (and (re-search-forward regexp end t) (point))
-                                  end))))
+                              (if (re-search-forward regexp end t) (match-beginning 0) end))))
     (let ((element (-min-by (lambda (delims1 delims2)
                               (> (next-match-pos (car (plist-get delims1 :delimiters)))
                                  (next-match-pos (car (plist-get delims2 :delimiters)))))
