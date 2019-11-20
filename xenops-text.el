@@ -93,13 +93,19 @@
          "[^{}]*"
          "}")))
 
+;; Regarding multiline font-lock:
+;; https://www.emacswiki.org/emacs/MultilineRegexp
+;; https://www.emacswiki.org/emacs/MultilineFontLock
 (defvar xenops-text-prettify-symbols-regexp-replacements
   ;; TODO Use an alist like the others.
   (format
    "\\(%s\\)"
    (s-join
     "\\|"
-    '("\\\\emph{\\([^}]+\\)}"
+    `("\\\\emph{\\([^}]+\\)}"
+      ,(concat
+        "\\\\footnote"
+        xenops-text-brace-delimited-multiline-expression-regexp)
       "\\\\textbf{\\([^}]+\\)}"
       "\\\\textit{\\([^}]+\\)}"
       "{\\\\bf +\\([^}]+\\)}"
@@ -142,6 +148,7 @@
     (mapc #'xenops-text-prettify-symbols-add-string-replacement
           xenops-text-prettify-symbols-string-replacements)
 
+    (setq font-lock-multiline t)
     (prettify-symbols-mode (or arg 'toggle))))
 
 (defun xenops-text-configure-tooltips (&optional deactivate)
@@ -166,7 +173,9 @@ Return the replacement text to be displayed, with any text properties."
   (let* ((beg (match-beginning 0))
          (end (match-end 0))
          (match (match-string 0))
-         (capture (s-join " " (split-string (xenops-text-prettify-regexp-get-match-capture))))
+         (capture (if (s-starts-with? "\\footnote" match)
+                      "(footnote)"
+                    (s-join " " (split-string (xenops-text-prettify-regexp-get-match-capture)))))
          (composition (xenops-text-make-composition capture))
          (properties (xenops-text-prettify-regexp-get-text-properties match)))
     (xenops-text-prettify-symbols-compose composition properties beg end))
