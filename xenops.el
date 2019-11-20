@@ -131,6 +131,14 @@
 (defun xenops-parse-element-at-point ()
   (xenops-math-parse-element-at-point))
 
+(defun xenops-element-delete-overlays (element)
+  (let ((beg (plist-get element :begin))
+        (end (plist-get element :end)))
+    (dolist (o (overlays-in beg end))
+      (when (eq (overlay-get o 'org-overlay-type)
+                'org-latex-overlay)
+        (delete-overlay o)))))
+
 (defun xenops-handle-paste ()
   (interactive)
   (or (xenops-math-handle-paste)

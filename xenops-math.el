@@ -46,7 +46,7 @@
             (message "Xenops: creating file: %s" cache-file)
             (org-create-formula-image
              latex cache-file org-format-latex-options 'forbuffer xenops-math-process))
-          (xenops-math-delete-overlays element)
+          (xenops-element-delete-overlays element)
           (xenops-math-make-overlay beg end cache-file image-type margin latex))))))
 
 (defun xenops-math-regenerate-image (element)
@@ -55,7 +55,7 @@
       (delete-file cache-file)
       (clear-image-cache cache-file)
       (message "Xenops: deleted file: %s" cache-file))
-    (xenops-math-delete-overlays element)
+    (xenops-element-delete-overlays element)
     (xenops-math-display-image element)))
 
 (defun xenops-math-hide-image (element)
@@ -161,14 +161,6 @@ If we are in a math element, then paste without the delimiters"
   (save-excursion
     (goto-char (plist-get element :begin))
     (xenops-math-get-image-at-point)))
-
-(defun xenops-math-delete-overlays (element)
-  (let ((beg (plist-get element :begin))
-        (end (plist-get element :end)))
-    (dolist (o (overlays-in beg end))
-      (when (eq (overlay-get o 'org-overlay-type)
-                'org-latex-overlay)
-        (delete-overlay o)))))
 
 (defun xenops-math-toggle-on-transition (move-point-command)
   "Display LaTeX on entry to a math element; display image on exit."
