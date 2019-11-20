@@ -1,6 +1,13 @@
 (defvar xenops-math-process 'dvisvgm)
 
-(defvar xenops-math-image-change-size-factor 1.1)
+(defvar xenops-math-image-change-size-factor 1.1
+  "The factor by which the image's size will be changed under
+  `xenops-math-image-increase-size' and
+  `xenops-math-image-decrease-size'.")
+
+(defvar xenops-math-image-scale-factor 0.8
+  "Scaling factor for SVG math images. This determines the size
+  of the image in the image file that is cached on disk.")
 
 (defvar xenops-math-image-margin 20
   "Number of pixels to be used as left margin for non-inline math images")
@@ -300,7 +307,7 @@ If we are in a math element, then paste without the delimiters"
          (dvisvgm-image-converter (car (plist-get dvisvgm-process-plist
                                                   :image-converter))))
     ;; TODO: this mutates the global variable!
-    (plist-put org-format-latex-options :scale 0.8)
+    (plist-put org-format-latex-options :scale xenops-math-image-scale-factor)
     (assert (and (string-match " -b \\([^ ]+\\) " dvisvgm-image-converter)
                  (plist-put dvisvgm-process-plist
                             :image-converter `(,(replace-match bounding-box t t
