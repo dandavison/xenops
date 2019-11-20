@@ -40,7 +40,7 @@
             (org-create-formula-image
              latex cache-file org-format-latex-options 'forbuffer xenops-math-process))
           (xenops-math-delete-overlays element)
-          (xenops-math-make-overlay element cache-file image-type margin latex))))))
+          (xenops-math-make-overlay beg end cache-file image-type margin latex))))))
 
 (defun xenops-math-regenerate-image (element)
   (let ((cache-file (xenops-math-get-cache-file element)))
@@ -232,19 +232,17 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-parse-element-at-point ()
   "If point is in previewable block, return plist describing match"
-  (or (-when-let (image (xenops-math-get-image-at-point))
-        (image-property image :element))
-      (let* ((math-delimiters (plist-get (cdr (assoc 'math xenops-ops)) :delimiters))
-             (inline-delimiter (car math-delimiters)))
-        (assert (xenops-math-inline-delimiters-p inline-delimiter))
-        (or (xenops-math-in-inline-math-element-p (car inline-delimiter))
-            (-any #'identity (mapcar
-                              (lambda (pair)
-                                (xenops-math-parse-element-at-point-matching-delimiters
-                                 pair
-                                 (point-min)
-                                 (point-max)))
-                              (cdr math-delimiters)))))))
+  (let* ((math-delimiters (plist-get (cdr (assoc 'math xenops-ops)) :delimiters))
+         (inline-delimiter (car math-delimiters)))
+    (assert (xenops-math-inline-delimiters-p inline-delimiter))
+    (or (xenops-math-in-inline-math-element-p (car inline-delimiter))
+        (-any #'identity (mapcar
+                          (lambda (pair)
+                            (xenops-math-parse-element-at-point-matching-delimiters
+                             pair
+                             (point-min)
+                             (point-max)))
+                          (cdr math-delimiters))))))
 
 (defun xenops-math-in-inline-math-element-p (delimiter)
   "Is point within an inline block delimited by `delimiter'?"
@@ -308,10 +306,9 @@ If we are in a math element, then paste without the delimiters"
                             :image-converter `(,(replace-match bounding-box t t
                                                                dvisvgm-image-converter 1)))))))
 
-(defun xenops-math-make-overlay (element image-file image-type margin help-echo)
+(defun xenops-math-make-overlay (beg end image-file image-type margin help-echo)
   "Copied from org--format-latex-make-overlay"
-  (let ((ov (make-overlay (plist-get element :begin)
-                          (plist-get element :end)))
+  (let ((ov (make-overlay beg end))
         (image-type (intern image-type)))
     (overlay-put ov 'org-overlay-type 'org-latex-overlay)
     (overlay-put ov 'evaporate t)
@@ -319,9 +316,9 @@ If we are in a math element, then paste without the delimiters"
                  'modification-hooks
                  (list (lambda (o _flag _beg _end &optional _l)
                          (delete-overlay o))))
-    (overlay-put ov 'display (list 'image
-                                   :type image-type :file image-file :ascent 'center :margin margin
-                                   :element element))
+    (overlay-put ov
+                 'display
+                 (list 'image :type image-type :file image-file :ascent 'center :margin margin))
     (overlay-put ov 'help-echo help-echo)))
 
 (defun xenops-math-get-cache-file (element)
