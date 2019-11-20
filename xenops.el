@@ -19,6 +19,11 @@
 (defvar xenops-tooltip-delay 0.2
   "`tooltip-delay' when xenops-mode is active.")
 
+(defvar xenops-variable-pitch-face-family "CMU Serif"
+  "The face family used for variable-pitch
+  faces (i.e. proportional fonts, as opposed to fixed-width fonts) in
+  a Xenops buffer.")
+
 (define-minor-mode xenops-mode
   "A LaTeX editing environment.
 
@@ -46,6 +51,12 @@
     (xenops-util-define-key-with-fallback [(super c)] #'xenops-math-handle-copy "\M-w")
     (xenops-util-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
     (xenops-util-define-key-with-fallback [(super x)] #'xenops-math-handle-delete)
+
+    (face-remap-add-relative 'variable-pitch :family xenops-variable-pitch-face-family)
+    (face-remap-add-relative 'default :family xenops-variable-pitch-face-family :height 160)
+    (face-remap-add-relative 'font-latex-math-face 'fixed-pitch :height 140)
+    (face-remap-add-relative 'font-latex-verbatim-face 'fixed-pitch :height 140)
+    (buffer-face-mode)
 
     (xenops-math-activate)
     (xenops-text-activate)
