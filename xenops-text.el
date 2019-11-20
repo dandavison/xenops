@@ -124,6 +124,24 @@
   (xenops-text-prettify-symbols-mode -1)
   (org-restart-font-lock))
 
+(defun xenops-text-render-footnote (element)
+  (let* ((beg (plist-get element :begin))
+         (end (plist-get element :end))
+         (ov (make-overlay beg end)))
+    (overlay-put ov 'display "[footnote]")
+    (overlay-put ov 'evaporate t)
+    (overlay-put ov
+                 'modification-hooks
+                 (list (lambda (o _flag _beg _end &optional _l)
+                         (delete-overlay o))))
+    (overlay-put ov 'help-echo (buffer-substring beg end))))
+
+(defun xenops-text-footnote-parse-match (element)
+  "See `xenops-image-parse-match'"
+  (append element `(:type footnote
+                          :begin ,(match-beginning 0)
+                          :end ,(match-end 0))))
+
 (defun xenops-text-prettify-symbols-mode (&optional arg)
   (interactive)
   (let ((prettify-symbols-alist prettify-symbols-alist)

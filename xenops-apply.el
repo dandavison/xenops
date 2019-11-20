@@ -34,7 +34,9 @@ section of the buffer that xenops can do something to."
                 ('math
                  (xenops-math-parse-match element))
                 ('image
-                 (xenops-image-parse-match element))))
+                 (xenops-image-parse-match element))
+                ('footnote
+                 (xenops-text-footnote-parse-match element))))
         ;; TODO: This shouldn't be necessary but it sometimes gets
         ;; stuck attempting to process the same block repeatedly.
         (goto-char (plist-get element :end))
@@ -50,7 +52,6 @@ section of the buffer that xenops can do something to."
                             (mapcar (lambda (delimiters)
                                       `(:type ,type :delimiters ,delimiters))
                                     (plist-get (cdr (assq type xenops-ops)) :delimiters))))
-    (append (get-delimiters 'math)
-            (get-delimiters 'image))))
+    (apply #'append (mapcar #'get-delimiters (mapcar #'car xenops-ops)))))
 
 (provide 'xenops-apply)

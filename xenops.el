@@ -76,7 +76,7 @@
    (t (xenops-display-images))))
 
 (defvar xenops-ops
-  '((math . (:ops
+  `((math . (:ops
              (xenops-math-display-image
               xenops-math-regenerate-image
               xenops-math-hide-image
@@ -94,12 +94,19 @@
               (xenops-image-display-image
                xenops-image-hide-image)
               :delimiters
-              (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))))))
+              (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))))
+    (footnote . (:ops
+                 (xenops-text-render-footnote
+                  xenops-element-delete-overlays)
+                 :delimiters
+                 ((,(concat "\\\\footnote"
+                            xenops-text-brace-delimited-multiline-expression-regexp)))))))
 
 (defun xenops-display-images ()
   (interactive)
   (xenops-apply '(xenops-math-display-image
-                  xenops-image-display-image)))
+                  xenops-image-display-image
+                  xenops-text-render-footnote)))
 
 (defun xenops-display-images-if-cached ()
   (let ((fn (symbol-function 'xenops-math-display-image)))
@@ -114,7 +121,8 @@
 (defun xenops-hide-images ()
   (interactive)
   (xenops-apply '(xenops-math-hide-image
-                  xenops-image-hide-image)))
+                  xenops-image-hide-image
+                  xenops-element-delete-overlays)))
 
 (defun xenops-image-increase-size ()
   (interactive)
