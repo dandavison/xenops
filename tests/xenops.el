@@ -21,7 +21,7 @@
         (latex-mode)
         (xenops-mode)
         (mark-whole-buffer)
-        (xenops-render)
+        (xenops-apply 'render)
         (goto-char element-begin)
         (let ((element (xenops-parse-element-at-point)))
           (should (equal (plist-get element :type) 'math)))

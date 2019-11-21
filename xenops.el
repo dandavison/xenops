@@ -37,11 +37,11 @@
     (define-key xenops-mode-map [(up)] (lambda () (interactive) (xenops-math-toggle-on-transition #'previous-line)))
     (xenops-util-define-key-with-fallback "\C-y" #'xenops-handle-paste)
     (xenops-util-define-key-with-fallback "\M-w" #'xenops-math-handle-copy)
-    (define-key xenops-mode-map (kbd "s-0") #'xenops-image-reset)
-    (define-key xenops-mode-map (kbd "s-+") #'xenops-image-increase-size)
-    (define-key xenops-mode-map (kbd "s--") #'xenops-image-decrease-size)
-    (define-key xenops-mode-map (kbd "s-=") #'xenops-image-increase-size)
-    (define-key xenops-mode-map (kbd "s-_") #'xenops-image-decrease-size)
+    (define-key xenops-mode-map (kbd "s-0") #'xenops-reset-size)
+    (define-key xenops-mode-map (kbd "s-+") #'xenops-increase-size)
+    (define-key xenops-mode-map (kbd "s--") #'xenops-decrease-size)
+    (define-key xenops-mode-map (kbd "s-=") #'xenops-increase-size)
+    (define-key xenops-mode-map (kbd "s-_") #'xenops-decrease-size)
     (xenops-util-define-key-with-fallback [(backspace)] #'xenops-math-handle-delete)
     (xenops-util-define-key-with-fallback [(return)] #'xenops-math-handle-return)
     (xenops-util-define-key-with-fallback [(super c)] #'xenops-math-handle-copy "\M-w")
@@ -65,7 +65,7 @@
       (save-restriction
         (widen)
         (goto-char (point-min))
-        (xenops-reveal)))
+        (xenops-apply 'reveal)))
     (xenops-math-deactivate)
     (xenops-text-deactivate))))
 
@@ -73,10 +73,23 @@
   (interactive "P")
   (cond
    ((equal arg '(16))
-    (xenops-regenerate))
+    (xenops-apply 'regenerate))
    ((equal arg '(4))
-    (xenops-reveal))
-   (t (xenops-render))))
+    (xenops-apply 'reveal))
+   (t (xenops-apply 'render))))
+
+(defvar xenops-ops
+  '((render . (xenops-math-render
+               xenops-image-render
+               xenops-text-footnote-render))
+    (reveal . (xenops-math-reveal
+               xenops-image-reveal
+               xenops-element-reveal))
+    (regenerate . (xenops-math-regenerate))
+    (increase-size . (xenops-math-image-increase-size))
+    (decrease-size . (xenops-math-image-decrease-size))
+    (reset-size . (xenops-math-image-reset-size)))
+  "Element-specific operation functions grouped by operation type.")
 
 (defvar xenops-elements
   `((math . (:ops
@@ -85,26 +98,26 @@
               xenops-math-reveal
               xenops-math-image-increase-size
               xenops-math-image-decrease-size
-              xenops-math-image-reset)
+              xenops-math-image-reset-size)
              :delimiters
              (("^[ \t]*\\\\begin{align\\*?}" .
                "^[ \t]*\\\\end{align\\*?}")
               ("^[ \t]*\\\\begin{tabular}" .
                "^[ \t]*\\\\end{tabular}"))
-             :parser
+             :parse-match
              xenops-math-parse-match))
     (inline-math . (:ops
                     math
                     :delimiters
                     (("\\$" . "\\$"))
-                    :parser
+                    :parse-match
                     math))
     (image . (:ops
               (xenops-image-render
                xenops-image-reveal)
               :delimiters
               (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))
-              :parser
+              :parse-match
               xenops-image-parse-match))
     (footnote . (:ops
                  (xenops-text-footnote-render
@@ -112,42 +125,38 @@
                  :delimiters
                  ((,(concat "\\\\footnote"
                             xenops-text-brace-delimited-multiline-expression-regexp)))
-                 :parser
-                 xenops-text-footnote-parse-match))))
+                 :parse-match
+                 xenops-text-footnote-parse-match)))
+  "Element-specific operation functions, regexps, and parsers, grouped by element type.")
 
-(defun xenops-render ()
-  (interactive)
-  (xenops-apply '(xenops-math-render
-                  xenops-image-render
-                  xenops-text-footnote-render)))
+(defmacro xenops-define-apply-command (op-type docstring)
+  `(defun ,(intern (concat "xenops-" (symbol-name op-type))) ()
+     ,(concat docstring " "
+              "The elements operated on are determined by trying the following:
+1. The element at point, if any.
+2. Elements in the active region, if there is an active region.
+3. All elements in the buffer.")
+     (interactive)
+     (xenops-apply ',op-type)))
+
+(xenops-define-apply-command render
+                             "Render elements: display LaTeX math, tables and included image files as images, and hide footnotes with tooltips.")
+(xenops-define-apply-command reveal
+                             "Reveal elements: this is the opposite of `xenops-render'. For LaTeX math, tables, and footnotes, reveal the LaTeX code for editing")
+(xenops-define-apply-command regenerate
+                             "Regenerate elements: for LaTeX math and footnotes, send the LaTeX to an external process to regenerate the image file, and display the new image.")
+(xenops-define-apply-command increase-size
+                             "Increase size of images.")
+(xenops-define-apply-command decrease-size
+                             "Decrease size of images.")
+(xenops-define-apply-command reset-size
+                             "Reset size of images.")
 
 (defun xenops-render-if-cached ()
   (let ((fn (symbol-function 'xenops-math-render)))
     (cl-letf (((symbol-function 'xenops-math-render)
                (lambda (element) (funcall fn element 'cached-only))))
-      (xenops-render))))
-
-(defun xenops-regenerate ()
-  (interactive)
-  (xenops-apply '(xenops-math-regenerate)))
-
-(defun xenops-reveal ()
-  (interactive)
-  (xenops-apply '(xenops-math-reveal
-                  xenops-image-reveal
-                  xenops-element-delete-overlays)))
-
-(defun xenops-image-increase-size ()
-  (interactive)
-  (xenops-apply '(xenops-math-image-increase-size)))
-
-(defun xenops-image-decrease-size ()
-  (interactive)
-  (xenops-apply '(xenops-math-image-decrease-size)))
-
-(defun xenops-image-reset ()
-  (interactive)
-  (xenops-apply '(xenops-math-image-reset)))
+      (xenops-apply 'render))))
 
 (defun xenops-parse-element-at-point ()
   (xenops-math-parse-element-at-point))
@@ -196,7 +205,7 @@ buffer, when running in a headless emacs process."
                  (:foreground "0,0,0")
                  (:background "1,1,1")
                  (t (error "Unexpected input: %s" attr))))))
-    (xenops-render)))
+    (xenops-apply 'render)))
 
 (defun xenops-avy-goto-math ()
   (interactive)

@@ -91,7 +91,7 @@
                          (setf (image-property image :file) nil)))))
         (setf (image-property image :data) (xenops-util-svg-resize data factor))))))
 
-(defun xenops-math-image-reset (element)
+(defun xenops-math-image-reset-size (element)
   (xenops-math-reveal element)
   (xenops-math-render element))
 

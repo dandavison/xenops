@@ -1,8 +1,15 @@
 ;; Generic operations on elements. Functions in this file should determine behavior based on the
-;; type of the element and the `xenops-elements' data structure. They should not directly call
-;; functions that are specific to element type (e.g. in xenops-math, xenops-image, xenops-text).
+;; type of the element and requested operations, by consulting the `xenops-elements' and
+;; `xenops-ops' data structures. They should not directly call functions that are specific to
+;; element type (e.g. in xenops-math, xenops-image, xenops-text).
 
-(defun xenops-apply (ops)
+(defun xenops-apply (op-type)
+  "Apply operation type OP-TYEP to any elements encountered. The region
+operated on is either the element at point, the active region, or
+the entire buffer."
+  (xenops-apply-operations (cdr (assq op-type xenops-ops))))
+
+(defun xenops-apply-operations (ops)
   "Apply operations OPS to any elements encountered. The region
 operated on is either the element at point, the active region, or
 the entire buffer."
@@ -38,7 +45,7 @@ section of the buffer that xenops can do something to."
                             (xenops-element-get-delimiters))))
       (when (re-search-forward (car (plist-get element :delimiters)) end t)
         (let* ((type (plist-get element :type))
-               (parser (xenops-element-get type :parser))
+               (parser (xenops-element-get type :parse-match))
                (element (funcall parser element)))
           ;; TODO: This shouldn't be necessary but it sometimes gets
           ;; stuck attempting to process the same block repeatedly.
