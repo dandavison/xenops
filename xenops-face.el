@@ -1,11 +1,12 @@
-(defvar xenops-face-font-family "CMU Serif"
+(defvar xenops-face-font-family nil
   "The font family used for all text other than math and source
-  code elements in a Xenops buffer.")
+  code elements in a Xenops buffer. To make this take effect,
+  call `xenops-face-set-faces' or restart `xenops-mode'.")
 
-(defun xenops-face-set-faces (&optional family)
-  (unless family (setq family xenops-face-font-family))
-  (face-remap-add-relative 'variable-pitch :family family)
-  (face-remap-add-relative 'default :family family :height 160)
+(defun xenops-face-set-faces ()
+  (interactive)
+  (face-remap-add-relative 'variable-pitch :family xenops-face-font-family)
+  (face-remap-add-relative 'default :family xenops-face-font-family :height 160)
   (face-remap-add-relative 'font-latex-math-face 'fixed-pitch :height 140)
   (face-remap-add-relative 'font-latex-verbatim-face 'fixed-pitch :height 140)
   (buffer-face-mode))
@@ -25,8 +26,10 @@
   (let* ((completing-read-function
           (if (fboundp 'ivy-completing-read) #'ivy-completing-read completing-read-function))
          (family
-          (completing-read "Font family: " (xenops-face-get-fontified-family-strings face-spec))))
-    (xenops-face-set-faces family)))
+          (substring-no-properties
+           (completing-read "Font family: " (xenops-face-get-fontified-family-strings face-spec)))))
+    (setq xenops-face-font-family family)
+    (xenops-face-set-faces)))
 
 (provide 'xenops-face)
 

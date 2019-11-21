@@ -48,7 +48,7 @@
     (xenops-util-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
     (xenops-util-define-key-with-fallback [(super x)] #'xenops-math-handle-delete)
 
-    (xenops-face-set-faces)
+    (if xenops-face-font-family (xenops-face-set-faces))
 
     (xenops-math-activate)
     (xenops-text-activate)
