@@ -1,6 +1,6 @@
 (defun xenops-apply (ops)
   (cl-flet ((process (lambda (el)
-                       (-if-let (op (xenops-apply-get-op-for-element el ops))
+                       (-if-let (op (xenops-element-get-operation el ops))
                            (save-excursion (funcall op el))))))
     (-if-let (el (xenops-parse-element-at-point))
         (process el)
@@ -11,13 +11,13 @@
         (save-excursion
           (goto-char beg)
           (let (el)
-            (while (setq el (xenops-apply-get-next-element end))
+            (while (setq el (xenops-element-get-next-element end))
               (process el))))
         (and region-active (not (-intersection ops '(xenops-math-image-increase-size
                                                      xenops-math-image-decrease-size)))
              (deactivate-mark))))))
 
-(defun xenops-apply-get-next-element (end)
+(defun xenops-element-get-next-element (end)
   "If there is another element, return it and leave point after it.
 An element is a plist containing data about a regexp match for a
 section of the buffer that xenops can do something to."
@@ -27,7 +27,7 @@ section of the buffer that xenops can do something to."
     (let ((element (-min-by (lambda (delims1 delims2)
                               (> (next-match-pos (car (plist-get delims1 :delimiters)))
                                  (next-match-pos (car (plist-get delims2 :delimiters)))))
-                            (xenops-apply-get-delimiters))))
+                            (xenops-element-get-delimiters))))
       (when (re-search-forward (car (plist-get element :delimiters)) end t)
         (let* ((type (plist-get element :type))
                (parser (plist-get (cdr (assq type xenops-elements)) :parser))
@@ -37,16 +37,16 @@ section of the buffer that xenops can do something to."
           (goto-char (plist-get element :end))
           element)))))
 
-(defun xenops-apply-get-op-for-element (el ops)
+(defun xenops-element-get-operation (el ops)
   (car (-intersection ops (plist-get
                            (cdr (assq (plist-get el :type) xenops-elements))
                            :ops))))
 
-(defun xenops-apply-get-delimiters ()
+(defun xenops-element-get-delimiters ()
   (cl-flet ((get-delimiters (type)
                             (mapcar (lambda (delimiters)
                                       `(:type ,type :delimiters ,delimiters))
                                     (plist-get (cdr (assq type xenops-elements)) :delimiters))))
     (apply #'append (mapcar #'get-delimiters (mapcar #'car xenops-elements)))))
 
-(provide 'xenops-apply)
+(provide 'xenops-element)

@@ -4,7 +4,7 @@
 (require 'f)
 (require 'org)
 (require 's)
-(require 'xenops-apply)
+(require 'xenops-element)
 (require 'xenops-execute)
 (require 'xenops-face)
 (require 'xenops-image)
