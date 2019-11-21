@@ -21,16 +21,23 @@
 
 (setq xenops-math-inline-math-delimiters '("\\$" . "\\$"))
 
+(defun xenops-math-font-lock-keywords ()
+  `((,(xenops-math-block-delimiter-lines-regexp)
+     (0
+      (xenops-math-block-delimiter-lines-set-face)))))
+
 (defun xenops-math-activate ()
   (setq mouse-drag-and-drop-region t)
   (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-around-advice)
   (advice-add fill-paragraph-function :after #'xenops-math-fill-paragraph-after-advice)
+  (font-lock-add-keywords nil (xenops-math-font-lock-keywords))
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-math-in-inline-math-element-p "\\$"))))
 
 (defun xenops-math-deactivate ()
   (advice-remove #'mouse-drag-and-drop-region #'xenops-math-mouse-drag-region-around-advice)
-  (advice-remove fill-paragraph-function #'xenops-math-fill-paragraph-after-advice))
+  (advice-remove fill-paragraph-function #'xenops-math-fill-paragraph-after-advice)
+  (font-lock-remove-keywords nil (xenops-math-font-lock-keywords)))
 
 (defun xenops-math-display-image (element &optional cached-only)
   (xenops-math-set-org-preview-latex-process-alist! element)
@@ -93,6 +100,16 @@
   (format "\\(%s\\)"
           (s-join "\\|"
                   (mapcar #'car (xenops-math-get-delimiters)))))
+
+(defun xenops-math-block-delimiter-lines-regexp ()
+  "A regexp matching the start or end line of any block math element."
+  (format "\\(%s\\)"
+          (s-join "\\|"
+                  (apply #'append (mapcar (lambda (pair) (list (car pair) (cdr pair)))
+                                          (xenops-math-get-block-delimiters))))))
+
+(defun xenops-math-block-delimiter-lines-set-face ()
+  (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch))
 
 (defun xenops-math-handle-return ()
   (when (xenops-math-get-image-at-point)
