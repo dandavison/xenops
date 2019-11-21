@@ -85,7 +85,7 @@
 (defun xenops-math-get-math-element-begin-regexp ()
   (format "\\(%s\\)"
           (s-join "\\|"
-                  (mapcar #'car (plist-get (cdr (assq 'math xenops-ops)) :delimiters)))))
+                  (mapcar #'car (xenops-math-get-delimiters)))))
 
 (defun xenops-math-handle-return ()
   (when (xenops-math-get-image-at-point)
@@ -231,9 +231,9 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-parse-element-at-point ()
   "If point is in previewable block, return plist describing match"
-  (let* ((math-delimiters (plist-get (cdr (assoc 'math xenops-ops)) :delimiters))
-         (inline-delimiter (car math-delimiters)))
-    (assert (xenops-math-inline-delimiters-p inline-delimiter))
+  (let* ((delimiters (xenops-math-get-delimiters))
+         (block-delimiters (xenops-math-get-block-delimiters delimiters))
+         (inline-delimiter (xenops-math-get-inline-delimiters delimiters)))
     (or (xenops-math-in-inline-math-element-p (car inline-delimiter))
         (-any #'identity (mapcar
                           (lambda (pair)
@@ -241,7 +241,7 @@ If we are in a math element, then paste without the delimiters"
                              pair
                              (point-min)
                              (point-max)))
-                          (cdr math-delimiters))))))
+                          block-delimiters)))))
 
 (defun xenops-math-in-inline-math-element-p (delimiter)
   "Is point within an inline block delimited by `delimiter'?"
@@ -253,6 +253,15 @@ If we are in a math element, then paste without the delimiters"
       (and odd-count
            (xenops-math-parse-element-at-point-matching-delimiters
             (cons delimiter delimiter) (point-at-bol) (point-at-eol))))))
+
+(defun xenops-math-get-delimiters ()
+  (plist-get (cdr (assoc 'math xenops-ops)) :delimiters))
+
+(defun xenops-math-get-inline-delimiters (&optional delimiters)
+  (car (or delimiters (xenops-math-get-delimiters))))
+
+(defun xenops-math-get-block-delimiters (&optional delimiters)
+  (cdr (or delimiters (xenops-math-get-delimiters))))
 
 (defun xenops-math-inline-delimiters-p (delimiters)
   (equal delimiters xenops-math-inline-math-delimiters))
