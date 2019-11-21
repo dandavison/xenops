@@ -28,7 +28,7 @@
   (cond
    (xenops-mode
     (define-key xenops-mode-map "\C-c\C-c" #'xenops)
-    (define-key xenops-mode-map [(double-down-mouse-1)] #'xenops-math-handle-second-click)
+    (define-key xenops-mode-map [(double-down-mouse-1)] #'xenops-reveal-at-point)
     (define-key xenops-mode-map [(down)] (lambda () (interactive) (xenops-math-toggle-on-transition #'next-line)))
     (define-key xenops-mode-map [(down-mouse-1)] #'xenops-math-handle-first-click)
     (define-key xenops-mode-map [(left)] (lambda () (interactive) (xenops-math-toggle-on-transition #'left-char)))
@@ -36,17 +36,17 @@
     (define-key xenops-mode-map [(right)] (lambda () (interactive) (xenops-math-toggle-on-transition #'right-char)))
     (define-key xenops-mode-map [(up)] (lambda () (interactive) (xenops-math-toggle-on-transition #'previous-line)))
     (xenops-util-define-key-with-fallback "\C-y" #'xenops-handle-paste)
-    (xenops-util-define-key-with-fallback "\M-w" #'xenops-math-handle-copy)
+    (xenops-util-define-key-with-fallback "\M-w" #'xenops-copy-at-point)
     (define-key xenops-mode-map (kbd "s-0") #'xenops-reset-size)
     (define-key xenops-mode-map (kbd "s-+") #'xenops-increase-size)
     (define-key xenops-mode-map (kbd "s--") #'xenops-decrease-size)
     (define-key xenops-mode-map (kbd "s-=") #'xenops-increase-size)
     (define-key xenops-mode-map (kbd "s-_") #'xenops-decrease-size)
-    (xenops-util-define-key-with-fallback [(backspace)] #'xenops-math-handle-delete)
-    (xenops-util-define-key-with-fallback [(return)] #'xenops-math-handle-return)
-    (xenops-util-define-key-with-fallback [(super c)] #'xenops-math-handle-copy "\M-w")
+    (xenops-util-define-key-with-fallback [(backspace)] #'xenops-delete-at-point)
+    (xenops-util-define-key-with-fallback [(return)] #'xenops-reveal-at-point)
+    (xenops-util-define-key-with-fallback [(super c)] #'xenops-copy-at-point "\M-w")
     (xenops-util-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
-    (xenops-util-define-key-with-fallback [(super x)] #'xenops-math-handle-delete)
+    (xenops-util-define-key-with-fallback [(super x)] #'xenops-delete-at-point)
 
     (if xenops-face-font-family (xenops-face-set-faces))
 
@@ -86,6 +86,8 @@
                xenops-image-reveal
                xenops-element-reveal))
     (regenerate . (xenops-math-regenerate))
+    (copy . (xenops-element-copy))
+    (delete . (xenops-element-delete))
     (increase-size . (xenops-math-image-increase-size))
     (decrease-size . (xenops-math-image-decrease-size))
     (reset-size . (xenops-math-image-reset-size)))
@@ -98,12 +100,16 @@
               xenops-math-reveal
               xenops-math-image-increase-size
               xenops-math-image-decrease-size
-              xenops-math-image-reset-size)
+              xenops-math-image-reset-size
+              xenops-element-copy
+              xenops-element-delete)
              :delimiters
              (("^[ \t]*\\\\begin{align\\*?}" .
                "^[ \t]*\\\\end{align\\*?}")
               ("^[ \t]*\\\\begin{tabular}" .
                "^[ \t]*\\\\end{tabular}"))
+             :parse-at-point
+             xenops-math-parse-element-at-point
              :parse-match
              xenops-math-parse-match))
     (inline-math . (:ops
@@ -114,14 +120,18 @@
                     math))
     (image . (:ops
               (xenops-image-render
-               xenops-image-reveal)
+               xenops-image-reveal
+               xenops-element-copy
+               xenops-element-delete)
               :delimiters
               (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))
               :parse-match
               xenops-image-parse-match))
     (footnote . (:ops
                  (xenops-text-footnote-render
-                  xenops-element-reveal)
+                  xenops-element-reveal
+                  xenops-element-copy
+                  xenops-element-delete)
                  :delimiters
                  ((,(concat "\\\\footnote"
                             xenops-text-brace-delimited-multiline-expression-regexp)))
@@ -139,6 +149,14 @@
      (interactive)
      (xenops-apply ',op-type)))
 
+(defmacro xenops-define-apply-at-point-command (op-type docstring)
+  `(defun ,(intern (concat "xenops-" (symbol-name op-type) "-at-point")) ()
+     ,docstring
+     (interactive)
+     (-when-let (el (xenops-element-parse-at-point))
+       (-when-let (op (xenops-element-op-of-type-for-el el ',op-type))
+         (funcall op el)))))
+
 (xenops-define-apply-command render
                              "Render elements: display LaTeX math, tables and included image files as images, and hide footnotes with tooltips.")
 (xenops-define-apply-command reveal
@@ -152,23 +170,20 @@
 (xenops-define-apply-command reset-size
                              "Reset size of images.")
 
+(xenops-define-apply-at-point-command reveal
+                                      "Reveal the element at point.")
+
+(xenops-define-apply-at-point-command copy
+                                      "Copy the element at point.")
+
+(xenops-define-apply-at-point-command delete
+                                      "Delete the element at point.")
+
 (defun xenops-render-if-cached ()
   (let ((fn (symbol-function 'xenops-math-render)))
     (cl-letf (((symbol-function 'xenops-math-render)
                (lambda (element) (funcall fn element 'cached-only))))
       (xenops-apply 'render))))
-
-(defun xenops-parse-element-at-point ()
-  (xenops-math-parse-element-at-point))
-
-(defun xenops-element-delete-overlays (element)
-  (let ((beg (plist-get element :begin))
-        (end (plist-get element :end)))
-    (dolist (ov (overlays-in beg end))
-      (when (overlay-get ov 'xenops-overlay-type)
-        (delete-overlay ov)))))
-
-(defalias 'xenops-element-reveal #'xenops-element-delete-overlays)
 
 (defun xenops-handle-paste ()
   (interactive)

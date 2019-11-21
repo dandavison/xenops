@@ -111,24 +111,6 @@
 (defun xenops-math-block-delimiter-lines-set-face ()
   (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch))
 
-(defun xenops-math-handle-return ()
-  (when (xenops-math-get-image-at-point)
-    (-when-let (element (xenops-math-parse-element-at-point))
-      (xenops-math-reveal element)
-      t)))
-
-(defun xenops-math-handle-delete ()
-  (when (xenops-math-get-image-at-point)
-    (-when-let (element (xenops-math-parse-element-at-point))
-      (kill-region (plist-get element :begin) (plist-get element :end))
-      t)))
-
-(defun xenops-math-handle-copy ()
-  (when (xenops-math-get-image-at-point)
-    (-when-let (element (xenops-math-parse-element-at-point))
-      (xenops-math-copy element)
-      t)))
-
 (defun xenops-math-handle-paste ()
   "If the text to be pasted is a math element then handle the paste.
 If we are in a math element, then paste without the delimiters"
@@ -144,10 +126,6 @@ If we are in a math element, then paste without the delimiters"
         (save-excursion (yank))
         (xenops-math-render (xenops-math-parse-element-at-point))
         t))))
-
-(defun xenops-math-copy (element)
-  (copy-region-as-kill (plist-get element :begin)
-                       (plist-get element :end)))
 
 (defun xenops-math-paste ()
   (or (xenops-math-handle-paste) (yank)))
@@ -206,7 +184,7 @@ If we are in a math element, then paste without the delimiters"
   (interactive "e")
   (cond
    ((memq 'double (event-modifiers event))
-    (xenops-math-handle-second-click event))
+    (xenops-element-reveal))
    (t (xenops-math-handle-first-click event))))
 
 (defun xenops-math-handle-first-click (event)
@@ -216,10 +194,6 @@ If we are in a math element, then paste without the delimiters"
       (let ((now-in (xenops-math-parse-element-at-point)))
         (and was-in (not (equal was-in now-in))
              (xenops-math-render was-in))))))
-
-(defun xenops-math-handle-second-click (event)
-  (-if-let (now-in (xenops-math-parse-element-at-point))
-      (xenops-math-reveal now-in)))
 
 (defun xenops-math-mouse-drag-region-around-advice (mouse-drag-region-fn start-event)
   "If point is in a math element, then cause mouse drag to appear to drag the associated image:

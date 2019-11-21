@@ -16,7 +16,7 @@ the entire buffer."
   (cl-flet ((process (lambda (el)
                        (-if-let (op (xenops-element-op-for-el el ops))
                            (save-excursion (funcall op el))))))
-    (-if-let (el (xenops-parse-element-at-point))
+    (-if-let (el (xenops-element-parse-at-point))
         (process el)
       (destructuring-bind (beg end region-active)
           (if (region-active-p)
@@ -31,6 +31,27 @@ the entire buffer."
         (and region-active (not (-intersection ops '(xenops-math-image-increase-size
                                                      xenops-math-image-decrease-size)))
              (deactivate-mark))))))
+
+(defun xenops-element-delete-overlays (element)
+  (let ((beg (plist-get element :begin))
+        (end (plist-get element :end)))
+    (dolist (ov (overlays-in beg end))
+      (when (overlay-get ov 'xenops-overlay-type)
+        (delete-overlay ov)))))
+
+(defalias 'xenops-element-reveal #'xenops-element-delete-overlays)
+
+(defun xenops-element-copy (element)
+  (copy-region-as-kill (plist-get element :begin)
+                       (plist-get element :end)))
+
+(defun xenops-element-delete (element)
+  (kill-region (plist-get element :begin)
+               (plist-get element :end))
+  t)
+
+(defun xenops-element-parse-at-point ()
+  (xenops-util-first-result #'funcall (xenops-element-get-all :parse-at-point)))
 
 (defun xenops-element-get-next-element (end)
   "If there is another element, return it and leave point after it.
@@ -67,6 +88,14 @@ section of the buffer that xenops can do something to."
 (defun xenops-element-ops-for-op-type (op-type)
   "The operations of type OP-TYPE."
   (cdr (assq op-type xenops-ops)))
+
+(defun xenops-element-get-all (key)
+  "Concatenated list of all items under key KEY for any element type."
+  (-uniq
+   (apply #'append
+          (mapcar (lambda (pair) (let ((val (xenops-element-get (car pair) key)))
+                              (if (listp val) val (list val))))
+                  xenops-elements))))
 
 (defun xenops-element-get-delimiters ()
   (cl-flet ((get-delimiters (type)

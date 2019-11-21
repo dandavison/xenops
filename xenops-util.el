@@ -18,6 +18,14 @@ non-nil, or nil if no such index exists."
         (and el (throw :index i))
         (setq i (1+ i))))))
 
+(defun xenops-util-first-result (fn list)
+  "Call FN on each element of LIST until a non-nil return value
+is encountered. Return this value without further evaluations."
+  (catch :result
+    (dolist (el list)
+      (-if-let (result (funcall fn el))
+          (throw :result result)))))
+
 (defun xenops-util-svg-resize (svg scale)
   "Return SVG data with height and width scaled by `scale'"
   (cl-flet ((resize (match)
