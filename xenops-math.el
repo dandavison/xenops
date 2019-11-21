@@ -99,14 +99,14 @@
   "A regexp matching the start of any math element."
   (format "\\(%s\\)"
           (s-join "\\|"
-                  (mapcar #'car (xenops-math-get-delimiters)))))
+                  (mapcar #'car (xenops-math-get-all-delimiters)))))
 
 (defun xenops-math-block-delimiter-lines-regexp ()
   "A regexp matching the start or end line of any block math element."
   (format "\\(%s\\)"
           (s-join "\\|"
                   (apply #'append (mapcar (lambda (pair) (list (car pair) (cdr pair)))
-                                          (xenops-math-get-block-delimiters))))))
+                                          (xenops-element-get 'math :delimiters))))))
 
 (defun xenops-math-block-delimiter-lines-set-face ()
   (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch))
@@ -255,9 +255,8 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-parse-element-at-point ()
   "If point is in previewable block, return plist describing match"
-  (let* ((delimiters (xenops-math-get-delimiters))
-         (block-delimiters (xenops-math-get-block-delimiters delimiters))
-         (inline-delimiter (xenops-math-get-inline-delimiters delimiters)))
+  (let* ((block-delimiters (xenops-element-get 'math :delimiters))
+         (inline-delimiter (car (xenops-element-get 'inline-math :delimiters))))
     (or (xenops-math-in-inline-math-element-p (car inline-delimiter))
         (-any #'identity (mapcar
                           (lambda (pair)
@@ -278,14 +277,9 @@ If we are in a math element, then paste without the delimiters"
            (xenops-math-parse-element-at-point-matching-delimiters
             (cons delimiter delimiter) (point-at-bol) (point-at-eol))))))
 
-(defun xenops-math-get-delimiters ()
-  (xenops-element-get 'math :delimiters))
-
-(defun xenops-math-get-inline-delimiters (&optional delimiters)
-  (car (or delimiters (xenops-math-get-delimiters))))
-
-(defun xenops-math-get-block-delimiters (&optional delimiters)
-  (cdr (or delimiters (xenops-math-get-delimiters))))
+(defun xenops-math-get-all-delimiters ()
+  (append (xenops-element-get 'math :delimiters)
+          (xenops-element-get 'inline-math :delimiters)))
 
 (defun xenops-math-inline-delimiters-p (delimiters)
   (equal delimiters xenops-math-inline-math-delimiters))

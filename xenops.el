@@ -87,14 +87,18 @@
               xenops-math-image-decrease-size
               xenops-math-image-reset)
              :delimiters
-             (("\\$" .
-               "\\$")
-              ("^[ \t]*\\\\begin{align\\*?}" .
+             (("^[ \t]*\\\\begin{align\\*?}" .
                "^[ \t]*\\\\end{align\\*?}")
               ("^[ \t]*\\\\begin{tabular}" .
                "^[ \t]*\\\\end{tabular}"))
              :parser
              xenops-math-parse-match))
+    (inline-math . (:ops
+                    math
+                    :delimiters
+                    (("\\$" . "\\$"))
+                    :parser
+                    math))
     (image . (:ops
               (xenops-image-render
                xenops-image-reveal)
