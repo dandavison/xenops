@@ -159,6 +159,9 @@
     (mapc #'xenops-text-prettify-symbols-add-string-replacement
           xenops-text-prettify-symbols-string-replacements)
 
+    (setq prettify-symbols-alist
+          (sort prettify-symbols-alist (lambda (x y) (> (length (car x)) (length (car y))))))
+
     (prettify-symbols-mode (or arg 'toggle))))
 
 (defun xenops-text-configure-tooltips (&optional deactivate)
