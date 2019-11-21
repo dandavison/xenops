@@ -100,18 +100,24 @@
               ("^[ \t]*\\\\begin{align\\*?}" .
                "^[ \t]*\\\\end{align\\*?}")
               ("^[ \t]*\\\\begin{tabular}" .
-               "^[ \t]*\\\\end{tabular}"))))
+               "^[ \t]*\\\\end{tabular}"))
+             :parser
+             xenops-math-parse-match))
     (image . (:ops
               (xenops-image-display-image
                xenops-image-hide-image)
               :delimiters
-              (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))))
+              (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))
+              :parser
+              xenops-image-parse-match))
     (footnote . (:ops
                  (xenops-text-render-footnote
                   xenops-element-delete-overlays)
                  :delimiters
                  ((,(concat "\\\\footnote"
-                            xenops-text-brace-delimited-multiline-expression-regexp)))))))
+                            xenops-text-brace-delimited-multiline-expression-regexp)))
+                 :parser
+                 xenops-text-footnote-parse-match))))
 
 (defun xenops-display-images ()
   (interactive)

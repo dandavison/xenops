@@ -29,18 +29,13 @@ section of the buffer that xenops can do something to."
                                  (next-match-pos (car (plist-get delims2 :delimiters)))))
                             (xenops-apply-get-delimiters))))
       (when (re-search-forward (car (plist-get element :delimiters)) end t)
-        (setq element
-              (case (plist-get element :type)
-                ('math
-                 (xenops-math-parse-match element))
-                ('image
-                 (xenops-image-parse-match element))
-                ('footnote
-                 (xenops-text-footnote-parse-match element))))
-        ;; TODO: This shouldn't be necessary but it sometimes gets
-        ;; stuck attempting to process the same block repeatedly.
-        (goto-char (plist-get element :end))
-        element))))
+        (let* ((type (plist-get element :type))
+               (parser (plist-get (cdr (assq type xenops-ops)) :parser))
+               (element (funcall parser element)))
+          ;; TODO: This shouldn't be necessary but it sometimes gets
+          ;; stuck attempting to process the same block repeatedly.
+          (goto-char (plist-get element :end))
+          element)))))
 
 (defun xenops-apply-get-op-for-element (el ops)
   (car (-intersection ops (plist-get
