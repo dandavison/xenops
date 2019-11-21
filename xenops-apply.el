@@ -30,7 +30,7 @@ section of the buffer that xenops can do something to."
                             (xenops-apply-get-delimiters))))
       (when (re-search-forward (car (plist-get element :delimiters)) end t)
         (let* ((type (plist-get element :type))
-               (parser (plist-get (cdr (assq type xenops-ops)) :parser))
+               (parser (plist-get (cdr (assq type xenops-elements)) :parser))
                (element (funcall parser element)))
           ;; TODO: This shouldn't be necessary but it sometimes gets
           ;; stuck attempting to process the same block repeatedly.
@@ -39,14 +39,14 @@ section of the buffer that xenops can do something to."
 
 (defun xenops-apply-get-op-for-element (el ops)
   (car (-intersection ops (plist-get
-                           (cdr (assq (plist-get el :type) xenops-ops))
+                           (cdr (assq (plist-get el :type) xenops-elements))
                            :ops))))
 
 (defun xenops-apply-get-delimiters ()
   (cl-flet ((get-delimiters (type)
                             (mapcar (lambda (delimiters)
                                       `(:type ,type :delimiters ,delimiters))
-                                    (plist-get (cdr (assq type xenops-ops)) :delimiters))))
-    (apply #'append (mapcar #'get-delimiters (mapcar #'car xenops-ops)))))
+                                    (plist-get (cdr (assq type xenops-elements)) :delimiters))))
+    (apply #'append (mapcar #'get-delimiters (mapcar #'car xenops-elements)))))
 
 (provide 'xenops-apply)

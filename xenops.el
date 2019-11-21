@@ -54,10 +54,10 @@
     (xenops-text-activate)
 
     ;; Display math and tables as images
-    (xenops-display-images-async)
+    (xenops-render-async)
     (save-excursion
       (goto-char (point-min))
-      (xenops-display-images-if-cached)))
+      (xenops-render-if-cached)))
 
    ;; Deactivate
    (t
@@ -65,7 +65,7 @@
       (save-restriction
         (widen)
         (goto-char (point-min))
-        (xenops-hide-images)))
+        (xenops-reveal)))
     (xenops-math-deactivate)
     (xenops-text-deactivate))))
 
@@ -73,16 +73,16 @@
   (interactive "P")
   (cond
    ((equal arg '(16))
-    (xenops-hide-images))
+    (xenops-regenerate))
    ((equal arg '(4))
-    (xenops-regenerate-images))
-   (t (xenops-display-images))))
+    (xenops-reveal))
+   (t (xenops-render))))
 
-(defvar xenops-ops
+(defvar xenops-elements
   `((math . (:ops
-             (xenops-math-display-image
-              xenops-math-regenerate-image
-              xenops-math-hide-image
+             (xenops-math-render
+              xenops-math-regenerate
+              xenops-math-reveal
               xenops-math-image-increase-size
               xenops-math-image-decrease-size
               xenops-math-image-reset)
@@ -96,41 +96,41 @@
              :parser
              xenops-math-parse-match))
     (image . (:ops
-              (xenops-image-display-image
-               xenops-image-hide-image)
+              (xenops-image-render
+               xenops-image-reveal)
               :delimiters
               (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))
               :parser
               xenops-image-parse-match))
     (footnote . (:ops
-                 (xenops-text-render-footnote
-                  xenops-element-delete-overlays)
+                 (xenops-text-footnote-render
+                  xenops-element-reveal)
                  :delimiters
                  ((,(concat "\\\\footnote"
                             xenops-text-brace-delimited-multiline-expression-regexp)))
                  :parser
                  xenops-text-footnote-parse-match))))
 
-(defun xenops-display-images ()
+(defun xenops-render ()
   (interactive)
-  (xenops-apply '(xenops-math-display-image
-                  xenops-image-display-image
-                  xenops-text-render-footnote)))
+  (xenops-apply '(xenops-math-render
+                  xenops-image-render
+                  xenops-text-footnote-render)))
 
-(defun xenops-display-images-if-cached ()
-  (let ((fn (symbol-function 'xenops-math-display-image)))
-    (cl-letf (((symbol-function 'xenops-math-display-image)
+(defun xenops-render-if-cached ()
+  (let ((fn (symbol-function 'xenops-math-render)))
+    (cl-letf (((symbol-function 'xenops-math-render)
                (lambda (element) (funcall fn element 'cached-only))))
-      (xenops-display-images))))
+      (xenops-render))))
 
-(defun xenops-regenerate-images ()
+(defun xenops-regenerate ()
   (interactive)
-  (xenops-apply '(xenops-math-regenerate-image)))
+  (xenops-apply '(xenops-math-regenerate)))
 
-(defun xenops-hide-images ()
+(defun xenops-reveal ()
   (interactive)
-  (xenops-apply '(xenops-math-hide-image
-                  xenops-image-hide-image
+  (xenops-apply '(xenops-math-reveal
+                  xenops-image-reveal
                   xenops-element-delete-overlays)))
 
 (defun xenops-image-increase-size ()
@@ -155,13 +155,15 @@
       (when (overlay-get ov 'xenops-overlay-type)
         (delete-overlay ov)))))
 
+(defalias 'xenops-element-reveal #'xenops-element-delete-overlays)
+
 (defun xenops-handle-paste ()
   (interactive)
   (or (xenops-math-handle-paste)
       (xenops-image-handle-paste)))
 
-(defun xenops-display-images-async ()
-  "Run `xenops-display-images' on the current buffer's file, asynchronously."
+(defun xenops-render-async ()
+  "Run `xenops-render' on the current buffer's file, asynchronously."
   (interactive)
   (message "Xenops: processing images asynchronously")
   (async-start `(lambda ()
@@ -177,7 +179,7 @@
                (lambda (result)
                  (run-with-idle-timer 0 nil
                                       (lambda () (save-excursion (goto-char (point-min))
-                                                            (xenops-display-images-if-cached)
+                                                            (xenops-render-if-cached)
                                                             (message "Xenops: done")))))))
 
 (defun xenops-generate-images-in-headless-process ()
@@ -190,7 +192,7 @@ buffer, when running in a headless emacs process."
                  (:foreground "0,0,0")
                  (:background "1,1,1")
                  (t (error "Unexpected input: %s" attr))))))
-    (xenops-display-images)))
+    (xenops-render)))
 
 (defun xenops-avy-goto-math ()
   (interactive)

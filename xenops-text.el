@@ -121,7 +121,7 @@
   (xenops-text-prettify-symbols-mode -1)
   (org-restart-font-lock))
 
-(defun xenops-text-render-footnote (element)
+(defun xenops-text-footnote-render (element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
          (ov (make-overlay beg end)))

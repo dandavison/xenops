@@ -39,7 +39,7 @@
   (advice-remove fill-paragraph-function #'xenops-math-fill-paragraph-after-advice)
   (font-lock-remove-keywords nil (xenops-math-font-lock-keywords)))
 
-(defun xenops-math-display-image (element &optional cached-only)
+(defun xenops-math-render (element &optional cached-only)
   (xenops-math-set-org-preview-latex-process-alist! element)
   (let ((beg (plist-get element :begin))
         (end (plist-get element :end)))
@@ -62,16 +62,16 @@
           (xenops-element-delete-overlays element)
           (xenops-math-make-overlay beg end cache-file image-type margin latex))))))
 
-(defun xenops-math-regenerate-image (element)
+(defun xenops-math-regenerate (element)
   (let ((cache-file (xenops-math-get-cache-file element)))
     (when cache-file
       (delete-file cache-file)
       (clear-image-cache cache-file)
       (message "Xenops: deleted file: %s" cache-file))
     (xenops-element-delete-overlays element)
-    (xenops-math-display-image element)))
+    (xenops-math-render element)))
 
-(defun xenops-math-hide-image (element)
+(defun xenops-math-reveal (element)
   (org-remove-latex-fragment-image-overlays (plist-get element :begin)
                                             (plist-get element :end))
   (goto-char (plist-get element :begin-math)))
@@ -92,8 +92,8 @@
         (setf (image-property image :data) (xenops-util-svg-resize data factor))))))
 
 (defun xenops-math-image-reset (element)
-  (xenops-math-hide-image element)
-  (xenops-math-display-image element))
+  (xenops-math-reveal element)
+  (xenops-math-render element))
 
 (defun xenops-math-get-math-element-begin-regexp ()
   "A regexp matching the start of any math element."
@@ -114,7 +114,7 @@
 (defun xenops-math-handle-return ()
   (when (xenops-math-get-image-at-point)
     (-when-let (element (xenops-math-parse-element-at-point))
-      (xenops-math-hide-image element)
+      (xenops-math-reveal element)
       t)))
 
 (defun xenops-math-handle-delete ()
@@ -142,7 +142,7 @@ If we are in a math element, then paste without the delimiters"
                         (plist-get element :end-math)))
             (rotate-yank-pointer 1))
         (save-excursion (yank))
-        (xenops-math-display-image (xenops-math-parse-element-at-point))
+        (xenops-math-render (xenops-math-parse-element-at-point))
         t))))
 
 (defun xenops-math-copy (element)
@@ -166,7 +166,7 @@ If we are in a math element, then paste without the delimiters"
       (push-mark (point) t t)
       (funcall backward-paragraph-fn)
       (if (region-active-p)
-          (xenops-display-images-if-cached)))))
+          (xenops-render-if-cached)))))
 
 (defun xenops-math-parse-element-from-string (element-string)
   (with-temp-buffer
@@ -196,7 +196,7 @@ If we are in a math element, then paste without the delimiters"
       (save-excursion
         (let* ((now-in (xenops-math-parse-element-at-point)))
           (setq exited (and was-in (not (equal was-in now-in))))
-          (if exited (xenops-math-display-image was-in))))
+          (if exited (xenops-math-render was-in))))
       (and exited (eq move-point-command #'next-line)
            ;; Hack: with a single (next-line), point ends up to the right of the image; we want it
            ;; on the line below.
@@ -215,11 +215,11 @@ If we are in a math element, then paste without the delimiters"
     (save-excursion
       (let ((now-in (xenops-math-parse-element-at-point)))
         (and was-in (not (equal was-in now-in))
-             (xenops-math-display-image was-in))))))
+             (xenops-math-render was-in))))))
 
 (defun xenops-math-handle-second-click (event)
   (-if-let (now-in (xenops-math-parse-element-at-point))
-      (xenops-math-hide-image now-in)))
+      (xenops-math-reveal now-in)))
 
 (defun xenops-math-mouse-drag-region-around-advice (mouse-drag-region-fn start-event)
   "If point is in a math element, then cause mouse drag to appear to drag the associated image:
@@ -279,7 +279,7 @@ If we are in a math element, then paste without the delimiters"
             (cons delimiter delimiter) (point-at-bol) (point-at-eol))))))
 
 (defun xenops-math-get-delimiters ()
-  (plist-get (cdr (assoc 'math xenops-ops)) :delimiters))
+  (plist-get (cdr (assoc 'math xenops-elements)) :delimiters))
 
 (defun xenops-math-get-inline-delimiters (&optional delimiters)
   (car (or delimiters (xenops-math-get-delimiters))))

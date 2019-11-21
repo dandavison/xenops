@@ -14,11 +14,11 @@ pasted from the system clipboard.")
   file path. Use a double backslash here to produce a single
   backslash in the resulting LaTeX.")
 
-(defun xenops-image-display-image (element)
+(defun xenops-image-render (element)
   (let ((org-element (plist-put element :type "file")))
-    (xenops-image-display-image- `(link ,org-element) xenops-image-width nil nil ".")))
+    (xenops-image-render- `(link ,org-element) xenops-image-width nil nil ".")))
 
-(defun xenops-image-hide-image (element)
+(defun xenops-image-reveal (element)
   ;; TODO: improve
   (save-restriction
     (narrow-to-region (plist-get element :begin)
@@ -59,7 +59,7 @@ pasted from the system clipboard.")
       (save-excursion
         (insert (format xenops-image-latex-template
                         (file-relative-name output-file))))
-      (xenops-image-display-image (xenops-apply-get-next-element (point-max)))
+      (xenops-image-render (xenops-apply-get-next-element (point-max)))
       t)))
 
 (defun xenops-image-get-file-name-suggestion (identifier extension)
@@ -81,7 +81,7 @@ pasted from the system clipboard.")
               extension))))
 
 
-(defun xenops-image-display-image- (link width include-linked refresh file-extension-re)
+(defun xenops-image-render- (link width include-linked refresh file-extension-re)
   ;; TODO: Hack: This is taken from `org-display-inline-images'.
   (when (and (equal "file" (org-element-property :type link))
              (or include-linked
