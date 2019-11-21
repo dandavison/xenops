@@ -159,10 +159,9 @@
 (defun xenops-element-delete-overlays (element)
   (let ((beg (plist-get element :begin))
         (end (plist-get element :end)))
-    (dolist (o (overlays-in beg end))
-      (when (eq (overlay-get o 'org-overlay-type)
-                'org-latex-overlay)
-        (delete-overlay o)))))
+    (dolist (ov (overlays-in beg end))
+      (when (overlay-get ov 'xenops-overlay-type)
+        (delete-overlay ov)))))
 
 (defun xenops-handle-paste ()
   (interactive)

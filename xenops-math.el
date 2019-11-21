@@ -344,6 +344,7 @@ If we are in a math element, then paste without the delimiters"
   (let ((ov (make-overlay beg end))
         (image-type (intern image-type)))
     (overlay-put ov 'org-overlay-type 'org-latex-overlay)
+    (overlay-put ov 'xenops-overlay-type 'xenops-math-overlay)
     (overlay-put ov 'evaporate t)
     (overlay-put ov
                  'modification-hooks

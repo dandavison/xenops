@@ -129,6 +129,8 @@
          (end (plist-get element :end))
          (ov (make-overlay beg end)))
     (overlay-put ov 'display "[footnote]")
+    (overlay-put ov 'org-overlay-type 'org-latex-overlay)
+    (overlay-put ov 'xenops-overlay-type 'xenops-footnote-overlay)
     (overlay-put ov 'evaporate t)
     (overlay-put ov
                  'modification-hooks
