@@ -1,6 +1,13 @@
+;; Generic operations on elements. Functions in this file should determine behavior based on the
+;; type of the element and the `xenops-elements' data structure. They should not directly call
+;; functions that are specific to element type (e.g. in xenops-math, xenops-image, xenops-text).
+
 (defun xenops-apply (ops)
+  "Apply operations OPS to any elements encountered. The region
+operated on is either the element at point, the active region, or
+the entire buffer."
   (cl-flet ((process (lambda (el)
-                       (-if-let (op (xenops-element-get-operation el ops))
+                       (-if-let (op (xenops-element-get-matching-operation el ops))
                            (save-excursion (funcall op el))))))
     (-if-let (el (xenops-parse-element-at-point))
         (process el)
@@ -13,6 +20,7 @@
           (let (el)
             (while (setq el (xenops-element-get-next-element end))
               (process el))))
+        ;; Hack: This should be abstracted.
         (and region-active (not (-intersection ops '(xenops-math-image-increase-size
                                                      xenops-math-image-decrease-size)))
              (deactivate-mark))))))
@@ -30,23 +38,30 @@ section of the buffer that xenops can do something to."
                             (xenops-element-get-delimiters))))
       (when (re-search-forward (car (plist-get element :delimiters)) end t)
         (let* ((type (plist-get element :type))
-               (parser (plist-get (cdr (assq type xenops-elements)) :parser))
+               (parser (xenops-element-get type :parser))
                (element (funcall parser element)))
           ;; TODO: This shouldn't be necessary but it sometimes gets
           ;; stuck attempting to process the same block repeatedly.
           (goto-char (plist-get element :end))
           element)))))
 
-(defun xenops-element-get-operation (el ops)
-  (car (-intersection ops (plist-get
-                           (cdr (assq (plist-get el :type) xenops-elements))
-                           :ops))))
+(defun xenops-element-get-matching-operation (el ops)
+  (car (-intersection ops (xenops-element-get (plist-get el :type) :ops))))
 
 (defun xenops-element-get-delimiters ()
   (cl-flet ((get-delimiters (type)
                             (mapcar (lambda (delimiters)
                                       `(:type ,type :delimiters ,delimiters))
-                                    (plist-get (cdr (assq type xenops-elements)) :delimiters))))
+                                    (xenops-element-get type :delimiters))))
     (apply #'append (mapcar #'get-delimiters (mapcar #'car xenops-elements)))))
+
+(defun xenops-element-get (type key)
+  "Return the value associated with KEY for element type TYPE."
+  (let ((value (plist-get (cdr (assq type xenops-elements)) key)))
+    (if (and (symbolp value) (assq value xenops-elements))
+        ;; Instead of a real entry, an element type may name another element type, meaning: use
+        ;; that element type's entry.
+        (xenops-element-get value key)
+      value)))
 
 (provide 'xenops-element)

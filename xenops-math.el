@@ -279,7 +279,7 @@ If we are in a math element, then paste without the delimiters"
             (cons delimiter delimiter) (point-at-bol) (point-at-eol))))))
 
 (defun xenops-math-get-delimiters ()
-  (plist-get (cdr (assoc 'math xenops-elements)) :delimiters))
+  (xenops-element-get 'math :delimiters))
 
 (defun xenops-math-get-inline-delimiters (&optional delimiters)
   (car (or delimiters (xenops-math-get-delimiters))))
