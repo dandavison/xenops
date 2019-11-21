@@ -321,6 +321,7 @@ If we are in a math element, then paste without the delimiters"
     (overlay-put ov
                  'display
                  (list 'image :type image-type :file image-file :ascent 'center :margin margin))
+    (overlay-put ov 'keymap xenops-rendered-element-keymap)
     (overlay-put ov 'help-echo help-echo)))
 
 (defun xenops-math-get-cache-file (element)
