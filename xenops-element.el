@@ -7,14 +7,14 @@
   "Apply operation type OP-TYEP to any elements encountered. The region
 operated on is either the element at point, the active region, or
 the entire buffer."
-  (xenops-apply-operations (cdr (assq op-type xenops-ops))))
+  (xenops-apply-operations (xenops-element-ops-for-op-type op-type)))
 
 (defun xenops-apply-operations (ops)
   "Apply operations OPS to any elements encountered. The region
 operated on is either the element at point, the active region, or
 the entire buffer."
   (cl-flet ((process (lambda (el)
-                       (-if-let (op (xenops-element-get-matching-operation el ops))
+                       (-if-let (op (xenops-element-op-for-el el ops))
                            (save-excursion (funcall op el))))))
     (-if-let (el (xenops-parse-element-at-point))
         (process el)
@@ -52,8 +52,21 @@ section of the buffer that xenops can do something to."
           (goto-char (plist-get element :end))
           element)))))
 
-(defun xenops-element-get-matching-operation (el ops)
-  (car (-intersection ops (xenops-element-get (plist-get el :type) :ops))))
+(defun xenops-element-op-for-el (el ops)
+  "The first operation in OPS that is valid for an element of this type."
+  (car (-intersection ops (xenops-element-ops-for-el el))))
+
+(defun xenops-element-op-of-type-for-el (el op-type)
+  "Does an element of this type have an operation of type OP-TYPE?"
+  (xenops-element-op-for-el el (xenops-element-ops-for-op-type op-type)))
+
+(defun xenops-element-ops-for-el (el)
+  "The valid operations for an element of this type."
+  (xenops-element-get (plist-get el :type) :ops))
+
+(defun xenops-element-ops-for-op-type (op-type)
+  "The operations of type OP-TYPE."
+  (cdr (assq op-type xenops-ops)))
 
 (defun xenops-element-get-delimiters ()
   (cl-flet ((get-delimiters (type)
