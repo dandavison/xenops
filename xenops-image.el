@@ -59,7 +59,7 @@ pasted from the system clipboard.")
       (save-excursion
         (insert (format xenops-image-latex-template
                         (file-relative-name output-file))))
-      (xenops-image-display-image (xenops-next-element (point-max)))
+      (xenops-image-display-image (xenops-apply-get-next-element (point-max)))
       t)))
 
 (defun xenops-image-get-file-name-suggestion (identifier extension)
