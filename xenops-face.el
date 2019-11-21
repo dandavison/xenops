@@ -10,5 +10,23 @@
   (face-remap-add-relative 'font-latex-verbatim-face 'fixed-pitch :height 140)
   (buffer-face-mode))
 
+(defun xenops-face-get-fontified-family-strings (face-spec)
+  (mapcar (lambda (family)
+            (setq family (substring family))
+            (add-face-text-property 0 (length family)
+                                    (append `(:family ,family) face-spec)
+                                    nil family)
+            family)
+          (font-family-list)))
+
+(defun xenops-select-font-family (&rest face-spec)
+  (interactive)
+  (unless face-spec (setq face-spec '(:height 1.1 :foreground "blue4" :weight 'bold)))
+  (let* ((completing-read-function
+          (if (fboundp 'ivy-completing-read) #'ivy-completing-read completing-read-function))
+         (family
+          (completing-read "Font family: " (xenops-face-get-fontified-family-strings face-spec))))
+    (xenops-face-set-faces family)))
+
 (provide 'xenops-face)
 
