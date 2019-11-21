@@ -4,10 +4,10 @@
 (require 'f)
 (require 'org)
 (require 's)
+(require 'xenops-apply)
 (require 'xenops-execute)
 (require 'xenops-image)
 (require 'xenops-math)
-(require 'xenops-apply)
 (require 'xenops-text)
 (require 'xenops-util)
 
