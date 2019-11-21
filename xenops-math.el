@@ -1,3 +1,10 @@
+;; Terminology
+;;
+;; | math element   | either an inline element or a block element    |
+;; | inline element | inline math delimited by $...$                 |
+;; | block element  | e.g. a \begin{align}...\end{align} environment |
+
+
 (defvar xenops-math-process 'dvisvgm)
 
 (defvar xenops-math-image-change-size-factor 1.1
@@ -17,7 +24,6 @@
 (defun xenops-math-activate ()
   (setq mouse-drag-and-drop-region t)
   (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-around-advice)
-
   (advice-add fill-paragraph-function :after #'xenops-math-fill-paragraph-after-advice)
   ;; TODO: DNW
   (add-to-list 'fill-nobreak-predicate (lambda () (xenops-math-in-inline-math-element-p "\\$"))))
@@ -83,6 +89,7 @@
   (xenops-math-display-image element))
 
 (defun xenops-math-get-math-element-begin-regexp ()
+  "A regexp matching the start of any math element."
   (format "\\(%s\\)"
           (s-join "\\|"
                   (mapcar #'car (xenops-math-get-delimiters)))))
@@ -287,6 +294,7 @@ If we are in a math element, then paste without the delimiters"
              (xenops-math-parse-match- nil delimiters lim-down pos))))))
 
 (defun xenops-math-parse-match- (element delimiters limit pos)
+  "Based on `org-between-regexps-p'."
   (let (beg-beg beg-end end-beg end-end)
     (and (setq beg-beg (match-beginning 0))
          (goto-char (match-end 0))
