@@ -3,13 +3,17 @@
 ;; `xenops-ops' data structures. They should not directly call functions that are specific to
 ;; element type (e.g. in xenops-math, xenops-image, xenops-text).
 
-(defun xenops-apply (op-type)
-  "Apply operation type OP-TYEP to any elements encountered. The region
+(defun xenops-apply (op-type &optional pred)
+  "Apply operation type OP-TYPE to any elements encountered. The region
 operated on is either the element at point, the active region, or
-the entire buffer."
-  (xenops-apply-operations (xenops-element-ops-for-op-type op-type)))
+the entire buffer.
 
-(defun xenops-apply-operations (ops)
+Optional argument PRED is a function taking an element plist as
+its only argument. The element will be operated on iff PRED
+returns non-nil."
+  (xenops-apply-operations (xenops-element-ops-for-op-type op-type) pred))
+
+(defun xenops-apply-operations (ops &optional pred)
   "Apply operations OPS to any elements encountered. The region
 operated on is either the element at point, the active region, or
 the entire buffer."
@@ -26,7 +30,8 @@ the entire buffer."
           (goto-char beg)
           (let (el)
             (while (setq el (xenops-element-get-next-element end))
-              (if (xenops-element-element? el)
+              (if (and (xenops-element-element? el)
+                       (or (null pred) (funcall pred el)))
                   (process el)))))
         ;; Hack: This should be abstracted.
         (and region-active (not (-intersection ops '(xenops-math-image-increase-size
