@@ -146,6 +146,8 @@
                  :delimiters
                  ((,(concat "\\\\footnote"
                             xenops-text-brace-delimited-multiline-expression-regexp)))
+                 :parse-at-point
+                 xenops-text-footnote-parse-at-point
                  :parse-match
                  xenops-text-footnote-parse-match)))
   "Element-specific operation functions, regexps, and parsers, grouped by element type.")

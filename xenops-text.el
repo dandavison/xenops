@@ -133,7 +133,12 @@
                  'modification-hooks
                  (list (lambda (o _flag _beg _end &optional _l)
                          (delete-overlay o))))
+    (overlay-put ov 'keymap xenops-rendered-element-keymap)
     (overlay-put ov 'help-echo (buffer-substring beg end))))
+
+(defun xenops-text-footnote-parse-at-point ()
+  (if (looking-at (caar (xenops-element-get 'footnote :delimiters)))
+      `(:type footnote :begin ,(match-beginning 0) :end ,(match-end 0))))
 
 (defun xenops-text-footnote-parse-match (element)
   "See `xenops-image-parse-match'"
