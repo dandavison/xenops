@@ -31,8 +31,7 @@
   (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-around-advice)
   (advice-add fill-paragraph-function :after #'xenops-math-fill-paragraph-after-advice)
   (font-lock-add-keywords nil (xenops-math-font-lock-keywords))
-  ;; TODO: DNW
-  (add-to-list 'fill-nobreak-predicate (lambda () (xenops-math-in-inline-math-element-p "\\$"))))
+  (add-to-list 'fill-nobreak-predicate #'xenops-math-parse-inline-element-at-point))
 
 (defun xenops-math-deactivate ()
   (advice-remove #'mouse-drag-and-drop-region #'xenops-math-mouse-drag-region-around-advice)
@@ -228,28 +227,30 @@ If we are in a math element, then paste without the delimiters"
     (xenops-math-parse-element-at-point)))
 
 (defun xenops-math-parse-element-at-point ()
-  "If point is in previewable block, return plist describing match"
-  (let* ((block-delimiters (xenops-element-get 'math :delimiters))
-         (inline-delimiter (car (xenops-element-get 'inline-math :delimiters))))
-    (or (xenops-math-in-inline-math-element-p (car inline-delimiter))
-        (-any #'identity (mapcar
-                          (lambda (pair)
-                            (xenops-math-parse-element-at-point-matching-delimiters
-                             pair
-                             (point-min)
-                             (point-max)))
-                          block-delimiters)))))
+  (or (xenops-math-parse-inline-element-at-point)
+      (xenops-math-parse-block-element-at-point)))
 
-(defun xenops-math-in-inline-math-element-p (delimiter)
-  "Is point within an inline block delimited by `delimiter'?"
-  (save-excursion
-    (let ((odd-count (oddp (count-matches delimiter (point-at-bol) (point)))))
-      (when (and (not odd-count) (looking-at (car xenops-math-inline-math-delimiters)))
-        (forward-char)
-        (setq odd-count t))
-      (and odd-count
-           (xenops-math-parse-element-at-point-matching-delimiters
-            (cons delimiter delimiter) (point-at-bol) (point-at-eol))))))
+(defun xenops-math-parse-block-element-at-point ()
+  "If point is in block math element, return plist describing match"
+  (-any #'identity (mapcar
+                    (lambda (pair)
+                      (xenops-math-parse-element-at-point-matching-delimiters
+                       pair
+                       (point-min)
+                       (point-max)))
+                    (xenops-element-get 'math :delimiters))))
+
+(defun xenops-math-parse-inline-element-at-point ()
+  "If point is in inline math element, return plist describing match"
+  (let ((delimiter (caar (xenops-element-get 'inline-math :delimiters))))
+    (save-excursion
+      (let ((odd-count (oddp (count-matches delimiter (point-at-bol) (point)))))
+        (when (and (not odd-count) (looking-at (car xenops-math-inline-math-delimiters)))
+          (forward-char)
+          (setq odd-count t))
+        (and odd-count
+             (xenops-math-parse-element-at-point-matching-delimiters
+              (cons delimiter delimiter) (point-at-bol) (point-at-eol)))))))
 
 (defun xenops-math-get-all-delimiters ()
   (append (xenops-element-get 'math :delimiters)

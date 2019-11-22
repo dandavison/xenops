@@ -118,13 +118,15 @@
               ("^[ \t]*\\\\begin{tabular}" .
                "^[ \t]*\\\\end{tabular}"))
              :parse-at-point
-             xenops-math-parse-element-at-point
+             xenops-math-parse-block-element-at-point
              :parse-match
              xenops-math-parse-match))
     (inline-math . (:ops
                     math
                     :delimiters
                     (("\\$" . "\\$"))
+                    :parse-at-point
+                    xenops-math-parse-inline-element-at-point
                     :parse-match
                     math))
     (image . (:ops
