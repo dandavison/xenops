@@ -4,6 +4,7 @@
 (require 'f)
 (require 'org)
 (require 's)
+(require 'xenops-apply)
 (require 'xenops-element)
 (require 'xenops-execute)
 (require 'xenops-face)
@@ -23,6 +24,28 @@
 (defvar xenops-rendered-element-keymap (make-sparse-keymap)
   "A keymap that is active when point is on a rendered element,
   such as a math/table image.")
+
+(xenops-define-apply-command render
+                             "Render elements: display LaTeX math, tables and included image files as images, and hide footnotes with tooltips.")
+(xenops-define-apply-command reveal
+                             "Reveal elements: this is the opposite of `xenops-render'. For LaTeX math, tables, and footnotes, reveal the LaTeX code for editing")
+(xenops-define-apply-command regenerate
+                             "Regenerate elements: for LaTeX math and footnotes, send the LaTeX to an external process to regenerate the image file, and display the new image.")
+(xenops-define-apply-command increase-size
+                             "Increase size of images.")
+(xenops-define-apply-command decrease-size
+                             "Decrease size of images.")
+(xenops-define-apply-command reset-size
+                             "Reset size of images.")
+
+(xenops-define-apply-at-point-command reveal
+                                      "Reveal the element at point.")
+
+(xenops-define-apply-at-point-command copy
+                                      "Copy the element at point.")
+
+(xenops-define-apply-at-point-command delete
+                                      "Delete the element at point.")
 
 (define-minor-mode xenops-mode
   "A LaTeX editing environment.
@@ -154,45 +177,26 @@
                  xenops-text-footnote-parse-match)))
   "Element-specific operation functions, regexps, and parsers, grouped by element type.")
 
-(defmacro xenops-define-apply-command (op-type docstring)
-  `(defun ,(intern (concat "xenops-" (symbol-name op-type))) ()
-     ,(concat docstring " "
-              "The elements operated on are determined by trying the following:
-1. The element at point, if any.
-2. Elements in the active region, if there is an active region.
-3. All elements in the buffer.")
-     (interactive)
-     (xenops-apply ',op-type)))
+(defun xenops-elements-get (type key)
+  "Return the value associated with KEY for element type TYPE."
+  (let ((value (plist-get (cdr (assq type xenops-elements)) key)))
+    (if (and (symbolp value) (assq value xenops-elements))
+        ;; Instead of a real entry, an element type may name another element type, meaning: use
+        ;; that element type's entry.
+        (xenops-elements-get value key)
+      value)))
 
-(defmacro xenops-define-apply-at-point-command (op-type docstring)
-  `(defun ,(intern (concat "xenops-" (symbol-name op-type) "-at-point")) ()
-     ,docstring
-     (interactive)
-     (-when-let (el (xenops-parse-at-point))
-       (-when-let (op (xenops-element-op-of-type-for-el el ',op-type))
-         (funcall op el)))))
+(defun xenops-elements-get-all (key)
+  "Concatenated list of all items under key KEY for any element type."
+  (-uniq
+   (apply #'append
+          (mapcar (lambda (pair) (let ((val (xenops-elements-get (car pair) key)))
+                              (if (listp val) val (list val))))
+                  xenops-elements))))
 
-(xenops-define-apply-command render
-                             "Render elements: display LaTeX math, tables and included image files as images, and hide footnotes with tooltips.")
-(xenops-define-apply-command reveal
-                             "Reveal elements: this is the opposite of `xenops-render'. For LaTeX math, tables, and footnotes, reveal the LaTeX code for editing")
-(xenops-define-apply-command regenerate
-                             "Regenerate elements: for LaTeX math and footnotes, send the LaTeX to an external process to regenerate the image file, and display the new image.")
-(xenops-define-apply-command increase-size
-                             "Increase size of images.")
-(xenops-define-apply-command decrease-size
-                             "Decrease size of images.")
-(xenops-define-apply-command reset-size
-                             "Reset size of images.")
-
-(xenops-define-apply-at-point-command reveal
-                                      "Reveal the element at point.")
-
-(xenops-define-apply-at-point-command copy
-                                      "Copy the element at point.")
-
-(xenops-define-apply-at-point-command delete
-                                      "Delete the element at point.")
+(defun xenops-ops-for-op-type (op-type)
+  "The operations of type OP-TYPE."
+  (cdr (assq op-type xenops-ops)))
 
 (defun xenops-render-if-cached ()
   (let ((fn (symbol-function 'xenops-math-render)))
