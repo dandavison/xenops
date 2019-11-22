@@ -73,7 +73,7 @@
 (defun xenops-math-reveal (element)
   (org-remove-latex-fragment-image-overlays (plist-get element :begin)
                                             (plist-get element :end))
-  (goto-char (plist-get element :begin-math)))
+  (goto-char (plist-get element :begin-content)))
 
 (defun xenops-math-image-increase-size (element)
   (xenops-math-image-change-size element xenops-math-image-change-size-factor))
@@ -119,8 +119,8 @@ If we are in a math element, then paste without the delimiters"
           (progn
             (insert-for-yank
              (substring copied-text
-                        (plist-get element :begin-math)
-                        (plist-get element :end-math)))
+                        (plist-get element :begin-content)
+                        (plist-get element :end-content)))
             (rotate-yank-pointer 1))
         (save-excursion (yank))
         (xenops-math-render (xenops-math-parse-element-at-point))
@@ -294,7 +294,7 @@ If we are in a math element, then paste without the delimiters"
          (setq end-beg (point))
          (not (re-search-backward (car delimiters) (1+ beg-beg) t))
          (append element
-                 `(:begin ,beg-beg :begin-math ,beg-end :end-math ,end-beg :end ,end-end)))))
+                 `(:begin ,beg-beg :begin-content ,beg-end :end-content ,end-beg :end ,end-end)))))
 
 (defun xenops-math-set-org-preview-latex-process-alist! (coords)
   (let* ((inline-p (xenops-math-inline-delimiters-p (plist-get coords :delimiters)))
