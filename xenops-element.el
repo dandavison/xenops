@@ -36,6 +36,15 @@
   "The valid operations for an element of this type."
   (xenops-elements-get (plist-get el :type) :ops))
 
+(defun xenops-element-get-image-at-point ()
+  (let ((display (get-char-property (point) 'display )))
+    (and (eq (car display) 'image) display)))
+
+(defun xenops-element-get-image (element)
+  (save-excursion
+    (goto-char (plist-get element :begin))
+    (xenops-element-get-image-at-point)))
+
 (defun xenops-element-make-overlay (beg end)
   (let* ((ov (make-overlay beg end)))
     (overlay-put ov 'org-overlay-type 'org-latex-overlay)

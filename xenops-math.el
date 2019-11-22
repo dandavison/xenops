@@ -43,7 +43,7 @@
   (let ((beg (plist-get element :begin))
         (end (plist-get element :end)))
     (goto-char beg)
-    (unless (xenops-math-get-image-at-point)
+    (unless (xenops-element-get-image-at-point)
       (let* ((latex (buffer-substring-no-properties beg end))
              (image-type (plist-get (cdr (assq xenops-math-process
                                                org-preview-latex-process-alist))
@@ -82,7 +82,7 @@
   (xenops-math-image-change-size element (/ 1 xenops-math-image-change-size-factor)))
 
 (defun xenops-math-image-change-size (element factor)
-  (-when-let (image (xenops-math-get-image element))
+  (-when-let (image (xenops-element-get-image element))
     (when (eq (image-property image :type) 'svg)
       (image-flush image)
       (let* ((data (or (eval (image-property image :data))
@@ -153,15 +153,6 @@ If we are in a math element, then paste without the delimiters"
                    (plist-get element :begin))
                 (length element-string))
         element))))
-
-(defun xenops-math-get-image-at-point ()
-  (let ((display (get-char-property (point) 'display )))
-    (and (eq (car display) 'image) display)))
-
-(defun xenops-math-get-image (element)
-  (save-excursion
-    (goto-char (plist-get element :begin))
-    (xenops-math-get-image-at-point)))
 
 (defun xenops-math-toggle-on-transition (move-point-command)
   "Display LaTeX on entry to a math element; display image on exit."

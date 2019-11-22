@@ -25,7 +25,7 @@
         (goto-char element-begin)
         (let ((element (xenops-apply-parse-at-point)))
           (should (equal (plist-get element :type) expected-type)))
-        (let ((image (xenops-math-get-image-at-point)))
+        (let ((image (xenops-element-get-image-at-point)))
           (should (equal (image-property image :type) 'svg)))))))
 
 (ert-deftest xenops-render--inline-math ()
