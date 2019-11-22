@@ -105,7 +105,7 @@
   (format "\\(%s\\)"
           (s-join "\\|"
                   (apply #'append (mapcar (lambda (pair) (list (car pair) (cdr pair)))
-                                          (xenops-element-get 'block-math :delimiters))))))
+                                          (xenops-elements-get 'block-math :delimiters))))))
 
 (defun xenops-math-block-delimiter-lines-set-face ()
   (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch))
@@ -239,11 +239,11 @@ If we are in a math element, then paste without the delimiters"
                        pair
                        (point-min)
                        (point-max)))
-                    (xenops-element-get 'block-math :delimiters))))
+                    (xenops-elements-get 'block-math :delimiters))))
 
 (defun xenops-math-parse-inline-element-at-point ()
   "If point is in inline math element, return plist describing match"
-  (let ((delimiter (caar (xenops-element-get 'inline-math :delimiters))))
+  (let ((delimiter (caar (xenops-elements-get 'inline-math :delimiters))))
     (save-excursion
       (let ((odd-count (oddp (count-matches delimiter (point-at-bol) (point)))))
         (when (and (not odd-count) (looking-at (car xenops-math-inline-math-delimiters)))
@@ -254,8 +254,8 @@ If we are in a math element, then paste without the delimiters"
               'inline-math (cons delimiter delimiter) (point-at-bol) (point-at-eol)))))))
 
 (defun xenops-math-get-all-delimiters ()
-  (append (xenops-element-get 'block-math :delimiters)
-          (xenops-element-get 'inline-math :delimiters)))
+  (append (xenops-elements-get 'block-math :delimiters)
+          (xenops-elements-get 'inline-math :delimiters)))
 
 (defun xenops-math-inline-delimiters-p (delimiters)
   (equal delimiters xenops-math-inline-math-delimiters))

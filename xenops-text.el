@@ -128,7 +128,7 @@
     ov))
 
 (defun xenops-text-footnote-parse-at-point ()
-  (if (looking-at (caar (xenops-element-get 'footnote :delimiters)))
+  (if (looking-at (caar (xenops-elements-get 'footnote :delimiters)))
       `(:type footnote :begin ,(match-beginning 0) :end ,(match-end 0))))
 
 (defun xenops-text-footnote-parse-match (element)

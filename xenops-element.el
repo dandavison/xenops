@@ -57,7 +57,7 @@ the entire buffer."
   t)
 
 (defun xenops-parse-at-point ()
-  (xenops-util-first-result #'funcall (xenops-element-get-all :parse-at-point)))
+  (xenops-util-first-result #'funcall (xenops-elements-get-all :parse-at-point)))
 
 (defun xenops-element-get-next-element (end)
   "If there is another element, return it and leave point after it.
@@ -72,7 +72,7 @@ section of the buffer that xenops can do something to."
                             (xenops-element-get-delimiters))))
       (when (re-search-forward (car (plist-get element :delimiters)) end t)
         (let* ((type (plist-get element :type))
-               (parse-match (xenops-element-get type :parse-match))
+               (parse-match (xenops-elements-get type :parse-match))
                (element (funcall parse-match element)))
           (and element (goto-char (plist-get element :end)))
           (or element 'unparseable))))))
@@ -90,17 +90,17 @@ section of the buffer that xenops can do something to."
 
 (defun xenops-element-ops-for-el (el)
   "The valid operations for an element of this type."
-  (xenops-element-get (plist-get el :type) :ops))
+  (xenops-elements-get (plist-get el :type) :ops))
 
 (defun xenops-element-ops-for-op-type (op-type)
   "The operations of type OP-TYPE."
   (cdr (assq op-type xenops-ops)))
 
-(defun xenops-element-get-all (key)
+(defun xenops-elements-get-all (key)
   "Concatenated list of all items under key KEY for any element type."
   (-uniq
    (apply #'append
-          (mapcar (lambda (pair) (let ((val (xenops-element-get (car pair) key)))
+          (mapcar (lambda (pair) (let ((val (xenops-elements-get (car pair) key)))
                               (if (listp val) val (list val))))
                   xenops-elements))))
 
@@ -108,16 +108,16 @@ section of the buffer that xenops can do something to."
   (cl-flet ((get-delimiters (type)
                             (mapcar (lambda (delimiters)
                                       `(:type ,type :delimiters ,delimiters))
-                                    (xenops-element-get type :delimiters))))
+                                    (xenops-elements-get type :delimiters))))
     (apply #'append (mapcar #'get-delimiters (mapcar #'car xenops-elements)))))
 
-(defun xenops-element-get (type key)
+(defun xenops-elements-get (type key)
   "Return the value associated with KEY for element type TYPE."
   (let ((value (plist-get (cdr (assq type xenops-elements)) key)))
     (if (and (symbolp value) (assq value xenops-elements))
         ;; Instead of a real entry, an element type may name another element type, meaning: use
         ;; that element type's entry.
-        (xenops-element-get value key)
+        (xenops-elements-get value key)
       value)))
 
 (defun xenops-element-make-overlay (beg end)

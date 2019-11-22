@@ -27,7 +27,7 @@ pasted from the system clipboard.")
                           '(display nil keymap nil)))
 
 (defun xenops-image-parse-at-point ()
-  (if (looking-at (caar (xenops-element-get 'image :delimiters)))
+  (if (looking-at (caar (xenops-elements-get 'image :delimiters)))
       (xenops-image-parse-match nil)))
 
 (defun xenops-image-parse-match (element)
