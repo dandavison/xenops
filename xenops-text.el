@@ -122,19 +122,10 @@
   (org-restart-font-lock))
 
 (defun xenops-text-footnote-render (element)
-  (let* ((beg (plist-get element :begin))
-         (end (plist-get element :end))
-         (ov (make-overlay beg end)))
+  (let ((ov (xenops-element-make-overlay (plist-get element :begin)
+                                         (plist-get element :end))))
     (overlay-put ov 'display "[footnote]")
-    (overlay-put ov 'org-overlay-type 'org-latex-overlay)
-    (overlay-put ov 'xenops-overlay-type 'xenops-footnote-overlay)
-    (overlay-put ov 'evaporate t)
-    (overlay-put ov
-                 'modification-hooks
-                 (list (lambda (o _flag _beg _end &optional _l)
-                         (delete-overlay o))))
-    (overlay-put ov 'keymap xenops-rendered-element-keymap)
-    (overlay-put ov 'help-echo (buffer-substring beg end))))
+    ov))
 
 (defun xenops-text-footnote-parse-at-point ()
   (if (looking-at (caar (xenops-element-get 'footnote :delimiters)))

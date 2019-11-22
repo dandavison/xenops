@@ -113,4 +113,17 @@ section of the buffer that xenops can do something to."
         (xenops-element-get value key)
       value)))
 
+(defun xenops-element-make-overlay (beg end)
+  (let* ((ov (make-overlay beg end)))
+    (overlay-put ov 'org-overlay-type 'org-latex-overlay)
+    (overlay-put ov 'xenops-overlay-type 'xenops-overlay)
+    (overlay-put ov 'evaporate t)
+    (overlay-put ov
+                 'modification-hooks
+                 (list (lambda (o _flag _beg _end &optional _l)
+                         (delete-overlay o))))
+    (overlay-put ov 'keymap xenops-rendered-element-keymap)
+    (overlay-put ov 'help-echo (buffer-substring beg end))
+    ov))
+
 (provide 'xenops-element)
