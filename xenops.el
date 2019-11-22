@@ -97,7 +97,7 @@
       (save-restriction
         (widen)
         (goto-char (point-min))
-        (xenops-apply 'reveal)))
+        (xenops-reveal)))
     (xenops-math-deactivate)
     (xenops-text-deactivate))))
 
@@ -105,10 +105,10 @@
   (interactive "P")
   (cond
    ((equal arg '(16))
-    (xenops-apply 'regenerate))
+    (xenops-regenerate))
    ((equal arg '(4))
-    (xenops-apply 'reveal))
-   (t (xenops-apply 'render))))
+    (xenops-reveal))
+   (t (xenops-render))))
 
 (defvar xenops-ops
   '((render . (xenops-math-render
@@ -206,7 +206,7 @@
   (let ((fn (symbol-function 'xenops-math-render)))
     (cl-letf (((symbol-function 'xenops-math-render)
                (lambda (element) (funcall fn element 'cached-only))))
-      (xenops-apply 'render))))
+      (xenops-render))))
 
 (defun xenops-handle-paste ()
   (interactive)
@@ -243,7 +243,7 @@ buffer, when running in a headless emacs process."
                  (:foreground "0,0,0")
                  (:background "1,1,1")
                  (t (error "Unexpected input: %s" attr))))))
-    (xenops-apply 'render)))
+    (xenops-render)))
 
 (defun xenops-avy-goto-math ()
   (interactive)
