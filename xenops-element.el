@@ -26,7 +26,8 @@ the entire buffer."
           (goto-char beg)
           (let (el)
             (while (setq el (xenops-element-get-next-element end))
-              (process el))))
+              (if (xenops-element-element? el)
+                  (process el)))))
         ;; Hack: This should be abstracted.
         (and region-active (not (-intersection ops '(xenops-math-image-increase-size
                                                      xenops-math-image-decrease-size)))
@@ -66,12 +67,13 @@ section of the buffer that xenops can do something to."
                             (xenops-element-get-delimiters))))
       (when (re-search-forward (car (plist-get element :delimiters)) end t)
         (let* ((type (plist-get element :type))
-               (parser (xenops-element-get type :parse-match))
-               (element (funcall parser element)))
-          ;; TODO: This shouldn't be necessary but it sometimes gets
-          ;; stuck attempting to process the same block repeatedly.
-          (goto-char (plist-get element :end))
-          element)))))
+               (parse-match (xenops-element-get type :parse-match))
+               (element (funcall parse-match element)))
+          (and element (goto-char (plist-get element :end)))
+          (or element 'unparseable))))))
+
+(defun xenops-element-element? (el)
+  (plist-get el :type))
 
 (defun xenops-element-op-for-el (el ops)
   "The first operation in OPS that is valid for an element of this type."
