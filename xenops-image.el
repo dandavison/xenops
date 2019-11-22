@@ -26,6 +26,12 @@ pasted from the system clipboard.")
                           (plist-get element :end)
                           '(display nil keymap nil)))
 
+(defun xenops-image-increase-size (element)
+  (image--change-size xenops-math-image-change-size-factor))
+
+(defun xenops-image-decrease-size (element)
+  (image--change-size (/ 1 xenops-math-image-change-size-factor)))
+
 (defun xenops-image-parse-at-point ()
   (if (looking-at (caar (xenops-elements-get 'image :delimiters)))
       (xenops-image-parse-match nil)))

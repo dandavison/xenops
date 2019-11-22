@@ -120,8 +120,10 @@
     (regenerate . (xenops-math-regenerate))
     (copy . (xenops-element-copy))
     (delete . (xenops-element-delete))
-    (increase-size . (xenops-math-image-increase-size))
-    (decrease-size . (xenops-math-image-decrease-size))
+    (increase-size . (xenops-math-image-increase-size
+                      xenops-image-increase-size))
+    (decrease-size . (xenops-math-image-decrease-size
+                      xenops-image-decrease-size))
     (reset-size . (xenops-math-image-reset-size)))
   "Element-specific operation functions grouped by operation type.")
 
@@ -155,6 +157,8 @@
     (image . (:ops
               (xenops-image-render
                xenops-image-reveal
+               xenops-image-increase-size
+               xenops-image-decrease-size
                xenops-element-copy
                xenops-element-delete)
               :delimiters
