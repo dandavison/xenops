@@ -20,7 +20,7 @@ the entire buffer."
   (cl-flet ((process (lambda (el)
                        (-if-let (op (xenops-element-op-for-el el ops))
                            (save-excursion (funcall op el))))))
-    (-if-let (el (xenops-element-parse-at-point))
+    (-if-let (el (xenops-parse-at-point))
         (process el)
       (destructuring-bind (beg end region-active)
           (if (region-active-p)
@@ -56,7 +56,7 @@ the entire buffer."
                (plist-get element :end))
   t)
 
-(defun xenops-element-parse-at-point ()
+(defun xenops-parse-at-point ()
   (xenops-util-first-result #'funcall (xenops-element-get-all :parse-at-point)))
 
 (defun xenops-element-get-next-element (end)

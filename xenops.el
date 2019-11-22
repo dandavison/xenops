@@ -168,7 +168,7 @@
   `(defun ,(intern (concat "xenops-" (symbol-name op-type) "-at-point")) ()
      ,docstring
      (interactive)
-     (-when-let (el (xenops-element-parse-at-point))
+     (-when-let (el (xenops-parse-at-point))
        (-when-let (op (xenops-element-op-of-type-for-el el ',op-type))
          (funcall op el)))))
 

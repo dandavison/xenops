@@ -23,7 +23,7 @@
         (mark-whole-buffer)
         (xenops-apply 'render)
         (goto-char element-begin)
-        (let ((element (xenops-element-parse-at-point)))
+        (let ((element (xenops-parse-at-point)))
           (should (equal (plist-get element :type) expected-type)))
         (let ((image (xenops-math-get-image-at-point)))
           (should (equal (image-property image :type) 'svg)))))))
