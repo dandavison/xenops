@@ -136,6 +136,8 @@
                xenops-element-delete)
               :delimiters
               (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))
+              :parse-at-point
+              xenops-image-parse-at-point
               :parse-match
               xenops-image-parse-match))
     (footnote . (:ops

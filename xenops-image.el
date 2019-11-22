@@ -15,16 +15,20 @@ pasted from the system clipboard.")
   backslash in the resulting LaTeX.")
 
 (defun xenops-image-render (element)
-  (let ((org-element (plist-put element :type "file")))
-    (xenops-image-render- `(link ,org-element) xenops-image-width nil nil ".")))
+  (let ((image (create-image (plist-get element :path)
+                             'imagemagick nil :width xenops-image-width)))
+    (add-text-properties (plist-get element :begin)
+                         (plist-get element :end)
+                         `(display ,image keymap ,xenops-rendered-element-keymap))))
 
 (defun xenops-image-reveal (element)
-  ;; TODO: improve
-  (save-restriction
-    (narrow-to-region (plist-get element :begin)
-                      (plist-get element :end))
-    (org-remove-inline-images)
-    (widen)))
+  (remove-text-properties (plist-get element :begin)
+                          (plist-get element :end)
+                          '(display nil keymap nil)))
+
+(defun xenops-image-parse-at-point ()
+  (if (looking-at (caar (xenops-element-get 'image :delimiters)))
+      (xenops-image-parse-match nil)))
 
 (defun xenops-image-parse-match (element)
   ;; A match has just been made for the opening delimiter and element
@@ -79,42 +83,5 @@ pasted from the system clipboard.")
               (s-join "--" headings)
               identifier
               extension))))
-
-
-(defun xenops-image-render- (link width include-linked refresh file-extension-re)
-  ;; TODO: Hack: This is taken from `org-display-inline-images'.
-  (when (and (equal "file" (org-element-property :type link))
-             (or include-linked
-                 (null (org-element-contents link)))
-             (string-match-p file-extension-re
-                             (org-element-property :path link)))
-    (let ((file (expand-file-name
-                 (org-link-unescape
-                  (org-element-property :path link)))))
-      (when (file-exists-p file)
-        (let ((old (get-char-property-and-overlay
-                    (org-element-property :begin link)
-                    'org-image-overlay)))
-          (if (and (car-safe old) refresh)
-              (image-refresh (overlay-get (cdr old) 'display))
-            (let ((image (create-image file
-                                       (and width 'imagemagick)
-                                       nil
-                                       :width width)))
-              (when image
-                (let ((ov (make-overlay
-                           (org-element-property :begin link)
-                           (progn
-                             (goto-char
-                              (org-element-property :end link))
-                             (skip-chars-backward " \t")
-                             (point)))))
-                  (overlay-put ov 'display image)
-                  (overlay-put ov 'face 'default)
-                  (overlay-put ov 'org-image-overlay t)
-                  (overlay-put
-                   ov 'modification-hooks
-                   (list 'org-display-inline-remove-overlay))
-                  (push ov org-inline-image-overlays))))))))))
 
 (provide 'xenops-image)
