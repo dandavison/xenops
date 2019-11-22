@@ -1,5 +1,5 @@
 (ert-deftest xenops-element-get ()
   (should (equal (xenops-element-get 'inline-math :ops)
-                 (xenops-element-get 'math :ops)))
+                 (xenops-element-get 'block-math :ops)))
   (should (not (equal (xenops-element-get 'inline-math :delimiters)
-                      (xenops-element-get 'math :delimiters)))))
+                      (xenops-element-get 'block-math :delimiters)))))

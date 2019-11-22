@@ -103,32 +103,32 @@
   "Element-specific operation functions grouped by operation type.")
 
 (defvar xenops-elements
-  `((math . (:ops
-             (xenops-math-render
-              xenops-math-regenerate
-              xenops-math-reveal
-              xenops-math-image-increase-size
-              xenops-math-image-decrease-size
-              xenops-math-image-reset-size
-              xenops-element-copy
-              xenops-element-delete)
-             :delimiters
-             (("^[ \t]*\\\\begin{align\\*?}" .
-               "^[ \t]*\\\\end{align\\*?}")
-              ("^[ \t]*\\\\begin{tabular}" .
-               "^[ \t]*\\\\end{tabular}"))
-             :parse-at-point
-             xenops-math-parse-block-element-at-point
-             :parse-match
-             xenops-math-parse-match))
+  `((block-math . (:ops
+                   (xenops-math-render
+                    xenops-math-regenerate
+                    xenops-math-reveal
+                    xenops-math-image-increase-size
+                    xenops-math-image-decrease-size
+                    xenops-math-image-reset-size
+                    xenops-element-copy
+                    xenops-element-delete)
+                   :delimiters
+                   (("^[ \t]*\\\\begin{align\\*?}" .
+                     "^[ \t]*\\\\end{align\\*?}")
+                    ("^[ \t]*\\\\begin{tabular}" .
+                     "^[ \t]*\\\\end{tabular}"))
+                   :parse-at-point
+                   xenops-math-parse-block-element-at-point
+                   :parse-match
+                   xenops-math-parse-match))
     (inline-math . (:ops
-                    math
+                    block-math
                     :delimiters
                     (("\\$" . "\\$"))
                     :parse-at-point
                     xenops-math-parse-inline-element-at-point
                     :parse-match
-                    math))
+                    block-math))
     (image . (:ops
               (xenops-image-render
                xenops-image-reveal

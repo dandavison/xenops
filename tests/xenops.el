@@ -12,7 +12,7 @@
     (insert xenops-test-svg)
     (write-file file)))
 
-(defun xenops-render--do-test (buffer-contents element-begin)
+(defun xenops-render--do-test (buffer-contents element-begin expected-type)
   (cl-letf (((symbol-function 'org-create-formula-image)
              #'xenops-test-mock-org-create-formula-image))
     (let ((xenops-cache-directory (make-temp-file "xenops-test-" 'dir)))
@@ -24,20 +24,20 @@
         (xenops-apply 'render)
         (goto-char element-begin)
         (let ((element (xenops-element-parse-at-point)))
-          (should (equal (plist-get element :type) 'math)))
+          (should (equal (plist-get element :type) expected-type)))
         (let ((image (xenops-math-get-image-at-point)))
           (should (equal (image-property image :type) 'svg)))))))
 
 (ert-deftest xenops-render--inline-math ()
-  (xenops-render--do-test "123$e^{2i\\pi}$maths." 4))
+  (xenops-render--do-test "123$e^{2i\\pi}$maths." 4 'inline-math))
 
-(ert-deftest xenops-render--display-math ()
+(ert-deftest xenops-render--block-math ()
   (xenops-render--do-test
    "Hello.
 \\begin{align*}
   e^{2i\\pi}
 \\end{align*}
-" 8))
+" 8 'block-math))
 
 (ert-deftest xenops-render--table ()
   (xenops-render--do-test
@@ -52,4 +52,4 @@
   c & c & d & e & a & b\\\\
   d & d & e & a & b & c
 \\end{tabular}\\\\
-" 18))
+" 18 'block-math))

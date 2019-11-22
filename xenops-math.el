@@ -105,7 +105,7 @@
   (format "\\(%s\\)"
           (s-join "\\|"
                   (apply #'append (mapcar (lambda (pair) (list (car pair) (cdr pair)))
-                                          (xenops-element-get 'math :delimiters))))))
+                                          (xenops-element-get 'block-math :delimiters))))))
 
 (defun xenops-math-block-delimiter-lines-set-face ()
   (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch))
@@ -235,10 +235,11 @@ If we are in a math element, then paste without the delimiters"
   (-any #'identity (mapcar
                     (lambda (pair)
                       (xenops-math-parse-element-at-point-matching-delimiters
+                       'block-math
                        pair
                        (point-min)
                        (point-max)))
-                    (xenops-element-get 'math :delimiters))))
+                    (xenops-element-get 'block-math :delimiters))))
 
 (defun xenops-math-parse-inline-element-at-point ()
   "If point is in inline math element, return plist describing match"
@@ -250,16 +251,16 @@ If we are in a math element, then paste without the delimiters"
           (setq odd-count t))
         (and odd-count
              (xenops-math-parse-element-at-point-matching-delimiters
-              (cons delimiter delimiter) (point-at-bol) (point-at-eol)))))))
+              'inline-math (cons delimiter delimiter) (point-at-bol) (point-at-eol)))))))
 
 (defun xenops-math-get-all-delimiters ()
-  (append (xenops-element-get 'math :delimiters)
+  (append (xenops-element-get 'block-math :delimiters)
           (xenops-element-get 'inline-math :delimiters)))
 
 (defun xenops-math-inline-delimiters-p (delimiters)
   (equal delimiters xenops-math-inline-math-delimiters))
 
-(defun xenops-math-parse-element-at-point-matching-delimiters (delimiters lim-up lim-down)
+(defun xenops-math-parse-element-at-point-matching-delimiters (type delimiters lim-up lim-down)
   "If point is between regexps, return plist describing match"
   (-if-let (element
             (save-excursion
@@ -268,7 +269,7 @@ If we are in a math element, then paste without the delimiters"
                 ;; zero characters.
                 (left-char))
               (xenops-math-parse-element-at-point-matching-delimiters- delimiters lim-up lim-down)))
-      (append element `(:type math :delimiters ,delimiters))))
+      (append element `(:type ,type :delimiters ,delimiters))))
 
 (defun xenops-math-parse-element-at-point-matching-delimiters- (delimiters lim-up lim-down)
   "`org-between-regexps-p' modified to return more match coordinates"
