@@ -12,11 +12,3 @@
                  '(:begin 1 :begin-math 18 :end-math 19 :end 32 :type math
                           :delimiters ("^[ \t]*\\\\begin{align\\*?}" .
                                        "^[ \t]*\\\\end{align\\*?}")))))
-
-(ert-deftest xenops-math-parse-match ())
-
-(ert-deftest xenops-math-parse-element-at-point ())
-
-(ert-deftest xenops-math-in-inline-math-element-p ())
-
-(ert-deftest xenops-math-parse-element-at-point-matching-delimiters ())
