@@ -48,15 +48,26 @@
 (defun xenops-element-make-overlay (element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
-         (ov (make-overlay beg end)))
+         (ov (make-overlay beg end))
+         (keymap (make-sparse-keymap)))
     (overlay-put ov 'xenops-overlay-type 'xenops-overlay)
     (overlay-put ov 'evaporate t)
     (overlay-put ov
                  'modification-hooks
                  (list (lambda (o _flag _beg _end &optional _l)
                          (delete-overlay o))))
-    (overlay-put ov 'keymap xenops-rendered-element-keymap)
     (overlay-put ov 'help-echo (buffer-substring beg end))
+
+    (set-keymap-parent keymap xenops-rendered-element-keymap)
+    (define-key keymap [mouse-3] `(lambda (event) (interactive "e") (xenops-element-menu ',element event)))
+    (overlay-put ov 'keymap keymap)
+
     ov))
+
+(defun xenops-element-menu (element event)
+  (popup-menu
+   `("Xenops"
+     ["Edit" (xenops-element-reveal ',element)])
+   event))
 
 (provide 'xenops-element)
