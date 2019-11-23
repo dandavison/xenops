@@ -125,9 +125,32 @@
 
 (defun xenops-text-footnote-render (element)
   (let ((ov (xenops-element-make-overlay (plist-get element :begin)
-                                         (plist-get element :end))))
+                                         (plist-get element :end)))
+        (image (xenops-text-footnote-create-image element)))
     (overlay-put ov 'display "[footnote]")
+    (overlay-put ov 'help-echo (propertize " " 'display image))
     ov))
+
+(defun xenops-text-footnote-create-image (element &optional cached-only)
+  (xenops-math-set-org-preview-latex-process-alist! element)
+  (let ((beg (plist-get element :begin-content))
+        (end (plist-get element :end-content)))
+    (goto-char beg)
+    (unless (xenops-element-get-image-at-point)
+      (let* ((latex (buffer-substring-no-properties beg end))
+             (image-type (plist-get (cdr (assq xenops-math-process
+                                               org-preview-latex-process-alist))
+                                    :image-output-type))
+             (margin 0)
+             (cache-file (xenops-math-compute-file-name latex image-type))
+             (cache-file-exists? (file-exists-p cache-file)))
+        (when (or cache-file-exists? (not cached-only))
+          (unless cache-file-exists?
+            (message "Xenops: creating file: %s" cache-file)
+            (org-create-formula-image
+             latex cache-file org-format-latex-options 'forbuffer xenops-math-process))
+          `(image :type ,(intern image-type)
+                  :file ,cache-file :ascent center :margin ,margin))))))
 
 (defun xenops-text-footnote-parse-at-point ()
   (if (looking-at (caar (xenops-elements-get 'footnote :delimiters)))
