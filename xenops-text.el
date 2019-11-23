@@ -127,6 +127,11 @@
   (let ((ov (xenops-element-make-overlay (plist-get element :begin)
                                          (plist-get element :end))))
     (overlay-put ov 'display "[footnote]")
+    (overlay-put ov 'help-echo
+                 (s-replace-regexp "[ \n]+" " "
+                                   (buffer-substring
+                                    (plist-get element :begin-content)
+                                    (plist-get element :end-content))))
     ov))
 
 (defun xenops-text-footnote-parse-at-point ()
