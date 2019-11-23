@@ -45,8 +45,10 @@
     (goto-char (plist-get element :begin))
     (xenops-element-get-image-at-point)))
 
-(defun xenops-element-make-overlay (beg end)
-  (let* ((ov (make-overlay beg end)))
+(defun xenops-element-make-overlay (element)
+  (let* ((beg (plist-get element :begin))
+         (end (plist-get element :end))
+         (ov (make-overlay beg end)))
     (overlay-put ov 'xenops-overlay-type 'xenops-overlay)
     (overlay-put ov 'evaporate t)
     (overlay-put ov

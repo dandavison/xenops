@@ -59,7 +59,7 @@
             (org-create-formula-image
              latex cache-file org-format-latex-options 'forbuffer xenops-math-process))
           (xenops-element-delete-overlays element)
-          (xenops-math-make-overlay beg end cache-file image-type margin latex))))))
+          (xenops-math-make-overlay element cache-file image-type margin latex))))))
 
 (defun xenops-math-regenerate (element)
   (let ((cache-file (xenops-math-get-cache-file element)))
@@ -280,8 +280,8 @@ If we are in a math element, then paste without the delimiters"
                             :image-converter `(,(replace-match bounding-box t t
                                                                dvisvgm-image-converter 1)))))))
 
-(defun xenops-math-make-overlay (beg end image-file image-type margin help-echo)
-  (let ((ov (xenops-element-make-overlay beg end)))
+(defun xenops-math-make-overlay (element image-file image-type margin help-echo)
+  (let ((ov (xenops-element-make-overlay element)))
     (overlay-put ov 'display
                  `(image :type ,(intern image-type)
                          :file ,image-file :ascent center :margin ,margin))

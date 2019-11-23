@@ -124,8 +124,7 @@
   (org-restart-font-lock))
 
 (defun xenops-text-footnote-render (element)
-  (let ((ov (xenops-element-make-overlay (plist-get element :begin)
-                                         (plist-get element :end))))
+  (let ((ov (xenops-element-make-overlay element)))
     (overlay-put ov 'display "[footnote]")
     (overlay-put ov 'help-echo
                  (s-replace-regexp "[ \n]+" " "
