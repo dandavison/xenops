@@ -37,6 +37,10 @@
                              "Decrease size of images.")
 (xenops-define-apply-command reset-size
                              "Reset size of images.")
+(xenops-define-apply-command rotate
+                             "Rotate image by 90 degrees.")
+(xenops-define-apply-command save
+                             "Save image to file.")
 
 (xenops-define-apply-at-point-command reveal
                                       "Reveal the element at point.")
@@ -70,6 +74,8 @@
     (define-key xenops-rendered-element-keymap "+" #'xenops-increase-size)
     (define-key xenops-rendered-element-keymap "-" #'xenops-decrease-size)
     (define-key xenops-rendered-element-keymap "0" #'xenops-reset-size)
+    (define-key xenops-rendered-element-keymap "r" #'xenops-rotate)
+    (define-key xenops-rendered-element-keymap "o" #'xenops-save)
 
     (define-key xenops-rendered-element-keymap [(double-down-mouse-1)] #'xenops-reveal-at-point)
 
@@ -120,7 +126,9 @@
                       xenops-image-increase-size))
     (decrease-size . (xenops-math-image-decrease-size
                       xenops-image-decrease-size))
-    (reset-size . (xenops-math-image-reset-size)))
+    (reset-size . (xenops-math-image-reset-size))
+    (rotate . (xenops-image-rotate))
+    (save . (xenops-image-save)))
   "Element-specific operation functions grouped by operation type.")
 
 (defvar xenops-elements
@@ -156,7 +164,9 @@
                xenops-image-increase-size
                xenops-image-decrease-size
                xenops-element-copy
-               xenops-element-delete)
+               xenops-element-delete
+               xenops-image-rotate
+               xenops-image-save)
               :delimiters
               (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))
               :parse-at-point
