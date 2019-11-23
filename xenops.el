@@ -59,7 +59,7 @@
   (cond
    (xenops-mode
 
-    (define-key xenops-mode-map "\C-c\C-c" #'xenops)
+    (define-key xenops-mode-map "\C-c\C-c" #'xenops-dwim)
     (define-key xenops-mode-map (kbd "s-0") #'xenops-reset-size)
     (define-key xenops-mode-map (kbd "s-+") #'xenops-increase-size)
     (define-key xenops-mode-map (kbd "s--") #'xenops-decrease-size)
@@ -103,7 +103,7 @@
     (xenops-math-deactivate)
     (xenops-text-deactivate))))
 
-(defun xenops (&optional arg)
+(defun xenops-dwim (&optional arg)
   (interactive "P")
   (cond
    ((equal arg '(16))
