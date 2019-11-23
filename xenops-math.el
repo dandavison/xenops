@@ -71,8 +71,7 @@
     (xenops-math-render element)))
 
 (defun xenops-math-reveal (element)
-  (org-remove-latex-fragment-image-overlays (plist-get element :begin)
-                                            (plist-get element :end))
+  (xenops-element-delete-overlays element)
   (goto-char (plist-get element :begin-content)))
 
 (defun xenops-math-image-increase-size (element)

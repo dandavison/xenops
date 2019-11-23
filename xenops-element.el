@@ -47,7 +47,6 @@
 
 (defun xenops-element-make-overlay (beg end)
   (let* ((ov (make-overlay beg end)))
-    (overlay-put ov 'org-overlay-type 'org-latex-overlay)
     (overlay-put ov 'xenops-overlay-type 'xenops-overlay)
     (overlay-put ov 'evaporate t)
     (overlay-put ov
