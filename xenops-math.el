@@ -72,7 +72,11 @@
 
 (defun xenops-math-reveal (element)
   (xenops-element-delete-overlays element)
-  (goto-char (plist-get element :begin-content)))
+  (goto-char (plist-get element :begin-content))
+  (cursor-sensor-mode +1)
+  (add-text-properties (plist-get element :begin)
+                       (plist-get element :end)
+                       '(cursor-sensor-functions (xenops-math-handle-element-exit))))
 
 (defun xenops-math-image-increase-size (element)
   (xenops-math-image-change-size element xenops-math-image-change-size-factor))
@@ -153,36 +157,13 @@ If we are in a math element, then paste without the delimiters"
                 (length element-string))
         element))))
 
-(defun xenops-math-toggle-on-transition (move-point-command)
-  "Display LaTeX on entry to a math element; display image on exit."
-  (if (region-active-p)
-      (funcall move-point-command)
-    (let ((was-in (xenops-math-parse-element-at-point))
-          exited)
-      (funcall move-point-command)
-      (save-excursion
-        (let* ((now-in (xenops-math-parse-element-at-point)))
-          (setq exited (and was-in (not (equal was-in now-in))))
-          (if exited (xenops-math-render was-in))))
-      (and exited (eq move-point-command #'next-line)
-           ;; Hack: with a single (next-line), point ends up to the right of the image; we want it
-           ;; on the line below.
-           (next-line)))))
-
-(defun xenops-math-handle-mouse-1 (event)
-  (interactive "e")
-  (cond
-   ((memq 'double (event-modifiers event))
-    (xenops-element-reveal))
-   (t (xenops-math-handle-first-click event))))
-
-(defun xenops-math-handle-first-click (event)
-  (let ((was-in (xenops-math-parse-element-at-point)))
-    (mouse-set-point event)
-    (save-excursion
-      (let ((now-in (xenops-math-parse-element-at-point)))
-        (and was-in (not (equal was-in now-in))
-             (xenops-math-render was-in))))))
+(defun xenops-math-handle-element-exit (window oldpos event-type)
+  "Render a math element when point leaves it."
+  ;; TODO: check window
+  (if (eq event-type 'left)
+      (-when-let (was-in (xenops-math-parse-element-at oldpos))
+        (cursor-sensor-mode -1)
+        (xenops-math-render was-in))))
 
 (defun xenops-math-mouse-drag-region-around-advice (mouse-drag-region-fn start-event)
   "If point is in a math element, then cause mouse drag to appear to drag the associated image:

@@ -69,13 +69,6 @@
     (define-key xenops-rendered-element-keymap [(super x)] #'xenops-delete-at-point)
 
     (define-key xenops-rendered-element-keymap [(double-down-mouse-1)] #'xenops-reveal-at-point)
-    (define-key xenops-rendered-element-keymap [(down-mouse-1)] #'xenops-math-handle-first-click)
-    (define-key xenops-rendered-element-keymap [(mouse-1)] #'xenops-math-handle-mouse-1)
-
-    (define-key xenops-mode-map [(down)] (lambda () (interactive) (xenops-math-toggle-on-transition #'next-line)))
-    (define-key xenops-mode-map [(left)] (lambda () (interactive) (xenops-math-toggle-on-transition #'left-char)))
-    (define-key xenops-mode-map [(right)] (lambda () (interactive) (xenops-math-toggle-on-transition #'right-char)))
-    (define-key xenops-mode-map [(up)] (lambda () (interactive) (xenops-math-toggle-on-transition #'previous-line)))
 
     (xenops-util-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
     (xenops-util-define-key-with-fallback "\C-y" #'xenops-handle-paste)
