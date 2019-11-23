@@ -59,15 +59,15 @@
     (overlay-put ov 'help-echo (buffer-substring beg end))
 
     (set-keymap-parent keymap xenops-rendered-element-keymap)
-    (define-key keymap [mouse-3] `(lambda (event) (interactive "e") (xenops-element-menu ',element event)))
+    (define-key keymap [mouse-3] #'xenops-element-menu)
     (overlay-put ov 'keymap keymap)
 
     ov))
 
-(defun xenops-element-menu (element event)
+(defun xenops-element-menu (event)
   (popup-menu
    `("Xenops"
-     ["Edit" (xenops-element-reveal ',element)])
+     ["Edit" (xenops-reveal)])
    event))
 
 (provide 'xenops-element)
