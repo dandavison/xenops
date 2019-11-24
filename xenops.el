@@ -88,7 +88,6 @@
     (xenops-text-activate)
 
     ;; Display math and tables as images
-    (xenops-render-async)
     (save-excursion
       (goto-char (point-min))
       (xenops-render-if-cached)))
