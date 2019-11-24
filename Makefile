@@ -4,6 +4,7 @@ test:
 		--eval '(package-initialize)' \
 		--eval '(require `use-package)' \
 		--eval '(use-package xenops :load-path "~/src/xenops")' \
+		--eval '(setq ert-batch-backtrace-right-margin nil)' \
 		-l tests/xenops.el \
 		-l tests/xenops-element.el \
 		-l tests/xenops-math.el \
