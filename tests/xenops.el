@@ -15,9 +15,11 @@
 (defun xenops-render--do-test (buffer-contents element-begin expected-type)
   (cl-letf (((symbol-function 'org-create-formula-image)
              #'xenops-test-mock-org-create-formula-image))
-    (let ((xenops-cache-directory (make-temp-file "xenops-test-" 'dir)))
+    (let ((xenops-cache-directory (make-temp-file "xenops-test-" 'dir))
+          (file (make-temp-file "xenops-test-")))
       (with-temp-buffer
         (insert buffer-contents)
+        (write-file file)
         (latex-mode)
         (xenops-mode)
         (mark-whole-buffer)
