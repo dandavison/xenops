@@ -56,10 +56,22 @@
         (when (or cache-file-exists? (not cached-only))
           (unless cache-file-exists?
             (message "Xenops: creating file: %s" cache-file)
-            (org-create-formula-image
-             latex cache-file org-format-latex-options 'forbuffer xenops-math-process))
+            (let ((org-latex-packages-alist (xenops-math-get-latex-preamble-lines)))
+              (org-create-formula-image
+               latex cache-file org-format-latex-options 'forbuffer xenops-math-process)))
           (xenops-element-delete-overlays element)
           (xenops-math-make-overlay element cache-file image-type margin latex))))))
+
+(defun xenops-math-get-latex-preamble-lines ()
+  (let ((file (make-temp-file "xenops-math-" nil ".tex")))
+    (TeX-region-create file "" (buffer-file-name) 0)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (split-string
+       (buffer-substring (re-search-forward "\\documentclass.+$")
+                         (progn (search-forward "\\begin{document}")
+                                (match-beginning 0)))
+       "\n" t "[ \t\n]+"))))
 
 (defun xenops-math-regenerate (element)
   (let ((cache-file (xenops-math-get-cache-file element)))

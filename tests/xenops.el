@@ -16,15 +16,20 @@
   (cl-letf (((symbol-function 'org-create-formula-image)
              #'xenops-test-mock-org-create-formula-image))
     (let ((xenops-cache-directory (make-temp-file "xenops-test-" 'dir))
-          (file (make-temp-file "xenops-test-")))
+          ;; We are relying on this file being treated as its own master file by
+          ;; `TeX-region-create'. If the file name does not end in .tex, then a master file will be
+          ;; sought with the .tex suffix, and this will fail.
+          (file (make-temp-file "xenops-test-" nil ".tex"))
+          (before "\\documentclass{article}\n\\begin{document}\n")
+          (after "\n\\end{document}"))
       (with-temp-buffer
-        (insert buffer-contents)
+        (insert (concat before buffer-contents after))
         (write-file file)
-        (latex-mode)
+        (LaTeX-mode)
         (xenops-mode)
         (mark-whole-buffer)
         (xenops-render)
-        (goto-char element-begin)
+        (goto-char (+ (length before) element-begin))
         (let ((element (xenops-apply-parse-at-point)))
           (should (equal (plist-get element :type) expected-type)))
         (let ((image (xenops-element-get-image-at-point)))

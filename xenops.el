@@ -3,7 +3,9 @@
 (require 'dash)
 (require 'f)
 (require 'org)
+(require 'preview)
 (require 's)
+
 (require 'xenops-apply)
 (require 'xenops-element)
 (require 'xenops-execute)
