@@ -10,3 +10,6 @@ test:
 		-l tests/xenops-image.el \
 		-l tests/xenops-util.el \
 		-f ert-run-tests-batch-and-exit
+
+build:
+	@:
