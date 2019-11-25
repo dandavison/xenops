@@ -8,11 +8,11 @@
 
 (require 'xenops-apply)
 (require 'xenops-element)
-(require 'xenops-execute)
 (require 'xenops-face)
 (require 'xenops-image)
 (require 'xenops-math)
 (require 'xenops-parse)
+(require 'xenops-src)
 (require 'xenops-text)
 (require 'xenops-util)
 
@@ -53,6 +53,9 @@
 
 (xenops-define-apply-at-point-command delete
                                       "Delete the element at point.")
+
+(xenops-define-apply-at-point-command execute
+                                      "Execute the org-src code block at point.")
 
 (define-minor-mode xenops-mode
   "A LaTeX editing environment.
@@ -112,7 +115,9 @@
     (xenops-regenerate))
    ((equal arg '(4))
     (xenops-reveal))
-   (t (xenops-render))))
+   (t (xenops-apply-operations
+       (append (cdr (assq 'render xenops-ops))
+               (cdr (assq 'execute xenops-ops)))))))
 
 (defvar xenops-ops
   '((render . (xenops-math-render
@@ -130,7 +135,8 @@
                       xenops-image-decrease-size))
     (reset-size . (xenops-math-image-reset-size))
     (rotate . (xenops-image-rotate))
-    (save . (xenops-image-save)))
+    (save . (xenops-image-save))
+    (execute . (xenops-src-execute)))
   "Element-specific operation functions grouped by operation type.")
 
 (defvar xenops-elements
@@ -186,7 +192,14 @@
                  :parse-at-point
                  xenops-text-footnote-parse-at-point
                  :parse-match
-                 xenops-text-footnote-parse-match)))
+                 xenops-text-footnote-parse-match))
+    (src . (:ops
+            (xenops-src-execute)
+            :delimiters
+            (("^[ \t]*#+begin_src" .
+              "^[ \t]*#+end_src"))
+            :parse-at-point
+            xenops-src-parse-at-point)))
   "Element-specific operation functions, regexps, and parsers, grouped by element type.")
 
 (defun xenops-elements-get (type key)
