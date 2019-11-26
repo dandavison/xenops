@@ -11,7 +11,13 @@
     ("\\mp" . "∓")))
 
 (defvar xenops-text-prettify-symbols-string-replacements
-  '(("\\begin{definition*}" . "Definition.")
+  '(("\\begin{abstract}" . "Abstract.")
+    ("\\end{abstract}" . "┘")
+
+    ("\\begin{definition}" . "Definition.")
+    ("\\end{definition}" . "┘")
+
+    ("\\begin{definition*}" . "Definition.")
     ("\\end{definition*}" . "┘")
 
     ("\\begin{theorem*}" . "Theorem.")
