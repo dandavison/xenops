@@ -2,8 +2,6 @@
   (if-let ((org-element (xenops-src-do-in-org-mode (org-element-context)))
            (org-babel-info (org-babel-get-src-block-info 'light org-element)))
       (list :type 'src
-            :begin (plist-get org-element :begin)
-            :end (plist-get org-element :end)
             :language (nth 0 org-babel-info)
             :org-babel-info org-babel-info)))
 
