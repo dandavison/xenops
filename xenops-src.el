@@ -19,13 +19,21 @@ insert the results in the LaTeX buffer."
   ;; TODO: `Use org-babel-insert-result'
   (let* ((case-fold-search t)
          (end-block-regexp "^[ \t]*#\\+end_.*")
-         (result-text (xenops-src-do-in-org-mode
-                       (org-babel-execute-src-block arg info)
-                       (re-search-forward end-block-regexp nil t)
-                       (buffer-substring (point) (point-max)))))
+         (result-text (xenops-src-execute-parsed-src-block arg info)))
     (save-excursion
       (re-search-forward end-block-regexp)
       (insert result-text))))
+
+(defun xenops-src-execute-parsed-src-block (arg info)
+  "Execute an org-babel src block from the parsed data structure
+INFO. Return the results section that is written to the org-mode
+buffer, as a string."
+  (with-temp-buffer
+    (org-mode)
+    ;; TODO: Execute the block based on parsed `info' without writing it into the buffer.
+    (insert (org-babel-exp-code info 'block))
+    (org-babel-execute-src-block arg info)
+    (buffer-substring (point) (point-max))))
 
 (defvar xenops-src-mathematica-latex-results-command
   "
