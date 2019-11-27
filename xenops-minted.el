@@ -4,15 +4,7 @@
              (body (buffer-substring (plist-get element :begin-content)
                                      (plist-get element :end-content)))
              (org-babel-info
-              (list language body
-                    '((:results . "latex replace")
-                      (:exports . "code")
-                      (:tangle . "no")
-                      (:hlines . "no")
-                      (:noweb . "no")
-                      (:cache . "no")
-                      (:session . "none"))
-                    "" nil 4 "(ref:%s)")))
+              (list language body '((:results . "latex replace")))))
         (xenops-util-plist-update
          element
          :language language
