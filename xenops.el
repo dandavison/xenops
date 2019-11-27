@@ -12,6 +12,7 @@
 (require 'xenops-face)
 (require 'xenops-image)
 (require 'xenops-math)
+(require 'xenops-parse)
 (require 'xenops-text)
 (require 'xenops-util)
 
@@ -237,8 +238,8 @@
                (lambda (result)
                  (run-with-idle-timer 0 nil
                                       (lambda () (save-excursion (goto-char (point-min))
-                                                            (xenops-render-if-cached)
-                                                            (message "Xenops: done")))))))
+                                                                 (xenops-render-if-cached)
+                                                                 (message "Xenops: done")))))))
 
 (defun xenops-generate-images-in-headless-process ()
   "Generate cached images on disk for all math elements in

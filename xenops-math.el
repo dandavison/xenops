@@ -199,10 +199,10 @@ If we are in a math element, then paste without the delimiters"
     (funcall mouse-drag-region-fn start-event)))
 
 (defun xenops-math-parse-match (element)
-  (xenops-math-parse-match- element
-                            (plist-get element :delimiters)
-                            (point-max)
-                            (match-beginning 0)))
+  (xenops-parse-match element
+                      (plist-get element :delimiters)
+                      (point-max)
+                      (match-beginning 0)))
 
 (defun xenops-math-parse-element-at (pos)
   (save-excursion
@@ -214,15 +214,7 @@ If we are in a math element, then paste without the delimiters"
       (xenops-math-parse-block-element-at-point)))
 
 (defun xenops-math-parse-block-element-at-point ()
-  "If point is in block math element, return plist describing match"
-  (-any #'identity (mapcar
-                    (lambda (pair)
-                      (xenops-math-parse-element-at-point-matching-delimiters
-                       'block-math
-                       pair
-                       (point-min)
-                       (point-max)))
-                    (xenops-elements-get 'block-math :delimiters))))
+  (xenops-parse-element-at-point 'block-math))
 
 (defun xenops-math-parse-inline-element-at-point ()
   "If point is in inline math element, return plist describing match"
@@ -233,7 +225,7 @@ If we are in a math element, then paste without the delimiters"
           (forward-char)
           (setq odd-count t))
         (and odd-count
-             (xenops-math-parse-element-at-point-matching-delimiters
+             (xenops-parse-element-at-point-matching-delimiters
               'inline-math (cons delimiter delimiter) (point-at-bol) (point-at-eol)))))))
 
 (defun xenops-math-get-all-delimiters ()
@@ -242,42 +234,6 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-inline-delimiters-p (delimiters)
   (equal delimiters xenops-math-inline-math-delimiters))
-
-(defun xenops-math-parse-element-at-point-matching-delimiters (type delimiters lim-up lim-down)
-  "If point is between regexps, return plist describing match"
-  (-if-let (element
-            (save-excursion
-              (when (looking-at (cdr delimiters))
-                ;; This function will return nil if point is between delimiters separated by
-                ;; zero characters.
-                (left-char))
-              (xenops-math-parse-element-at-point-matching-delimiters- delimiters lim-up lim-down)))
-      (append element `(:type ,type :delimiters ,delimiters))))
-
-(defun xenops-math-parse-element-at-point-matching-delimiters- (delimiters lim-up lim-down)
-  "`org-between-regexps-p' modified to return more match coordinates"
-  (save-match-data ;; TODO: necessary?
-    (let ((pos (point)))
-      (save-excursion
-        (and (or (org-in-regexp (car delimiters))
-                 (re-search-backward (car delimiters) lim-up t))
-             (xenops-math-parse-match- nil delimiters lim-down pos))))))
-
-(defun xenops-math-parse-match- (element delimiters limit pos)
-  "Based on `org-between-regexps-p'."
-  (let (beg-beg beg-end end-beg end-end)
-    (and (setq beg-beg (match-beginning 0))
-         (goto-char (match-end 0))
-         (skip-chars-forward " \t\n")
-         (setq beg-end (point))
-         (re-search-forward (cdr delimiters) limit t)
-         (> (setq end-end (match-end 0)) pos)
-         (goto-char (match-beginning 0))
-         (skip-chars-backward " \t\n")
-         (setq end-beg (point))
-         (not (re-search-backward (car delimiters) (1+ beg-beg) t))
-         (append element
-                 `(:begin ,beg-beg :begin-content ,beg-end :end-content ,end-beg :end ,end-end)))))
 
 (defun xenops-math-set-org-preview-latex-process-alist! (element)
   (let* ((inline-p (xenops-math-inline-delimiters-p (plist-get element :delimiters)))
