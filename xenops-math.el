@@ -279,8 +279,8 @@ If we are in a math element, then paste without the delimiters"
          (append element
                  `(:begin ,beg-beg :begin-content ,beg-end :end-content ,end-beg :end ,end-end)))))
 
-(defun xenops-math-set-org-preview-latex-process-alist! (coords)
-  (let* ((inline-p (xenops-math-inline-delimiters-p (plist-get coords :delimiters)))
+(defun xenops-math-set-org-preview-latex-process-alist! (element)
+  (let* ((inline-p (xenops-math-inline-delimiters-p (plist-get element :delimiters)))
          (bounding-box (if inline-p "1" "10"))
          (dvisvgm-process-plist (cdr (assoc 'dvisvgm org-preview-latex-process-alist)))
          (dvisvgm-image-converter (car (plist-get dvisvgm-process-plist
