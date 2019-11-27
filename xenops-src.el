@@ -31,7 +31,7 @@ insert the results in the LaTeX buffer."
   "
 f () {
   echo \\\\begin{align*}
-  MathematicaScript -noprompt -run < \"$1\"
+  MathematicaScript -script \"$1\"
   echo \\\\end{align*}
 }
 f")
@@ -43,7 +43,7 @@ f")
          (latex-results (member "latex" result-params)))
     (if latex-results
         (let ((org-babel-mathematica-command xenops-src-mathematica-latex-results-command))
-          (setf (nth 1 info) (concat body " // TeXForm" ))
+          (setf (nth 1 info) (concat body " // TeXForm // ToString" ))
           (setf (cdr (assq :results (nth 2 info))) "raw")
           (xenops-src-execute-src-block arg info)
           (save-excursion
