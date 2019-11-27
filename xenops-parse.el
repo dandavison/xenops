@@ -1,13 +1,13 @@
 (defun xenops-parse-element-at-point (type)
   "If point is in element, return parsed element as a plist."
-  (-any #'identity (mapcar
-                    (lambda (pair)
-                      (xenops-parse-element-at-point-matching-delimiters
-                       type
-                       pair
-                       (point-min)
-                       (point-max)))
-                    (xenops-elements-get type :delimiters))))
+  (xenops-util-first-result
+   (lambda (pair)
+     (xenops-parse-element-at-point-matching-delimiters
+      type
+      pair
+      (point-min)
+      (point-max)))
+   (xenops-elements-get type :delimiters)))
 
 (defun xenops-parse-element-at-point-matching-delimiters (type delimiters lim-up lim-down)
   "If point is between regexps, return plist describing
