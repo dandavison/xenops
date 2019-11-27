@@ -18,10 +18,10 @@
 insert the results in the LaTeX buffer."
   ;; TODO: `Use org-babel-insert-result'
   (let* ((case-fold-search t)
-         (result-text (xenops-src-execute-parsed-src-block nil (plist-get element :org-babel-info))))
+         (result (xenops-src-execute-parsed-src-block nil (plist-get element :org-babel-info))))
     (save-excursion
       (goto-char (plist-get element :end))
-      (insert result-text))))
+      (insert result))))
 
 (defun xenops-src-execute-parsed-src-block (arg info)
   "Execute an org-babel src block from the parsed data structure
