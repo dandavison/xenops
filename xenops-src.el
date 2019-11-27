@@ -11,17 +11,16 @@
   (let ((execute-src-block-fn (if (equal (plist-get element :language) "mathematica")
                                   #'xenops-src-execute-src-block:mathematica
                                 #'xenops-src-execute-src-block)))
-    (funcall execute-src-block-fn nil (plist-get element :org-babel-info))))
+    (funcall execute-src-block-fn element)))
 
-(defun xenops-src-execute-src-block (arg info)
+(defun xenops-src-execute-src-block (element)
   "Execute the src block in a temporary org-mode buffer and
 insert the results in the LaTeX buffer."
   ;; TODO: `Use org-babel-insert-result'
   (let* ((case-fold-search t)
-         (end-block-regexp "^[ \t]*#\\+end_.*")
-         (result-text (xenops-src-execute-parsed-src-block arg info)))
+         (result-text (xenops-src-execute-parsed-src-block nil (plist-get element :org-babel-info))))
     (save-excursion
-      (re-search-forward end-block-regexp)
+      (goto-char (plist-get element :end))
       (insert result-text))))
 
 (defun xenops-src-execute-parsed-src-block (arg info)
@@ -44,8 +43,9 @@ f () {
 }
 f")
 
-(defun xenops-src-execute-src-block:mathematica (arg info)
-  (let* ((body (nth 1 info))
+(defun xenops-src-execute-src-block:mathematica (element)
+  (let* ((info (plist-get element :org-babel-info))
+         (body (nth 1 info))
          (params (nth 2 info))
          (result-params (split-string (downcase (cdr (assq :results params)))))
          (latex-results (member "latex" result-params)))
@@ -53,12 +53,12 @@ f")
         (let ((org-babel-mathematica-command xenops-src-mathematica-latex-results-command))
           (setf (nth 1 info) (concat body " // TeXForm // ToString" ))
           (setf (cdr (assq :results (nth 2 info))) "raw")
-          (xenops-src-execute-src-block arg info)
+          (xenops-src-execute-src-block element)
           (save-excursion
             (search-forward "#+RESULTS:\n")
             (-if-let (element (xenops-math-parse-block-element-at-point))
                 (xenops-math-render element))))
-      (xenops-src-execute-src-block arg info))))
+      (xenops-src-execute-src-block element))))
 
 (defmacro xenops-src-do-in-org-mode (&rest body)
   `(save-restriction
