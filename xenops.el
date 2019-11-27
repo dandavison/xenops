@@ -11,6 +11,7 @@
 (require 'xenops-face)
 (require 'xenops-image)
 (require 'xenops-math)
+(require 'xenops-minted)
 (require 'xenops-parse)
 (require 'xenops-src)
 (require 'xenops-text)
@@ -193,6 +194,13 @@
                  xenops-text-footnote-parse-at-point
                  :parse-match
                  xenops-text-footnote-parse-match))
+    (minted . (:ops
+               (xenops-src-execute)
+               :delimiters
+               (("^[ \t]*\\\\begin{minted}\\({\\([^}]+\\)}\\)?" .
+                 "^[ \t]*\\\\end{minted}"))
+               :parse-at-point
+               xenops-minted-parse-at-point))
     (src . (:ops
             (xenops-src-execute)
             :delimiters

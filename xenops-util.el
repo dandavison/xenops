@@ -26,6 +26,11 @@ is encountered. Return this value without further evaluations."
       (-if-let (result (funcall fn el))
           (throw :result result)))))
 
+(defun xenops-util-plist-update (plist &rest args)
+  (dolist (pair (-partition 2 args))
+    (setq plist (apply #'plist-put plist pair)))
+  plist)
+
 (defun xenops-util-svg-resize (svg scale)
   "Return SVG data with height and width scaled by `scale'"
   (cl-flet ((resize (match)
