@@ -1,3 +1,5 @@
+(setq xenops-src-do-in-org-mode-header "* \n")
+
 (defun xenops-src-parse-at-point ()
   (if-let ((org-element (xenops-src-do-in-org-mode (org-element-context)))
            (org-babel-info (org-babel-get-src-block-info 'light org-element)))
@@ -67,7 +69,7 @@ f")
        (let ((region (buffer-substring (point-min) (point-max))))
          (with-temp-buffer
            (erase-buffer)
-           (insert "* \n")
+           (insert xenops-src-do-in-org-mode-header)
            (insert region)
            (org-mode)
            ,@body)))))
