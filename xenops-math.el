@@ -198,14 +198,6 @@ If we are in a math element, then paste without the delimiters"
             (funcall mouse-drag-region-fn start-event))))
     (funcall mouse-drag-region-fn start-event)))
 
-(defun xenops-math-parse-match (element)
-  (append
-   element
-   (xenops-parse-between-regexps?
-    (plist-get element :delimiters)
-    (point-max)
-    (match-beginning 0))))
-
 (defun xenops-math-parse-element-at (pos)
   (save-excursion
     (goto-char pos)

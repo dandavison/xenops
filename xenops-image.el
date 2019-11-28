@@ -40,17 +40,10 @@ pasted from the system clipboard.")
 
 (defun xenops-image-parse-at-point ()
   (if (looking-at (caar (xenops-elements-get 'image :delimiters)))
-      (xenops-image-parse-match nil)))
-
-(defun xenops-image-parse-match (element)
-  ;; A match has just been made for the opening delimiter and element
-  ;; is a plist containing data from that match, but needs more data
-  ;; to be a properly populated element.
-  ;; TODO: This API is inconsistent with xenops-math.
-  (append element `(:type image
-                          :begin ,(match-beginning 0)
-                          :end ,(match-end 0)
-                          :path ,(expand-file-name (match-string 2)))))
+      (list :type 'image
+            :begin (match-beginning 0)
+            :end (match-end 0)
+            :path (expand-file-name (match-string 2)))))
 
 (defun xenops-image-handle-paste ()
   (interactive)

@@ -156,17 +156,13 @@
                     ("^[ \t]*\\\\begin{tabular}" .
                      "^[ \t]*\\\\end{tabular}"))
                    :parse-at-point
-                   xenops-math-parse-block-element-at-point
-                   :parse-match
-                   xenops-math-parse-match))
+                   xenops-math-parse-block-element-at-point))
     (inline-math . (:ops
                     block-math
                     :delimiters
                     (("\\$" . "\\$"))
                     :parse-at-point
-                    xenops-math-parse-inline-element-at-point
-                    :parse-match
-                    block-math))
+                    xenops-math-parse-inline-element-at-point))
     (image . (:ops
               (xenops-image-render
                xenops-image-reveal
@@ -179,9 +175,7 @@
               :delimiters
               (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))
               :parse-at-point
-              xenops-image-parse-at-point
-              :parse-match
-              xenops-image-parse-match))
+              xenops-image-parse-at-point))
     (footnote . (:ops
                  (xenops-text-footnote-render
                   xenops-element-reveal
@@ -191,9 +185,7 @@
                  ((,(concat "\\\\footnote"
                             xenops-text-brace-delimited-multiline-expression-regexp)))
                  :parse-at-point
-                 xenops-text-footnote-parse-at-point
-                 :parse-match
-                 xenops-text-footnote-parse-match))
+                 xenops-text-footnote-parse-at-point))
     (minted . (:ops
                (xenops-src-execute)
                :delimiters

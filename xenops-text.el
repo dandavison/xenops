@@ -152,14 +152,6 @@
       `(:type footnote :begin ,(match-beginning 0) :end ,(match-end 0)
               :begin-content ,(match-beginning 1) :end-content ,(match-end 1))))
 
-(defun xenops-text-footnote-parse-match (element)
-  "See `xenops-image-parse-match'"
-  (append element `(:type footnote
-                          :begin ,(match-beginning 0)
-                          :end ,(match-end 0)
-                          :begin-content ,(match-beginning 1)
-                          :end-content ,(match-end 1))))
-
 (defun xenops-text-prettify-symbols-mode (&optional arg)
   (interactive)
   (let ((prettify-symbols-alist prettify-symbols-alist)

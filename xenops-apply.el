@@ -63,11 +63,12 @@ section of the buffer that xenops can do something to."
                                  (next-match-pos (car (plist-get delims2 :delimiters)))))
                             (xenops-apply-get-all-delimiters))))
       (when (re-search-forward (car (plist-get element :delimiters)) end t)
-        (let* ((type (plist-get element :type))
-               (parse-match (xenops-elements-get type :parse-match))
-               (element (funcall parse-match element)))
-          (and element (goto-char (plist-get element :end)))
-          (or element 'unparseable))))))
+        (goto-char (match-beginning 0))
+        (if-let ((element (xenops-apply-parse-at-point)))
+            (progn
+              (goto-char (plist-get element :end))
+              element)
+          'unparseable)))))
 
 (defun xenops-apply-get-all-delimiters ()
   (cl-flet ((get-delimiters (type)
