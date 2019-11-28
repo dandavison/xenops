@@ -41,6 +41,12 @@
     ("\\begin{align}" . "⚡")
     ("\\end{align}" . "⚡")
 
+    ("\\begin{minted}" . "⚡")
+    ("\\end{minted}" . "⚡")
+
+    ("#+begin_src" . "⚡")
+    ("#+end_src" . "⚡")
+
     ("\\begin{cases}" . "cases:")
     ("\\end{cases}" . "┘")
 
@@ -53,7 +59,6 @@
     ("\\begin{mdframed}" . "┐")
     ("\\end{mdframed}" . "┘")
 
-    ("\\end{minted}" . "┘")
     ("\\end{verbatim}" . "┘")
     ("\\end{tabular}" . "┘")
     ("\\end{tabular*}" . "┘")
@@ -65,6 +70,9 @@
     ("\\section" . "§")
     ("\\subsection" . "§§")
     ("\\subsubsection" . "§§§")
+    ("\\section*" . "§")
+    ("\\subsection*" . "§§")
+    ("\\subsubsection*" . "§§§")
 
     ("\\includegraphics" . "img")
 
