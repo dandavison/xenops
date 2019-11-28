@@ -41,6 +41,21 @@
    (let ((image (xenops-element-get-image-at-point)))
      (should (equal (image-property image :type) 'svg)))))
 
+(defun xenops-render--do-src-test (buffer-contents element-begin expected-type keyword)
+  (xenops-render--do-test
+   buffer-contents
+   (forward-char element-begin)
+   (should (or (looking-at (caar (xenops-elements-get 'src :delimiters)))
+               (looking-at (caar (xenops-elements-get 'minted :delimiters)))))
+   (let ((element (xenops-apply-parse-at-point)))
+     (should (equal (plist-get element :type) expected-type)))
+   (should (not (xenops-element-get-image-at-point)))
+   (search-forward keyword)
+   (goto-char (match-beginning 0))
+   ;; (font-lock-fontify-buffer)
+   ;; (should (equal (face-at-point) 'font-lock-keyword-face))
+   ))
+
 (ert-deftest xenops-render--inline-math ()
   (xenops-render--do-image-test "123$e^{2i\\pi}$maths." 4 'inline-math))
 
@@ -51,6 +66,22 @@
   e^{2i\\pi}
 \\end{align*}
 " 8 'block-math))
+
+(ert-deftest xenops-render--minted ()
+  (xenops-render--do-src-test
+   "Hello.
+\\begin{minted}{emacs-lisp}
+ (defun f ())
+\\end{minted}
+ " 8 'minted "defun"))
+
+(ert-deftest xenops-render--src ()
+  (xenops-render--do-src-test
+   "Hello.
+ #+begin_src emacs-lisp
+ (defun f ())
+ #+end_src
+ " 8 'src "defun"))
 
 (ert-deftest xenops-render--table ()
   (xenops-render--do-image-test
