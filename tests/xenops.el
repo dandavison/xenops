@@ -12,34 +12,40 @@
     (insert xenops-test-svg)
     (write-file file)))
 
-(defun xenops-render--do-test (buffer-contents element-begin expected-type)
-  (cl-letf (((symbol-function 'org-create-formula-image)
-             #'xenops-test-mock-org-create-formula-image))
-    (let ((xenops-cache-directory (make-temp-file "xenops-test-" 'dir))
-          ;; We are relying on this file being treated as its own master file by
-          ;; `TeX-region-create'. If the file name does not end in .tex, then a master file will be
-          ;; sought with the .tex suffix, and this will fail.
-          (file (make-temp-file "xenops-test-" nil ".tex"))
-          (before "\\documentclass{article}\n\\begin{document}\n")
-          (after "\n\\end{document}"))
-      (with-temp-buffer
-        (insert (concat before buffer-contents after))
-        (write-file file)
-        (LaTeX-mode)
-        (xenops-mode)
-        (mark-whole-buffer)
-        (xenops-render)
-        (goto-char (+ (length before) element-begin))
-        (let ((element (xenops-apply-parse-at-point)))
-          (should (equal (plist-get element :type) expected-type)))
-        (let ((image (xenops-element-get-image-at-point)))
-          (should (equal (image-property image :type) 'svg)))))))
+(defmacro xenops-render--do-test (buffer-contents &rest body)
+  `(cl-letf (((symbol-function 'org-create-formula-image)
+              #'xenops-test-mock-org-create-formula-image))
+     (let ((xenops-cache-directory (make-temp-file "xenops-test-" 'dir))
+           ;; We are relying on this file being treated as its own master file by
+           ;; `TeX-region-create'. If the file name does not end in .tex, then a master file will be
+           ;; sought with the .tex suffix, and this will fail.
+           (file (make-temp-file "xenops-test-" nil ".tex"))
+           (before "\\documentclass{article}\n\\begin{document}\n")
+           (after "\n\\end{document}"))
+       (with-temp-buffer
+         (insert (concat before ,buffer-contents after))
+         (write-file file)
+         (LaTeX-mode)
+         (xenops-mode)
+         (mark-whole-buffer)
+         (xenops-render)
+         (goto-char (length before))
+         ,@body))))
+
+(defun xenops-render--do-image-test (buffer-contents element-begin expected-type)
+  (xenops-render--do-test
+   buffer-contents
+   (forward-char element-begin)
+   (let ((element (xenops-apply-parse-at-point)))
+     (should (equal (plist-get element :type) expected-type)))
+   (let ((image (xenops-element-get-image-at-point)))
+     (should (equal (image-property image :type) 'svg)))))
 
 (ert-deftest xenops-render--inline-math ()
-  (xenops-render--do-test "123$e^{2i\\pi}$maths." 4 'inline-math))
+  (xenops-render--do-image-test "123$e^{2i\\pi}$maths." 4 'inline-math))
 
 (ert-deftest xenops-render--block-math ()
-  (xenops-render--do-test
+  (xenops-render--do-image-test
    "Hello.
 \\begin{align*}
   e^{2i\\pi}
@@ -47,7 +53,7 @@
 " 8 'block-math))
 
 (ert-deftest xenops-render--table ()
-  (xenops-render--do-test
+  (xenops-render--do-image-test
    "This is a table.
 \\begin{tabular}{c||c|c|c|c|c|}
     & e & a & b & c & d\\\\
