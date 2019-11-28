@@ -152,16 +152,16 @@
                     xenops-element-copy
                     xenops-element-delete)
                    :delimiters
-                   (("^[ \t]*\\\\begin{align\\*?}" .
+                   (("^[ \t]*\\\\begin{align\\*?}"
                      "^[ \t]*\\\\end{align\\*?}")
-                    ("^[ \t]*\\\\begin{tabular}" .
+                    ("^[ \t]*\\\\begin{tabular}"
                      "^[ \t]*\\\\end{tabular}"))
                    :parse-at-point
                    xenops-math-parse-block-element-at-point))
     (inline-math . (:ops
                     block-math
                     :delimiters
-                    (("\\$" . "\\$"))
+                    (("\\$" "\\$"))
                     :parse-at-point
                     xenops-math-parse-inline-element-at-point))
     (image . (:ops
@@ -190,14 +190,14 @@
     (minted . (:ops
                (xenops-src-execute)
                :delimiters
-               (("^[ \t]*\\\\begin{minted}\\({\\([^}]+\\)}\\)?" .
+               (("^[ \t]*\\\\begin{minted}\\({\\([^}]+\\)}\\)?"
                  "^[ \t]*\\\\end{minted}"))
                :parse-at-point
                xenops-minted-parse-at-point))
     (src . (:ops
             (xenops-src-execute)
             :delimiters
-            (("^[ \t]*#\\+begin_src[ \t]+\\([^ \t\n]+\\)" .
+            (("^[ \t]*#\\+begin_src[ \t]+\\([^ \t\n]+\\)"
               "^[ \t]*#\\+end_src"))
             :parse-at-point
             xenops-src-parse-at-point)))

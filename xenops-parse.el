@@ -15,7 +15,7 @@
   more match data."
   (-if-let (coords
             (save-excursion
-              (when (looking-at (cdr delimiters))
+              (when (looking-at (car (last delimiters)))
                 ;; This function will return nil if point is between delimiters separated by
                 ;; zero characters.
                 (left-char))
@@ -34,7 +34,7 @@
               (goto-char (match-end 0))
               (skip-chars-forward " \t\n")
               (setq beg-end (point))
-              (re-search-forward (cdr delimiters) limit t)
+              (re-search-forward (car (last delimiters)) limit t)
               (> (setq end-end (match-end 0)) pos)
               (goto-char (match-beginning 0))
               (skip-chars-backward " \t\n")

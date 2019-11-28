@@ -19,7 +19,7 @@
 (defvar xenops-math-image-margin 20
   "Number of pixels to be used as left margin for non-inline math images")
 
-(setq xenops-math-inline-math-delimiters '("\\$" . "\\$"))
+(setq xenops-math-inline-math-delimiters '("\\$" "\\$"))
 
 (defun xenops-math-font-lock-keywords ()
   `((,(xenops-math-block-delimiter-lines-regexp)
@@ -119,8 +119,7 @@
   "A regexp matching the start or end line of any block math element."
   (format "\\(%s\\)"
           (s-join "\\|"
-                  (apply #'append (mapcar (lambda (pair) (list (car pair) (cdr pair)))
-                                          (xenops-elements-get 'block-math :delimiters))))))
+                  (apply #'append (xenops-elements-get 'block-math :delimiters)))))
 
 (defun xenops-math-block-delimiter-lines-set-face ()
   (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch))
@@ -220,7 +219,7 @@ If we are in a math element, then paste without the delimiters"
           (setq odd-count t))
         (and odd-count
              (xenops-parse-element-at-point-matching-delimiters
-              'inline-math (cons delimiter delimiter) (point-at-bol) (point-at-eol)))))))
+              'inline-math (list delimiter delimiter) (point-at-bol) (point-at-eol)))))))
 
 (defun xenops-math-get-all-delimiters ()
   (append (xenops-elements-get 'block-math :delimiters)
