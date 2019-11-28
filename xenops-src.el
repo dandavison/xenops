@@ -1,12 +1,5 @@
 (setq xenops-src-do-in-org-mode-header "* \n")
 
-(defun xenops-src-activate ()
-  (font-lock-add-keywords
-   nil
-   `((,(caar (xenops-elements-get 'src :delimiters))
-      (0
-       (xenops-src-apply-syntax-highlighting))))))
-
 (defun xenops-src-parse-at-point ()
   (if-let ((element (xenops-parse-element-at-point 'src))
            (org-element (xenops-src-do-in-org-mode (org-element-context)))

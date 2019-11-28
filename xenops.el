@@ -92,8 +92,8 @@
     (if xenops-face-font-family (xenops-face-set-faces))
 
     (xenops-math-activate)
-    (xenops-src-activate)
     (xenops-text-activate)
+    (xenops-font-lock-activate)
 
     ;; Display math and tables as images
     (save-excursion
@@ -199,6 +199,8 @@
             :delimiters
             (("^[ \t]*#\\+begin_src[ \t]+\\([^ \t\n]+\\)"
               "^[ \t]*#\\+end_src"))
+            :font-lock-keywords
+            (((((0 (xenops-src-apply-syntax-highlighting))))))
             :parse-at-point
             xenops-src-parse-at-point)))
   "Element-specific operation functions, regexps, and parsers, grouped by element type.")
@@ -219,6 +221,19 @@
           (mapcar (lambda (pair) (let ((val (xenops-elements-get (car pair) key)))
                               (if (listp val) val (list val))))
                   xenops-elements))))
+
+(defun xenops-font-lock-activate ()
+  "Configure font-lock for all element types by adding entries to
+`font-lock-keywords`."
+  (loop for (type . --unused--) in xenops-elements
+        do
+        (if-let ((keywords (xenops-elements-get type :font-lock-keywords)))
+            (loop for (regexps keywords) in (-zip (xenops-elements-get type :delimiters)
+                                                  keywords)
+                  do
+                  (loop for (regexp keyword) in (-zip regexps keywords)
+                        do
+                        (font-lock-add-keywords nil `((,regexp ,keyword))))))))
 
 (defun xenops-ops-for-op-type (op-type)
   "The operations of type OP-TYPE."
