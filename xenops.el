@@ -92,6 +92,7 @@
     (if xenops-face-font-family (xenops-face-set-faces))
 
     (xenops-math-activate)
+    (xenops-src-activate)
     (xenops-text-activate)
 
     ;; Display math and tables as images
@@ -196,8 +197,8 @@
     (src . (:ops
             (xenops-src-execute)
             :delimiters
-            (("^[ \t]*#+begin_src" .
-              "^[ \t]*#+end_src"))
+            (("^[ \t]*#\\+begin_src[ \t]+\\([^ \t\n]+\\)" .
+              "^[ \t]*#\\+end_src"))
             :parse-at-point
             xenops-src-parse-at-point)))
   "Element-specific operation functions, regexps, and parsers, grouped by element type.")

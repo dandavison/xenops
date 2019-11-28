@@ -1,11 +1,21 @@
 (setq xenops-src-do-in-org-mode-header "* \n")
 
+(defun xenops-src-activate ()
+  (font-lock-add-keywords
+   nil
+   `((,(caar (xenops-elements-get 'src :delimiters))
+      (0
+       (xenops-src-apply-syntax-highlighting))))))
+
 (defun xenops-src-parse-at-point ()
-  (if-let ((org-element (xenops-src-do-in-org-mode (org-element-context)))
+  (if-let ((element (xenops-parse-element-at-point 'src))
+           (org-element (xenops-src-do-in-org-mode (org-element-context)))
            (org-babel-info (org-babel-get-src-block-info 'light org-element)))
-      (list :type 'src
-            :language (nth 0 org-babel-info)
-            :org-babel-info org-babel-info)))
+      (xenops-util-plist-update
+       element
+       :type 'src
+       :language (nth 0 org-babel-info)
+       :org-babel-info org-babel-info)))
 
 (defun xenops-src-execute (element)
   (let ((execute-src-block-fn (if (equal (plist-get element :language) "mathematica")
@@ -73,5 +83,13 @@ f")
            (insert region)
            (org-mode)
            ,@body)))))
+
+(defun xenops-src-apply-syntax-highlighting ()
+  (let ((lang (match-string 1)))
+    (and lang (not (string= lang ""))
+         (if-let ((element (xenops-src-parse-at-point))
+                  (beg (plist-get element :begin))
+                  (end (plist-get element :end)))
+             (org-src-font-lock-fontify-block lang beg end)))))
 
 (provide 'xenops-src)
