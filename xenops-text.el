@@ -106,33 +106,38 @@
          "\\)"
          "}")))
 
-(defvar xenops-text-prettify-symbols-regexp-replacements
-  ;; TODO Use an alist like the others.
-  (format
-   "\\(%s\\)"
-   (s-join
-    "\\|"
-    '("\\\\emph{\\([^\n}]+\\)}"
-      "\\\\textbf{\\([^\n}]+\\)}"
-      "\\\\textit{\\([^\n}]+\\)}"
-      "{\\\\bf +\\([^\n}]+\\)}"
-      "{\\\\it +\\([^\n}]+\\)}"))))
+(defvar xenops-text-regexp-replacements
+  '("\\\\emph{\\([^\n}]+\\)}"
+    "\\\\textbf{\\([^\n}]+\\)}"
+    "\\\\textit{\\([^\n}]+\\)}"
+    "{\\\\bf +\\([^\n}]+\\)}"
+    "{\\\\it +\\([^\n}]+\\)}")
+  "List of regexp-based visual replacements. These are analogous
+to the entries of `prettify-symbols-alist'. Each entry must be a
+regular expression with exactly one capture group. When
+`prettify-symbols-mode' is active, a match for a regular
+expression in this list will be displayed as the text captured by
+the capture group. For example, the entry
+\"\\\\\\\\textit{\\\\([^\\n}]+\\\\)}\" causes occurrences of the
+LaTeX italic markup \"\\textit{some text}\" to be displayed
+visually as \"some text\". See
+`xenops-text-prettify-regexp-get-text-properties' for how an
+italic font is then applied to \"some text\".")
 
 (setq xenops-text-tooltip-delay-orig nil)
 
-;; Prettify-symbols replacements using captured text
-(setq xenops-text-prettify-symbols-font-lock-keywords
-      `((,xenops-text-prettify-symbols-regexp-replacements
-         (0
-          (xenops-text-prettify-regexp-replacement)))))
+(defun xenops-text-prettify-symbols-font-lock-keywords ()
+  `((,(xenops-text-regexp-replacements-make-regexp)
+     (0
+      (xenops-text-regexp-replacement-do)))))
 
 (defun xenops-text-activate ()
-  (font-lock-add-keywords nil xenops-text-prettify-symbols-font-lock-keywords)
+  (font-lock-add-keywords nil (xenops-text-prettify-symbols-font-lock-keywords))
   (xenops-text-prettify-symbols-mode +1)
   (xenops-text-configure-tooltips))
 
 (defun xenops-text-deactivate ()
-  (font-lock-remove-keywords nil xenops-text-prettify-symbols-font-lock-keywords)
+  (font-lock-remove-keywords nil (xenops-text-prettify-symbols-font-lock-keywords))
   (xenops-text-configure-tooltips 'deactivate)
   (xenops-text-prettify-symbols-mode -1)
   (org-restart-font-lock))
@@ -180,7 +185,7 @@
   ;; TODO: I think this is causing the very long regexp to be matched twice during fontification.
   ;; Can this be done by modifying the existing prettify-symbols entry?
   (dolist (regexp (list (caar prettify-symbols--keywords)
-                        xenops-text-prettify-symbols-regexp-replacements))
+                        (xenops-text-regexp-replacements-make-regexp)))
     (funcall
      (if deactivate 'font-lock-remove-keywords 'font-lock-add-keywords)
      nil
@@ -191,7 +196,13 @@
       (setq tooltip-delay xenops-text-tooltip-delay-orig)
     (setq xenops-text-tooltip-delay-orig tooltip-delay)))
 
-(defun xenops-text-prettify-regexp-replacement ()
+(defun xenops-text-regexp-replacements-make-regexp ()
+  "Return a regular expression matching any entry in
+`xenops-text-regexp-replacements'."
+  (format "\\(%s\\)"
+          (s-join "\\|" xenops-text-regexp-replacements)))
+
+(defun xenops-text-regexp-replacement-do ()
   "A match for a regexp capture replacement has just been made.
 Return the replacement text to be displayed, with any text properties."
   (let* ((beg (match-beginning 0))
