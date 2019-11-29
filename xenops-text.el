@@ -67,13 +67,6 @@
     ("\\end{quote}" . "”")
 
     ("\\item" . "⁃")
-    ("\\section" . "§")
-    ("\\subsection" . "§§")
-    ("\\subsubsection" . "§§§")
-    ("\\section*" . "§")
-    ("\\subsection*" . "§§")
-    ("\\subsubsection*" . "§§§")
-
     ("\\includegraphics" . "img")
 
     ;; post-spacing is incorrect for these when using
@@ -110,6 +103,7 @@
   '("\\\\emph{\\([^\n}]+\\)}"
     "\\\\textbf{\\([^\n}]+\\)}"
     "\\\\textit{\\([^\n}]+\\)}"
+    "\\\\\\(?:sub\\)*section\\*?{\\([^\n}]+\\)}"
     "{\\\\bf +\\([^\n}]+\\)}"
     "{\\\\it +\\([^\n}]+\\)}")
   "List of regexp-based visual replacements. These are analogous
