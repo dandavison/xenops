@@ -192,6 +192,8 @@
                :delimiters
                (("^[ \t]*\\\\begin{minted}\\({\\([^}]+\\)}\\)?"
                  "^[ \t]*\\\\end{minted}"))
+               :font-lock-keywords
+               src
                :parse-at-point
                xenops-minted-parse-at-point))
     (src . (:ops
