@@ -11,7 +11,7 @@
   x
 \\end{align*}
 "))
-                 '(:begin 1 :begin-content 18 :end-content 19 :end 32 :type block-math
+                 '(:begin 1 :begin-content 15 :end-content 20 :end 32 :type block-math
                           :delimiters ("^[ \t]*\\\\begin{align\\*?}"
                                        "^[ \t]*\\\\end{align\\*?}")))))
 

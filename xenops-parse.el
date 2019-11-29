@@ -32,13 +32,13 @@
              (and
               (setq beg-beg (match-beginning 0))
               (goto-char (match-end 0))
-              (skip-chars-forward " \t\n")
               (setq beg-end (point))
+              (skip-chars-forward " \t\n")
               (re-search-forward (car (last delimiters)) limit t)
               (> (setq end-end (match-end 0)) pos)
               (goto-char (match-beginning 0))
-              (skip-chars-backward " \t\n")
               (setq end-beg (point))
+              (skip-chars-backward " \t\n")
               (not (re-search-backward (car delimiters) (1+ beg-beg) t))
               (list :begin beg-beg :begin-content beg-end :end-content end-beg :end end-end)))))))
 
