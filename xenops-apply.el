@@ -38,43 +38,30 @@ the entire buffer."
           `(,(point-min) ,(point-max) nil))
       (save-excursion
         (goto-char beg)
-        (while (setq el (xenops-apply-get-next-element end))
-          (and (xenops-element-element? el)
-               (or (null pred) (funcall pred el))
-               (if-let ((op (xenops-element-op-for-el el ops)))
-                   (save-excursion (funcall op el))))))
+        (let ((parse-at-point-fns (xenops-elements-get-all :parse-at-point)))
+          (while (setq el (xenops-apply-get-next-element
+                           (xenops-elements-delimiter-start-regexp) end parse-at-point-fns))
+            (and el
+                 (or (null pred) (funcall pred el))
+                 (if-let ((op (xenops-element-op-for-el el ops)))
+                     (save-excursion (funcall op el)))))))
       ;; Hack: This should be abstracted.
       (and region-active (not (-intersection ops '(xenops-math-image-increase-size
                                                    xenops-math-image-decrease-size)))
            (deactivate-mark)))))
 
-(defun xenops-apply-get-next-element (end)
+(defun xenops-apply-get-next-element (start-regexp end &optional parse-at-point-fns)
   "If there is another element, return it and leave point after it.
 An element is a plist containing data about a regexp match for a
 section of the buffer that xenops can do something to."
-  (cl-flet ((next-match-pos (regexp)
-                            (save-excursion
-                              (if (re-search-forward regexp end t) (match-beginning 0) end))))
-    (let ((element (-min-by (lambda (delims1 delims2)
-                              (> (next-match-pos (car (plist-get delims1 :delimiters)))
-                                 (next-match-pos (car (plist-get delims2 :delimiters)))))
-                            (xenops-apply-get-all-delimiters))))
-      (when (re-search-forward (car (plist-get element :delimiters)) end t)
-        (goto-char (match-beginning 0))
-        (if-let ((element (xenops-apply-parse-at-point)))
-            (progn
-              (goto-char (plist-get element :end))
-              element)
-          'unparseable)))))
+  (if-let (((re-search-forward start-regexp end t))
+           ((goto-char (match-beginning 0)))
+           (element (xenops-apply-parse-at-point parse-at-point-fns))
+           ((goto-char (plist-get element :end))))
+      element))
 
-(defun xenops-apply-get-all-delimiters ()
-  (cl-flet ((get-delimiters (type)
-                            (mapcar (lambda (delimiters)
-                                      `(:type ,type :delimiters ,delimiters))
-                                    (xenops-elements-get type :delimiters))))
-    (apply #'append (mapcar #'get-delimiters (mapcar #'car xenops-elements)))))
-
-(defun xenops-apply-parse-at-point ()
-  (xenops-util-first-result #'funcall (xenops-elements-get-all :parse-at-point)))
+(defun xenops-apply-parse-at-point (&optional parse-at-point-fns)
+  (xenops-util-first-result #'funcall (or parse-at-point-fns
+                                          (xenops-elements-get-all :parse-at-point))))
 
 (provide 'xenops-apply)

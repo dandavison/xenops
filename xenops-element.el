@@ -21,9 +21,6 @@
                (plist-get element :end))
   t)
 
-(defun xenops-element-element? (el)
-  (plist-get el :type))
-
 (defun xenops-element-op-for-el (el ops)
   "The first operation in OPS that is valid for an element of this type."
   (car (-intersection ops (xenops-element-ops-for-el el))))
