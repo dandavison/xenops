@@ -153,74 +153,60 @@
   "Element-specific operation functions grouped by operation type.")
 
 (defvar xenops-elements
-  `((block-math . (:ops
-                   (xenops-math-render
-                    xenops-math-regenerate
-                    xenops-math-reveal
-                    xenops-math-image-increase-size
-                    xenops-math-image-decrease-size
-                    xenops-math-image-reset-size
-                    xenops-element-copy
-                    xenops-element-delete)
-                   :delimiters
-                   (("^[ \t]*\\\\begin{align\\*?}"
-                     "^[ \t]*\\\\end{align\\*?}")
-                    ("^[ \t]*\\\\begin{tabular}"
-                     "^[ \t]*\\\\end{tabular}"))
-                   :parse-at-point
-                   xenops-math-parse-block-element-at-point))
-    (inline-math . (:ops
-                    block-math
-                    :delimiters
-                    (("\\$" "\\$"))
-                    :parse-at-point
-                    xenops-math-parse-inline-element-at-point))
-    (image . (:ops
-              (xenops-image-render
-               xenops-image-reveal
-               xenops-image-increase-size
-               xenops-image-decrease-size
-               xenops-element-copy
-               xenops-element-delete
-               xenops-image-rotate
-               xenops-image-save)
-              :delimiters
-              (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}"))
-              :parse-at-point
-              xenops-image-parse-at-point))
-    (footnote . (:ops
-                 (xenops-text-footnote-render
-                  xenops-element-reveal
+  `((block-math
+     .  ((:ops . (xenops-math-render
+                  xenops-math-regenerate
+                  xenops-math-reveal
+                  xenops-math-image-increase-size
+                  xenops-math-image-decrease-size
+                  xenops-math-image-reset-size
                   xenops-element-copy
-                  xenops-element-delete)
-                 :delimiters
-                 ((,(concat "\\\\footnote"
-                            xenops-text-brace-delimited-multiline-expression-regexp)))
-                 :parse-at-point
-                 xenops-text-footnote-parse-at-point))
-    (minted . (:ops
-               (xenops-src-execute)
-               :delimiters
-               (("^[ \t]*\\\\begin{minted}\\({\\([^}]+\\)}\\)?"
-                 "^[ \t]*\\\\end{minted}"))
-               :font-lock-keywords
-               src
-               :parse-at-point
-               xenops-minted-parse-at-point))
-    (src . (:ops
-            (xenops-src-execute)
-            :delimiters
-            (("^[ \t]*#\\+begin_src[ \t]+\\([^ \t\n]+\\)"
-              "^[ \t]*#\\+end_src"))
-            :font-lock-keywords
-            (((((0 (xenops-src-apply-syntax-highlighting))))))
-            :parse-at-point
-            xenops-src-parse-at-point)))
+                  xenops-element-delete))
+         (:delimiters . (("^[ \t]*\\\\begin{align\\*?}"
+                          "^[ \t]*\\\\end{align\\*?}")
+                         ("^[ \t]*\\\\begin{tabular}"
+                          "^[ \t]*\\\\end{tabular}")))
+         (:parse-at-point . xenops-math-parse-block-element-at-point)))
+    (inline-math
+     . ((:ops . block-math)
+        (:delimiters . (("\\$" "\\$")))
+        (:parse-at-point . xenops-math-parse-inline-element-at-point)))
+    (image
+     . ((:ops . (xenops-image-render
+                 xenops-image-reveal
+                 xenops-image-increase-size
+                 xenops-image-decrease-size
+                 xenops-element-copy
+                 xenops-element-delete
+                 xenops-image-rotate
+                 xenops-image-save))
+        (:delimiters . (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}")))
+        (:parse-at-point . xenops-image-parse-at-point)))
+    (footnote
+     . ((:ops .(xenops-text-footnote-render
+                xenops-element-reveal
+                xenops-element-copy
+                xenops-element-delete))
+        (:delimiters . ((,(concat "\\\\footnote"
+                                  xenops-text-brace-delimited-multiline-expression-regexp))))
+        (:parse-at-point . xenops-text-footnote-parse-at-point)))
+    (minted
+     . ((:ops . (xenops-src-execute))
+        (:delimiters . (("^[ \t]*\\\\begin{minted}\\({\\([^}]+\\)}\\)?"
+                         "^[ \t]*\\\\end{minted}")))
+        (:font-lock-keywords . src)
+        (:parse-at-point . xenops-minted-parse-at-point)))
+    (src
+     . ((:ops . (xenops-src-execute))
+        (:delimiters . (("^[ \t]*#\\+begin_src[ \t]+\\([^ \t\n]+\\)"
+                         "^[ \t]*#\\+end_src")))
+        (:font-lock-keywords . (((((0 (xenops-src-apply-syntax-highlighting)))))))
+        (:parse-at-point . xenops-src-parse-at-point))))
   "Element-specific operation functions, regexps, and parsers, grouped by element type.")
 
 (defun xenops-elements-get (type key)
   "Return the value associated with KEY for element type TYPE."
-  (let ((value (plist-get (cdr (assq type xenops-elements)) key)))
+  (let ((value (cdr (assq key (cdr (assq type xenops-elements))))))
     (if (and (symbolp value) (assq value xenops-elements))
         ;; Instead of a real entry, an element type may name another element type, meaning: use
         ;; that element type's entry.
@@ -233,7 +219,7 @@ TYPES. If TYPES is 'all, then all items under key KEY for any
 type."
   (-uniq
    (apply #'append
-          (loop for (type plist) in xenops-elements
+          (loop for (type --unused--) in xenops-elements
                 collecting (and (or (eq types 'all) (memq type types))
                                 (let ((val (xenops-elements-get type key)))
                                   (if (listp val) val (list val))))))))
