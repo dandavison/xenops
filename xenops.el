@@ -216,13 +216,26 @@
         (xenops-elements-get value key)
       value)))
 
-(defun xenops-elements-get-all (key)
-  "Concatenated list of all items under key KEY for any element type."
+(defun xenops-elements-get-for-types (key types)
+  "Concatenated list of all items under key KEY for any type in
+TYPES. If TYPES is 'all, then all items under key KEY for any
+type."
   (-uniq
    (apply #'append
-          (mapcar (lambda (pair) (let ((val (xenops-elements-get (car pair) key)))
-                              (if (listp val) val (list val))))
-                  xenops-elements))))
+          (loop for (type plist) in xenops-elements
+                collecting (and (or (eq types 'all) (memq type types))
+                                (let ((val (xenops-elements-get type key)))
+                                  (if (listp val) val (list val))))))))
+
+(defun xenops-elements-get-all (key)
+  "Concatenated list of all items under key KEY for any element type."
+  (xenops-elements-get-for-types key 'all))
+
+(defun xenops-elements-delimiter-start-regexp (&optional types)
+  "A regexp matching the start of any element."
+  (format "\\(%s\\)"
+          (s-join "\\|"
+                  (mapcar #'car (xenops-elements-get-for-types :delimiters (or types 'all))))))
 
 (defun xenops-font-lock-activate ()
   "Configure font-lock for all element types by adding entries to
@@ -306,6 +319,6 @@ buffer, when running in a headless emacs process."
     (xenops-avy-do-at-math)))
 
 (defun xenops-avy-do-at-math ()
-  (avy-jump (xenops-math-get-math-element-begin-regexp)))
+  (avy-jump (xenops-elements-delimiter-start-regexp '(block-math inline-math))))
 
 (provide 'xenops)

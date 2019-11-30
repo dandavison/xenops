@@ -109,12 +109,6 @@
   (xenops-math-reveal element)
   (xenops-math-render element))
 
-(defun xenops-math-get-math-element-begin-regexp ()
-  "A regexp matching the start of any math element."
-  (format "\\(%s\\)"
-          (s-join "\\|"
-                  (mapcar #'car (xenops-math-get-all-delimiters)))))
-
 (defun xenops-math-block-delimiter-lines-regexp ()
   "A regexp matching the start or end line of any block math element."
   (format "\\(%s\\)"
@@ -220,10 +214,6 @@ If we are in a math element, then paste without the delimiters"
         (and odd-count
              (xenops-parse-element-at-point-matching-delimiters
               'inline-math (list delimiter delimiter) (point-at-bol) (point-at-eol)))))))
-
-(defun xenops-math-get-all-delimiters ()
-  (append (xenops-elements-get 'block-math :delimiters)
-          (xenops-elements-get 'inline-math :delimiters)))
 
 (defun xenops-math-set-org-preview-latex-process-alist! (element)
   (let* ((bounding-box (if (eq 'inline-math (plist-get element :type)) "1" "10"))
