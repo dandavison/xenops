@@ -1,51 +1,42 @@
 (ert-deftest xenops-text-prettify-symbols ()
-  (let ((xenops-text-prettify-symbols
-         '(("\\grad" . "∇"))))
-    (with-temp-buffer
-      (save-excursion (insert "\\grad"))
-      (xenops-mode)
-      (font-lock-fontify-buffer)
-      (should (plist-get (text-properties-at (point)) 'prettify-symbols-start)))))
+  (with-temp-buffer
+    (save-excursion (insert "\\grad"))
+    (xenops-mode)
+    (font-lock-fontify-buffer)
+    (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))))
 
 (ert-deftest xenops-text-prettify-symbols-string-replacement ()
-  (let* ((replacement `("\\begin{abstract}" . "Abstract."))
-         (xenops-text-prettify-symbols-string-replacements
-          `(,replacement)))
-    (with-temp-buffer
-      (save-excursion (insert (car replacement)))
-      (xenops-mode)
-      (font-lock-fontify-buffer)
-      (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
-      (should (equal
-               (xenops-text-composition-to-string
-                (plist-get (text-properties-at (point)) 'composition))
-               (cdr replacement))))))
+  (with-temp-buffer
+    (save-excursion (insert "\\begin{abstract}"))
+    (xenops-mode)
+    (font-lock-fontify-buffer)
+    (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
+    (should (equal
+             (xenops-text-composition-to-string
+              (plist-get (text-properties-at (point)) 'composition))
+             "Abstract."))))
 
 (ert-deftest xenops-text-prettify-symbols-regexp-replacement-1 ()
-  (let* ((xenops-text-prettify-symbols-regexp-replacements
-          '("\\\\textit{\\([^\n}]+\\)}")))
-    (with-temp-buffer
-      (save-excursion (insert "\\textit{To be italicised}"))
-      (xenops-mode)
-      (font-lock-fontify-buffer)
-      (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
-      (should (equal
-               (xenops-text-composition-to-string
-                (plist-get (text-properties-at (point)) 'composition))
-               "To be italicised")))))
+  (with-temp-buffer
+    (save-excursion (insert "\\textit{To be italicised}"))
+    (xenops-mode)
+    (font-lock-fontify-buffer)
+    (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
+    (should (equal
+             (xenops-text-composition-to-string
+              (plist-get (text-properties-at (point)) 'composition))
+             "To be italicised"))))
 
 (ert-deftest xenops-text-prettify-symbols-regexp-replacement-2 ()
-  (let* ((xenops-text-prettify-symbols-regexp-replacements
-          '("\\\\\\(?:sub\\)*section\\*?{\\([^\n}]+\\)}")))
-    (with-temp-buffer
-      (save-excursion (insert "\\subsubsection*{Section title}"))
-      (xenops-mode)
-      (font-lock-fontify-buffer)
-      (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
-      (should (equal
-               (xenops-text-composition-to-string
-                (plist-get (text-properties-at (point)) 'composition))
-               "Section title")))))
+  (with-temp-buffer
+    (save-excursion (insert "\\subsubsection*{Section title}"))
+    (xenops-mode)
+    (font-lock-fontify-buffer)
+    (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
+    (should (equal
+             (xenops-text-composition-to-string
+              (plist-get (text-properties-at (point)) 'composition))
+             "Section title"))))
 
 (defun xenops-text-composition-to-string (composition)
   "Return string corresponding to composition text property. When
