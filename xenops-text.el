@@ -103,7 +103,7 @@
   '("\\\\emph{\\([^\n}]+\\)}"
     "\\\\textbf{\\([^\n}]+\\)}"
     "\\\\textit{\\([^\n}]+\\)}"
-    "\\\\\\(?:sub\\)*section\\*?{\\([^\n}]+\\)}"
+    ("\\\\\\(?:sub\\)*section\\*?{\\([^\n}]+\\)}" xenops-text-format-section-replacement)
     "{\\\\bf +\\([^\n}]+\\)}"
     "{\\\\it +\\([^\n}]+\\)}")
   "List of regexp-based visual replacements. These are analogous
@@ -240,11 +240,18 @@ text."
    ((string-match "\\(\\\\textbf{\\|{\\\\bf \\)" match)
     '(face bold))
    ((string-match "\\(\\\\textit{\\|\\\\emph{\\|{\\\\it \\)" match)
-    '(face italic))))
+    '(face italic))
+   ((string-match "\\\\subsubsection" match)
+    '(face font-latex-sectioning-4-face))
+   ((string-match "\\\\subsection" match)
+    '(face font-latex-sectioning-3-face))
+   ((string-match "\\\\section" match)
+    '(face font-latex-sectioning-2-face))))
 
 (defun xenops-text-regexp-replacement-make-display-string (match-string-index)
   (let ((spec (nth (- match-string-index 2) xenops-text-regexp-replacements))
-        (capture (s-join " " (split-string (match-string match-string-index)))))
+        (capture (save-match-data
+                   (s-join " " (split-string (match-string match-string-index))))))
     (pcase spec
       (`(,regexp ,formatter) (funcall formatter capture))
       (_ capture))))
@@ -280,5 +287,12 @@ for more information."
                   (nreverse (cdr composition)))
       (push char composition)
       (push '(Br . Bl) composition))))
+
+(defun xenops-text-format-section-replacement (capture)
+  (let* ((match (match-string 0))
+         (level (cond ((s-starts-with? "\\subsub" match) 3)
+                      ((s-starts-with? "\\sub" match) 2)
+                      (t 1))))
+    (format "%s %s" (s-repeat level "§") capture)))
 
 (provide 'xenops-text)

@@ -29,14 +29,14 @@
 
 (ert-deftest xenops-text-prettify-symbols-regexp-replacement-2 ()
   (with-temp-buffer
-    (save-excursion (insert "\\subsubsection*{Section title}"))
+    (save-excursion (insert "\\subsection*{Section title}"))
     (xenops-mode)
     (font-lock-fontify-buffer)
     (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
     (should (equal
              (xenops-text-composition-to-string
               (plist-get (text-properties-at (point)) 'composition))
-             "Section title"))))
+             "§§ Section title"))))
 
 (defun xenops-text-composition-to-string (composition)
   "Return string corresponding to composition text property. When
