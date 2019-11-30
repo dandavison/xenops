@@ -190,27 +190,28 @@ italic font is then applied to \"some text\".")
       (setq tooltip-delay xenops-text-tooltip-delay-orig)
     (setq xenops-text-tooltip-delay-orig tooltip-delay)))
 
-(defun xenops-text-regexp-replacements-make-regexp ()
-  "Return a regular expression matching any entry in
-`xenops-text-regexp-replacements'."
-  (format "\\(%s\\)"
-          (s-join "\\|" xenops-text-regexp-replacements)))
-
 (defun xenops-text-regexp-replacement-do ()
   "A match for a regexp capture replacement has just been made.
 Return the replacement text to be displayed, with any text properties."
   (let* ((beg (match-beginning 0))
          (end (match-end 0))
          (match (match-string 0))
-         (capture (s-join " " (split-string (xenops-text-prettify-regexp-get-match-capture))))
-         (composition (xenops-text-make-composition capture))
+         (match-string-index (xenops-text-prettify-regexp-match-string-index))
+         (display-string (xenops-text-regexp-replacement-make-display-string match-string-index))
+         (composition (xenops-text-make-composition display-string))
          (properties (xenops-text-prettify-regexp-get-text-properties match)))
     (xenops-text-prettify-symbols-compose composition properties beg end))
   nil)
 
-(defun xenops-text-prettify-regexp-get-match-capture ()
+(defun xenops-text-regexp-replacements-make-regexp ()
+  "Return a regular expression matching any entry in
+`xenops-text-regexp-replacements'."
+  (format "\\(%s\\)"
+          (s-join "\\|" xenops-text-regexp-replacements)))
+
+(defun xenops-text-prettify-regexp-match-string-index ()
   "A match for a regexp capture replacement has just been made.
-Return the captured text."
+Return the to be supplied to `match-string' to obtain the caotured text."
   ;; The regexp is like (option_1(captured)|option_2(captured)|...).
   ;; Note that there is an "outer union expression" followed by N "options", each of which has its
   ;; own capture group.
@@ -226,9 +227,8 @@ Return the captured text."
   ;; 7 3 option_2 end
   ;;
   ;; We ignore the first 4 indices and start counting at index 4.  Then, we find the first `beg`
-  ;; index that is non-nil. Suppose this is i. Then (i + 4)/2 is the corresponding match-string
-  ;; index.
-  (match-string (/ (+ (xenops-util-first-index (-drop 4 (match-data 'integers))) 4) 2)))
+  ;; index that is non-nil. Suppose this is i. Then (i + 4)/2 is the corresponding index.
+  (/ (+ (xenops-util-first-index (-drop 4 (match-data 'integers))) 4) 2))
 
 (defun xenops-text-prettify-regexp-get-text-properties (match)
   "Return plist of text properties for match.
@@ -240,6 +240,12 @@ text."
     '(face bold))
    ((string-match "\\(\\\\textit{\\|\\\\emph{\\|{\\\\it \\)" match)
     '(face italic))))
+
+(defun xenops-text-regexp-replacement-make-display-string (match-string-index)
+  (let ((spec (nth (- match-string-index 2) xenops-text-regexp-replacements))
+        (capture (s-join " " (split-string (match-string match-string-index)))))
+    (pcase spec
+      (_ capture))))
 
 (defun xenops-text-prettify-symbols-compose (composition properties beg end)
   "Taken from `prettify-symbols--compose-symbol'"
