@@ -30,26 +30,23 @@ returns non-nil."
   "Apply operations OPS to any elements encountered. The region
 operated on is either the element at point, the active region, or
 the entire buffer."
-  (cl-flet ((process (lambda (el)
-                       (-if-let (op (xenops-element-op-for-el el ops))
-                           (save-excursion (funcall op el))))))
-    (-if-let (el (xenops-apply-parse-at-point))
-        (process el)
-      (destructuring-bind (beg end region-active)
-          (if (region-active-p)
-              `(,(region-beginning) ,(region-end) t)
-            `(,(point-min) ,(point-max) nil))
-        (save-excursion
-          (goto-char beg)
-          (let (el)
-            (while (setq el (xenops-apply-get-next-element end))
-              (if (and (xenops-element-element? el)
-                       (or (null pred) (funcall pred el)))
-                  (process el)))))
-        ;; Hack: This should be abstracted.
-        (and region-active (not (-intersection ops '(xenops-math-image-increase-size
-                                                     xenops-math-image-decrease-size)))
-             (deactivate-mark))))))
+  (if-let ((el (xenops-apply-parse-at-point)))
+      (process el)
+    (destructuring-bind (beg end region-active)
+        (if (region-active-p)
+            `(,(region-beginning) ,(region-end) t)
+          `(,(point-min) ,(point-max) nil))
+      (save-excursion
+        (goto-char beg)
+        (while (setq el (xenops-apply-get-next-element end))
+          (and (xenops-element-element? el)
+               (or (null pred) (funcall pred el))
+               (if-let ((op (xenops-element-op-for-el el ops)))
+                   (save-excursion (funcall op el))))))
+      ;; Hack: This should be abstracted.
+      (and region-active (not (-intersection ops '(xenops-math-image-increase-size
+                                                   xenops-math-image-decrease-size)))
+           (deactivate-mark)))))
 
 (defun xenops-apply-get-next-element (end)
   "If there is another element, return it and leave point after it.
