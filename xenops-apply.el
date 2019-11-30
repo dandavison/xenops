@@ -31,25 +31,27 @@ returns non-nil."
   "Apply HANDLERS to any elements encountered. The region
 operated on is either the element at point, the active region, or
 the entire buffer."
-  (if-let ((el (xenops-apply-parse-at-point)))
-      (process el)
-    (destructuring-bind (beg end region-active)
-        (if (region-active-p)
-            `(,(region-beginning) ,(region-end) t)
-          `(,(point-min) ,(point-max) nil))
-      (save-excursion
-        (goto-char beg)
-        (let ((parse-at-point-fns (xenops-elements-get-all :parse-at-point)))
-          (while (setq el (xenops-apply-get-next-element
-                           (xenops-elements-delimiter-start-regexp) end parse-at-point-fns))
-            (and el
-                 (or (null pred) (funcall pred el))
-                 (if-let ((handler (xenops-element-dispatch-operation el handlers)))
-                     (save-excursion (funcall handler el)))))))
-      ;; Hack: This should be abstracted.
-      (and region-active (not (-intersection handlers '(xenops-math-image-increase-size
-                                                        xenops-math-image-decrease-size)))
-           (deactivate-mark)))))
+  (cl-flet ((handle (lambda (el)
+                      (if-let ((handler (xenops-element-dispatch-operation el handlers)))
+                          (save-excursion (funcall handler el))))))
+    (if-let ((el (xenops-apply-parse-at-point)))
+        (handle el)
+      (destructuring-bind (beg end region-active)
+          (if (region-active-p)
+              `(,(region-beginning) ,(region-end) t)
+            `(,(point-min) ,(point-max) nil))
+        (save-excursion
+          (goto-char beg)
+          (let ((parse-at-point-fns (xenops-elements-get-all :parse-at-point)))
+            (while (setq el (xenops-apply-get-next-element
+                             (xenops-elements-delimiter-start-regexp) end parse-at-point-fns))
+              (and el
+                   (or (null pred) (funcall pred el))
+                   (handle el)))))
+        ;; Hack: This should be abstracted.
+        (and region-active (not (-intersection handlers '(xenops-math-image-increase-size
+                                                          xenops-math-image-decrease-size)))
+             (deactivate-mark))))))
 
 (defun xenops-apply-get-next-element (start-regexp end &optional parse-at-point-fns)
   "If there is another element, return it and leave point after it.
