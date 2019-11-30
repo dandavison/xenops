@@ -27,7 +27,7 @@
 
 (defun xenops-element-op-of-type-for-el (el op-type)
   "Does an element of this type have an operation of type OP-TYPE?"
-  (xenops-element-op-for-el el (xenops-ops-for-op-type op-type)))
+  (xenops-element-op-for-el el (xenops-ops-get op-type :handlers)))
 
 (defun xenops-element-ops-for-el (el)
   "The valid operations for an element of this type."

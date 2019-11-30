@@ -118,27 +118,38 @@
    ((equal arg '(4))
     (xenops-reveal))
    (t (xenops-apply-operations
-       (append (cdr (assq 'render xenops-ops))
-               (cdr (assq 'execute xenops-ops)))))))
+       (append (xenops-ops-get 'render :handlers)
+               (xenops-ops-get 'execute :handlers))))))
 
 (defvar xenops-ops
-  '((render . (xenops-math-render
-               xenops-image-render
-               xenops-text-footnote-render))
-    (reveal . (xenops-math-reveal
-               xenops-image-reveal
-               xenops-element-reveal))
-    (regenerate . (xenops-math-regenerate))
-    (copy . (xenops-element-copy))
-    (delete . (xenops-element-delete))
-    (increase-size . (xenops-math-image-increase-size
-                      xenops-image-increase-size))
-    (decrease-size . (xenops-math-image-decrease-size
-                      xenops-image-decrease-size))
-    (reset-size . (xenops-math-image-reset-size))
-    (rotate . (xenops-image-rotate))
-    (save . (xenops-image-save))
-    (execute . (xenops-src-execute)))
+  '((render
+     . ((:handlers . (xenops-math-render
+                      xenops-image-render
+                      xenops-text-footnote-render))))
+    (reveal
+     . ((:handlers . (xenops-math-reveal
+                      xenops-image-reveal
+                      xenops-element-reveal))))
+    (regenerate
+     . ((:handlers . (xenops-math-regenerate))))
+    (copy
+     . ((:handlers . (xenops-element-copy))))
+    (delete
+     . ((:handlers . (xenops-element-delete))))
+    (increase-size
+     . ((:handlers . (xenops-math-image-increase-size
+                      xenops-image-increase-size))))
+    (decrease-size
+     . ((:handlers . (xenops-math-image-decrease-size
+                      xenops-image-decrease-size))))
+    (reset-size
+     . ((:handlers . (xenops-math-image-reset-size))))
+    (rotate
+     . ((:handlers . (xenops-image-rotate))))
+    (save
+     . ((:handlers . (xenops-image-save))))
+    (execute
+     . ((:handlers . (xenops-src-execute)))))
   "Element-specific operation functions grouped by operation type.")
 
 (defvar xenops-elements
@@ -250,9 +261,9 @@ type."
                         do
                         (font-lock-add-keywords nil `((,regexp ,keyword))))))))
 
-(defun xenops-ops-for-op-type (op-type)
-  "The operations of type OP-TYPE."
-  (cdr (assq op-type xenops-ops)))
+(defun xenops-ops-get (type key)
+  "Return the value associated with KEY for operation type TYPE."
+  (cdr (assq key (cdr (assq type xenops-ops)))))
 
 (defun xenops-render-if-cached ()
   (let ((fn (symbol-function 'xenops-math-render)))

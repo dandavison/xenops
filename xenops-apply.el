@@ -24,7 +24,7 @@ the entire buffer.
 Optional argument PRED is a function taking an element plist as
 its only argument. The element will be operated on iff PRED
 returns non-nil."
-  (xenops-apply-operations (xenops-ops-for-op-type op-type) pred))
+  (xenops-apply-operations (xenops-ops-get op-type :handlers) pred))
 
 (defun xenops-apply-operations (ops &optional pred)
   "Apply operations OPS to any elements encountered. The region
