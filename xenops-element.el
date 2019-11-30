@@ -21,17 +21,13 @@
                (plist-get element :end))
   t)
 
-(defun xenops-element-op-for-el (el ops)
-  "The first operation in OPS that is valid for an element of this type."
-  (car (-intersection ops (xenops-element-ops-for-el el))))
+(defun xenops-element-dispatch-operation (el handlers)
+  "The first handler in HANDLERS that is valid for an element of this type."
+  (car (-intersection handlers (xenops-element-handlers-for-el el))))
 
-(defun xenops-element-op-of-type-for-el (el op-type)
-  "Does an element of this type have an operation of type OP-TYPE?"
-  (xenops-element-op-for-el el (xenops-ops-get op-type :handlers)))
-
-(defun xenops-element-ops-for-el (el)
+(defun xenops-element-handlers-for-el (el)
   "The valid operations for an element of this type."
-  (xenops-elements-get (plist-get el :type) :ops))
+  (xenops-elements-get (plist-get el :type) :handlers))
 
 (defun xenops-element-get-image-at-point ()
   (let ((display (get-char-property (point) 'display )))

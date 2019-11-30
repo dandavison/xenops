@@ -8,15 +8,16 @@
      (interactive)
      (xenops-apply ',op-type)))
 
-(defmacro xenops-define-apply-at-point-command (op-type docstring)
-  `(defun ,(intern (concat "xenops-" (symbol-name op-type) "-at-point")) ()
+(defmacro xenops-define-apply-at-point-command (op docstring)
+  `(defun ,(intern (concat "xenops-" (symbol-name op) "-at-point")) ()
      ,docstring
      (interactive)
-     (-when-let (el (xenops-apply-parse-at-point))
-       (-when-let (op (xenops-element-op-of-type-for-el el ',op-type))
-         (funcall op el)))))
+     (if-let ((el (xenops-apply-parse-at-point))
+              (handlers (xenops-ops-get ',op :handlers))
+              (handler (xenops-element-dispatch-operation el handlers)))
+         (funcall handler el))))
 
-(defun xenops-apply (op-type &optional pred)
+(defun xenops-apply (op &optional pred)
   "Apply operation type OP-TYPE to any elements encountered. The region
 operated on is either the element at point, the active region, or
 the entire buffer.
@@ -24,10 +25,10 @@ the entire buffer.
 Optional argument PRED is a function taking an element plist as
 its only argument. The element will be operated on iff PRED
 returns non-nil."
-  (xenops-apply-operations (xenops-ops-get op-type :handlers) pred))
+  (xenops-apply-handlers (xenops-ops-get op :handlers) pred))
 
-(defun xenops-apply-operations (ops &optional pred)
-  "Apply operations OPS to any elements encountered. The region
+(defun xenops-apply-handlers (handlers &optional pred)
+  "Apply HANDLERS to any elements encountered. The region
 operated on is either the element at point, the active region, or
 the entire buffer."
   (if-let ((el (xenops-apply-parse-at-point)))
@@ -43,11 +44,11 @@ the entire buffer."
                            (xenops-elements-delimiter-start-regexp) end parse-at-point-fns))
             (and el
                  (or (null pred) (funcall pred el))
-                 (if-let ((op (xenops-element-op-for-el el ops)))
-                     (save-excursion (funcall op el)))))))
+                 (if-let ((handler (xenops-element-dispatch-operation el handlers)))
+                     (save-excursion (funcall handler el)))))))
       ;; Hack: This should be abstracted.
-      (and region-active (not (-intersection ops '(xenops-math-image-increase-size
-                                                   xenops-math-image-decrease-size)))
+      (and region-active (not (-intersection handlers '(xenops-math-image-increase-size
+                                                        xenops-math-image-decrease-size)))
            (deactivate-mark)))))
 
 (defun xenops-apply-get-next-element (start-regexp end &optional parse-at-point-fns)

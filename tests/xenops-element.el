@@ -1,5 +1,15 @@
-(ert-deftest xenops-elements-get ()
-  (should (equal (xenops-elements-get 'inline-math :ops)
-                 (xenops-elements-get 'block-math :ops)))
-  (should (not (equal (xenops-elements-get 'inline-math :delimiters)
-                      (xenops-elements-get 'block-math :delimiters)))))
+(ert-deftest xenops-elements-get--handlers ()
+  (let ((inline-math-handlers (xenops-elements-get 'inline-math :handlers))
+        (block-math-handlers (xenops-elements-get 'block-math :handlers)))
+    (should (and
+             inline-math-handlers
+             block-math-handlers
+             (equal inline-math-handlers block-math-handlers)))))
+
+(ert-deftest xenops-elements-get--delimiters ()
+  (let ((inline-math-delimiters (xenops-elements-get 'inline-math :delimiters))
+        (block-math-delimiters (xenops-elements-get 'block-math :delimiters)))
+    (should (and
+             inline-math-delimiters
+             block-math-delimiters
+             (not (equal inline-math-delimiters block-math-delimiters))))))
