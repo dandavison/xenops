@@ -207,7 +207,8 @@ Return the replacement text to be displayed, with any text properties."
   "Return a regular expression matching any entry in
 `xenops-text-regexp-replacements'."
   (format "\\(%s\\)"
-          (s-join "\\|" xenops-text-regexp-replacements)))
+          (s-join "\\|" (mapcar (lambda (spec) (if (listp spec) (car spec) spec))
+                                xenops-text-regexp-replacements))))
 
 (defun xenops-text-prettify-regexp-match-string-index ()
   "A match for a regexp capture replacement has just been made.
@@ -245,6 +246,7 @@ text."
   (let ((spec (nth (- match-string-index 2) xenops-text-regexp-replacements))
         (capture (s-join " " (split-string (match-string match-string-index)))))
     (pcase spec
+      (`(,regexp ,formatter) (funcall formatter capture))
       (_ capture))))
 
 (defun xenops-text-prettify-symbols-compose (composition properties beg end)
