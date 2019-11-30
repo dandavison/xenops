@@ -48,7 +48,7 @@
              (image-type (plist-get (cdr (assq xenops-math-process
                                                org-preview-latex-process-alist))
                                     :image-output-type))
-             (margin (if (xenops-math-inline-delimiters-p (plist-get element :delimiters))
+             (margin (if (eq 'inline-math (plist-get element :type))
                          0
                        `(,xenops-math-image-margin . 0)))
              (cache-file (xenops-math-compute-file-name latex image-type))
@@ -214,7 +214,7 @@ If we are in a math element, then paste without the delimiters"
   (let ((delimiter (caar (xenops-elements-get 'inline-math :delimiters))))
     (save-excursion
       (let ((odd-count (oddp (count-matches delimiter (point-at-bol) (point)))))
-        (when (and (not odd-count) (looking-at (car xenops-math-inline-math-delimiters)))
+        (when (and (not odd-count) (looking-at (caar (xenops-elements-get 'inline-math :delimiters))))
           (forward-char)
           (setq odd-count t))
         (and odd-count
@@ -225,12 +225,8 @@ If we are in a math element, then paste without the delimiters"
   (append (xenops-elements-get 'block-math :delimiters)
           (xenops-elements-get 'inline-math :delimiters)))
 
-(defun xenops-math-inline-delimiters-p (delimiters)
-  (equal delimiters xenops-math-inline-math-delimiters))
-
 (defun xenops-math-set-org-preview-latex-process-alist! (element)
-  (let* ((inline-p (xenops-math-inline-delimiters-p (plist-get element :delimiters)))
-         (bounding-box (if inline-p "1" "10"))
+  (let* ((bounding-box (if (eq 'inline-math (plist-get element :type)) "1" "10"))
          (dvisvgm-process-plist (cdr (assoc 'dvisvgm org-preview-latex-process-alist)))
          (dvisvgm-image-converter (car (plist-get dvisvgm-process-plist
                                                   :image-converter))))
