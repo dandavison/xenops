@@ -6,6 +6,7 @@ test:
 		--eval '(use-package xenops :load-path "~/src/xenops")' \
 		--eval '(setq ert-batch-backtrace-right-margin nil)' \
 		-l tests/xenops.el \
+		-l tests/xenops-apply.el \
 		-l tests/xenops-util.el \
 		-l tests/xenops-element.el \
 		-l tests/xenops-image.el \
