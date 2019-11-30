@@ -1,5 +1,9 @@
 (defun xenops-parse-element-at-point (type)
-  "If point is in element, return parsed element as a plist."
+  "A base `parse-at-point` implementation that is used by some
+concrete element types. It is not expected to work for all
+types.
+
+If point is in element, return parsed element as a plist."
   (xenops-util-first-result
    (lambda (pair)
      (xenops-parse-element-at-point-matching-delimiters
