@@ -118,16 +118,9 @@
     "\\\\emph{\\([^\n}]+\\)}"
     "\\\\textbf{\\([^\n}]+\\)}"
     "\\\\textit{\\([^\n}]+\\)}"
-    ("\\\\\\(?:sub\\)*section\\*?{\\([^\n}]+\\)}" . xenops-xen-regexp-rule-format-section-replacement)
+    "\\\\\\(?:sub\\)*section\\*?{\\([^\n}]+\\)}"
     "{\\\\bf +\\([^\n}]+\\)}"
     "{\\\\it +\\([^\n}]+\\)}"))
-
-(defun xenops-xen-regexp-rule-format-section-replacement (capture)
-  (let* ((match (match-string 0))
-         (level (cond ((s-starts-with? "\\subsub" match) 3)
-                      ((s-starts-with? "\\sub" match) 2)
-                      (t 1))))
-    (format "%s %s" (s-repeat level "§") capture)))
 
 (defun xenops-xen-style-regexp-rules-get-text-properties (match)
   "An implementation of `style-regexp-rules-get-text-properties'."
