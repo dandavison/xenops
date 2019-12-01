@@ -10,7 +10,7 @@
 (require 'xenops-apply)
 (require 'xenops-element)
 (require 'xenops-elements)
-(require 'xenops-face)
+(require 'xenops-font)
 (require 'xenops-footnote)
 (require 'xenops-image)
 (require 'xenops-math)
@@ -92,7 +92,7 @@
     (xenops-util-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
     (xenops-util-define-key-with-fallback "\C-y" #'xenops-handle-paste)
 
-    (if xenops-face-font-family (xenops-face-set-faces))
+    (if xenops-font-font-family (xenops-font-set-faces))
 
     (xenops-math-activate)
     (xenops-xen-mode +1)
