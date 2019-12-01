@@ -33,7 +33,7 @@
     (should (equal
              (style-composition-to-displayed-string
               (plist-get (text-properties-at (point)) 'composition))
-             "Abstract."))))
+             "Abstract"))))
 
 (ert-deftest xenops-xen-regexp-replacement-1 ()
   "Test replacement by regexp captured text."

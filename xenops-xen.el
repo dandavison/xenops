@@ -48,57 +48,11 @@
     ("\\&" . "&")
     ("\\pm" . "±")
     ("\\mp" . "∓")
-    ("\\begin{abstract}" . "Abstract.")
-    ("\\end{abstract}" . "┘")
+    ("\\to " . "⟶ ")
+    ("\\in " . "∈ ")
 
-    ("\\begin{definition}" . "Definition.")
-    ("\\end{definition}" . "┘")
-
-    ("\\begin{definition*}" . "Definition.")
-    ("\\end{definition*}" . "┘")
-
-    ("\\begin{theorem*}" . "Theorem.")
-    ("\\end{theorem*}" . "┘")
-
-    ("\\begin{theorem}" . "Theorem.")
-    ("\\end{theorem}" . "┘")
-
-    ("\\begin{lemma*}" . "Lemma.")
-    ("\\end{lemma*}" . "┘")
-
-    ("\\begin{lemma}" . "Lemma.")
-    ("\\end{lemma}" . "┘")
-
-    ("\\begin{proof}" . "Proof.")
-    ("\\end{proof}" . "□")
-
-    ("\\begin{align*}" . "⚡")
-    ("\\end{align*}" . "⚡")
-
-    ("\\begin{align}" . "⚡")
-    ("\\end{align}" . "⚡")
-
-    ("\\begin{minted}" . "⚡")
-    ("\\end{minted}" . "⚡")
-
-    ("#+begin_src" . "⚡")
-    ("#+end_src" . "⚡")
-
-    ("\\begin{cases}" . "cases:")
-    ("\\end{cases}" . "┘")
-
-    ("\\begin{enumerate}" . "┐")
-    ("\\end{enumerate}" . "┘")
-
-    ("\\begin{itemize}" . "┐")
-    ("\\end{itemize}" . "┘")
-
-    ("\\begin{mdframed}" . "┐")
-    ("\\end{mdframed}" . "┘")
-
-    ("\\end{verbatim}" . "┘")
-    ("\\end{tabular}" . "┘")
-    ("\\end{tabular*}" . "┘")
+    ("\\\\begin{\\([^}*\n]+\\)\\*?}" . xenops-xen-begin-latex-environment-formatter)
+    ("\\\\end{\\([^}*\n]+\\)\\*?}" . xenops-xen-end-latex-environment-formatter)
 
     ("\\begin{quote}" . "“")
     ("\\end{quote}" . "”")
@@ -106,21 +60,24 @@
     ("\\item" . "⁃")
     ("\\includegraphics" . "img")
 
-    ;; post-spacing is incorrect for these when using
-    ;; prettify-symbols-mode with the latex-unicode-math-mode
-    ;; symbols. So using a string replacement with explicit
-    ;; space.
-    ;; TODO: combine string and single-character replacements cleanly.
-    ("\\to " . "⟶ ")
-    ("\\in " . "∈ ")
-
-    ;; Computed display-strings
     "\\\\emph{\\([^\n}]+\\)}"
     "\\\\textbf{\\([^\n}]+\\)}"
     "\\\\textit{\\([^\n}]+\\)}"
     "\\\\\\(?:sub\\)*section\\*?{\\([^\n}]+\\)}"
     "{\\\\bf +\\([^\n}]+\\)}"
     "{\\\\it +\\([^\n}]+\\)}"))
+
+(defun xenops-xen-begin-latex-environment-formatter (env)
+  (cond
+   ((member env '("src" "minted" "align")) "⚡")
+   ((member env '("enumerate" "itemize" "mdframed")) "┐")
+   (t (upcase-initials env))))
+
+(defun xenops-xen-end-latex-environment-formatter (env)
+  (cond
+   ((member env '("align" "src" "minted")) "⚡")
+   ((member env '("proof")) "□")
+   (t "┘")))
 
 (defun xenops-xen-style-regexp-rules-get-text-properties (match)
   "An implementation of `style-regexp-rules-get-text-properties'."
