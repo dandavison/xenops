@@ -1,4 +1,4 @@
-(ert-deftest xenops-text-prettify-symbols-native-replacement ()
+(ert-deftest xenops-xen-prettify-symbols-replacement ()
   "An entry in  `prettify-symbols-alist' set outside xenops should be honored."
   (let ((prettify-symbols-alist '(("replacement-specified-outside-xenops" . ?⚡))))
     (with-temp-buffer
@@ -7,11 +7,11 @@
       (font-lock-fontify-buffer)
       (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
       (should (equal
-               (xenops-text-composition-to-displayed-string
+               (style-composition-to-displayed-string
                 (plist-get (text-properties-at (point)) 'composition))
                "⚡")))))
 
-(ert-deftest xenops-text-prettify-symbols-xenops-replacement ()
+(ert-deftest xenops-xen-character-replacement ()
   "Test replacement by a single character."
   (with-temp-buffer
     (save-excursion (insert "\\grad"))
@@ -19,11 +19,11 @@
     (font-lock-fontify-buffer)
     (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
     (should (equal
-             (xenops-text-composition-to-displayed-string
+             (style-composition-to-displayed-string
               (plist-get (text-properties-at (point)) 'composition))
              "∇"))))
 
-(ert-deftest xenops-text-prettify-symbols-string-replacement ()
+(ert-deftest xenops-xen-string-replacement ()
   "Test replacement by a multi-character string."
   (with-temp-buffer
     (save-excursion (insert "\\begin{abstract}"))
@@ -31,11 +31,11 @@
     (font-lock-fontify-buffer)
     (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
     (should (equal
-             (xenops-text-composition-to-displayed-string
+             (style-composition-to-displayed-string
               (plist-get (text-properties-at (point)) 'composition))
              "Abstract."))))
 
-(ert-deftest xenops-text-prettify-symbols-regexp-replacement-1 ()
+(ert-deftest xenops-xen-regexp-replacement-1 ()
   "Test replacement by regexp captured text."
   (with-temp-buffer
     (save-excursion (insert "\\textit{To be italicised}"))
@@ -43,11 +43,11 @@
     (font-lock-fontify-buffer)
     (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
     (should (equal
-             (xenops-text-composition-to-displayed-string
+             (style-composition-to-displayed-string
               (plist-get (text-properties-at (point)) 'composition))
              "To be italicised"))))
 
-(ert-deftest xenops-text-prettify-symbols-regexp-replacement-2 ()
+(ert-deftest xenops-xen-regexp-replacement-2 ()
   "Test replacement by regexp captured text employing a formatting function."
   (with-temp-buffer
     (save-excursion (insert "\\subsection*{Section title}"))
@@ -55,11 +55,11 @@
     (font-lock-fontify-buffer)
     (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
     (should (equal
-             (xenops-text-composition-to-displayed-string
+             (style-composition-to-displayed-string
               (plist-get (text-properties-at (point)) 'composition))
              "§§ Section title"))))
 
-(defun xenops-text-composition-to-displayed-string (composition)
+(defun style-composition-to-displayed-string (composition)
   "Return string corresponding to composition text property.
 
 When the displayed text is the string \"Abstract.\", the

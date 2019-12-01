@@ -1,6 +1,7 @@
 (require 'avy)
 (require 'cl)
 (require 'dash)
+(require 'dash-functional)
 (require 'f)
 (require 'org)
 (require 'preview)
@@ -8,14 +9,16 @@
 
 (require 'xenops-apply)
 (require 'xenops-element)
+(require 'xenops-elements)
 (require 'xenops-face)
+(require 'xenops-footnote)
 (require 'xenops-image)
 (require 'xenops-math)
 (require 'xenops-minted)
 (require 'xenops-parse)
 (require 'xenops-src)
-(require 'xenops-text)
 (require 'xenops-util)
+(require 'xenops-xen)
 
 (defvar xenops-cache-directory "/tmp/xenops-cache/"
   "Path to a directory in which xenops can save files.")
@@ -92,7 +95,7 @@
     (if xenops-face-font-family (xenops-face-set-faces))
 
     (xenops-math-activate)
-    (xenops-text-activate)
+    (xenops-xen-mode +1)
     (xenops-font-lock-activate)
 
     ;; Display math and tables as images
@@ -108,7 +111,7 @@
         (goto-char (point-min))
         (xenops-reveal)))
     (xenops-math-deactivate)
-    (xenops-text-deactivate))))
+    (xenops-xen-mode -1))))
 
 (defun xenops-dwim (&optional arg)
   (interactive "P")
@@ -154,90 +157,60 @@
 
 (defvar xenops-elements
   `((block-math
-     .  ((:handlers . (xenops-math-render
+     .  ((:delimiters . (("^[ \t]*\\\\begin{align\\*?}"
+                          "^[ \t]*\\\\end{align\\*?}")
+                         ("^[ \t]*\\\\begin{tabular}"
+                          "^[ \t]*\\\\end{tabular}")))
+         (:parser . xenops-math-parse-block-element-at-point)
+         (:handlers . (xenops-math-render
                        xenops-math-regenerate
                        xenops-math-reveal
                        xenops-math-image-increase-size
                        xenops-math-image-decrease-size
                        xenops-math-image-reset-size
                        xenops-element-copy
-                       xenops-element-delete))
-         (:delimiters . (("^[ \t]*\\\\begin{align\\*?}"
-                          "^[ \t]*\\\\end{align\\*?}")
-                         ("^[ \t]*\\\\begin{tabular}"
-                          "^[ \t]*\\\\end{tabular}")))
-         (:parse-at-point . xenops-math-parse-block-element-at-point)))
+                       xenops-element-delete))))
     (inline-math
-     . ((:handlers . block-math)
-        (:delimiters . (("\\$" "\\$")))
-        (:parse-at-point . xenops-math-parse-inline-element-at-point)))
+     . ((:delimiters . (("\\$" "\\$")))
+        (:parser . xenops-math-parse-inline-element-at-point)
+        (:handlers . block-math)))
     (image
-     . ((:handlers . (xenops-image-render
+     . ((:delimiters . (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}")))
+        (:parser . xenops-image-parse-at-point)
+        (:handlers . (xenops-image-render
                       xenops-image-reveal
                       xenops-image-increase-size
                       xenops-image-decrease-size
                       xenops-element-copy
                       xenops-element-delete
                       xenops-image-rotate
-                      xenops-image-save))
-        (:delimiters . (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}")))
-        (:parse-at-point . xenops-image-parse-at-point)))
+                      xenops-image-save))))
     (footnote
-     . ((:handlers .(xenops-text-footnote-render
+     . ((:delimiters . ((,(concat "\\\\footnote"
+                                  xenops-brace-delimited-multiline-expression-regexp))))
+        (:parser . xenops-text-footnote-parse-at-point)
+        (:handlers .(xenops-text-footnote-render
                      xenops-element-reveal
                      xenops-element-copy
-                     xenops-element-delete))
-        (:delimiters . ((,(concat "\\\\footnote"
-                                  xenops-text-brace-delimited-multiline-expression-regexp))))
-        (:parse-at-point . xenops-text-footnote-parse-at-point)))
+                     xenops-element-delete))))
     (minted
-     . ((:handlers . (xenops-src-execute))
-        (:delimiters . (("^[ \t]*\\\\begin{minted}\\({\\([^}]+\\)}\\)?"
+     . ((:delimiters . (("^[ \t]*\\\\begin{minted}\\({\\([^}]+\\)}\\)?"
                          "^[ \t]*\\\\end{minted}")))
         (:font-lock-keywords . src)
-        (:parse-at-point . xenops-minted-parse-at-point)))
+        (:parser . xenops-minted-parse-at-point)
+        (:handlers . (xenops-src-execute))))
     (src
-     . ((:handlers . (xenops-src-execute))
-        (:delimiters . (("^[ \t]*#\\+begin_src[ \t]+\\([^ \t\n]+\\)"
+     . ((:delimiters . (("^[ \t]*#\\+begin_src[ \t]+\\([^ \t\n]+\\)"
                          "^[ \t]*#\\+end_src")))
         (:font-lock-keywords . (((((0 (xenops-src-apply-syntax-highlighting)))))))
-        (:parse-at-point . xenops-src-parse-at-point))))
+        (:parser . xenops-src-parse-at-point)
+        (:handlers . (xenops-src-execute)))))
   "Element-specific operation functions, regexps, and parsers, grouped by element type.")
-
-(defun xenops-elements-get (type key)
-  "Return the value associated with KEY for element type TYPE."
-  (let ((value (cdr (assq key (cdr (assq type xenops-elements))))))
-    (if (and (symbolp value) (assq value xenops-elements))
-        ;; Instead of a real entry, an element type may name another element type, meaning: use
-        ;; that element type's entry.
-        (xenops-elements-get value key)
-      value)))
-
-(defun xenops-elements-get-for-types (key types)
-  "Concatenated list of all items under key KEY for any type in
-TYPES. If TYPES is 'all, then all items under key KEY for any
-type."
-  (-uniq
-   (apply #'append
-          (loop for (type --unused--) in xenops-elements
-                collecting (and (or (eq types 'all) (memq type types))
-                                (let ((val (xenops-elements-get type key)))
-                                  (if (listp val) val (list val))))))))
-
-(defun xenops-elements-get-all (key)
-  "Concatenated list of all items under key KEY for any element type."
-  (xenops-elements-get-for-types key 'all))
-
-(defun xenops-elements-delimiter-start-regexp (&optional types)
-  "A regexp matching the start of any element."
-  (format "\\(%s\\)"
-          (s-join "\\|"
-                  (mapcar #'car (xenops-elements-get-for-types :delimiters (or types 'all))))))
 
 (defun xenops-font-lock-activate ()
   "Configure font-lock for all element types by adding entries to
 `font-lock-keywords`."
-  (loop for (type . --unused--) in xenops-elements
+  (loop for (type . _) in xenops-elements
         do
         (if-let ((keywords (xenops-elements-get type :font-lock-keywords)))
             (loop for (regexps keywords) in (-zip (xenops-elements-get type :delimiters)
@@ -279,8 +252,8 @@ type."
                (lambda (result)
                  (run-with-idle-timer 0 nil
                                       (lambda () (save-excursion (goto-char (point-min))
-                                                                 (xenops-render-if-cached)
-                                                                 (message "Xenops: done")))))))
+                                                            (xenops-render-if-cached)
+                                                            (message "Xenops: done")))))))
 
 (defun xenops-generate-images-in-headless-process ()
   "Generate cached images on disk for all math elements in

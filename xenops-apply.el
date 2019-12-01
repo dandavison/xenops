@@ -42,7 +42,7 @@ the entire buffer."
             `(,(point-min) ,(point-max) nil))
         (save-excursion
           (goto-char beg)
-          (let ((parse-at-point-fns (xenops-elements-get-all :parse-at-point)))
+          (let ((parse-at-point-fns (xenops-elements-get-all :parser)))
             (while (setq el (xenops-apply-get-next-element
                              (xenops-elements-delimiter-start-regexp) end parse-at-point-fns))
               (and el
@@ -65,6 +65,6 @@ section of the buffer that xenops can do something to."
 
 (defun xenops-apply-parse-at-point (&optional parse-at-point-fns)
   (xenops-util-first-result #'funcall (or parse-at-point-fns
-                                          (xenops-elements-get-all :parse-at-point))))
+                                          (xenops-elements-get-all :parser))))
 
 (provide 'xenops-apply)

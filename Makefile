@@ -11,7 +11,7 @@ test:
 		-l tests/xenops-element.el \
 		-l tests/xenops-image.el \
 		-l tests/xenops-math.el \
-		-l tests/xenops-text.el \
+		-l tests/xenops-xen.el \
 		-f ert-run-tests-batch-and-exit
 
 build:
