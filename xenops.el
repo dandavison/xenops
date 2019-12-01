@@ -153,7 +153,7 @@
      . ((:handlers . (xenops-image-save))))
     (execute
      . ((:handlers . (xenops-src-execute)))))
-  "Element-specific operation functions grouped by operation type.")
+  "Element-specific operation handlers grouped by operation type.")
 
 (defvar xenops-elements
   `((block-math
@@ -205,7 +205,7 @@
         (:font-lock-keywords . (((((0 (xenops-src-apply-syntax-highlighting)))))))
         (:parser . xenops-src-parse-at-point)
         (:handlers . (xenops-src-execute)))))
-  "Element-specific operation functions, regexps, and parsers, grouped by element type.")
+  "Element-specific operation handlers, regexps, and parsers, grouped by element type.")
 
 (defun xenops-font-lock-activate ()
   "Configure font-lock for all element types by adding entries to

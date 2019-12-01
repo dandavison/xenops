@@ -1,4 +1,4 @@
-;; Generic operations on elements. Functions in this file should determine behavior based on the
+;; Generic operations on an element. Functions in this file should determine behavior based on the
 ;; type of the element and requested operations, by consulting the `xenops-elements' and
 ;; `xenops-ops' data structures. They should not directly call functions that are specific to
 ;; element type (e.g. in xenops-math, xenops-image, xenops-text).
