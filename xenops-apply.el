@@ -57,10 +57,10 @@ the entire buffer."
   "If there is another element, return it and leave point after it.
 An element is a plist containing data about a regexp match for a
 section of the buffer that xenops can do something to."
-  (if-let (((re-search-forward start-regexp end t))
-           ((goto-char (match-beginning 0)))
+  (if-let ((_ (re-search-forward start-regexp end t))
+           (_ (goto-char (match-beginning 0)))
            (element (xenops-apply-parse-at-point parse-at-point-fns))
-           ((goto-char (plist-get element :end))))
+           (_ (goto-char (plist-get element :end))))
       element))
 
 (defun xenops-apply-parse-at-point (&optional parse-at-point-fns)
