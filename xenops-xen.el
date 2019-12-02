@@ -50,6 +50,8 @@
     ("\\mp" . "∓")
     ("\\to " . "⟶ ")
     ("\\in " . "∈ ")
+    ("``" . "“")
+    ("''" . "”")
 
     ("\\\\begin{\\([^}*\n]+\\)\\*?}" . xenops-xen-begin-latex-environment-formatter)
     ("\\\\end{\\([^}*\n]+\\)\\*?}" . xenops-xen-end-latex-environment-formatter)
