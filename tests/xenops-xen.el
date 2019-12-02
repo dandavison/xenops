@@ -1,7 +1,7 @@
 (ert-deftest xenops-xen-prettify-symbols-replacement ()
   "An entry in  `prettify-symbols-alist' set outside xenops should be honored."
-  (let ((prettify-symbols-alist '(("replacement-specified-outside-xenops" . ?⚡))))
-    (with-temp-buffer
+  (with-temp-buffer
+    (let ((prettify-symbols-alist '(("replacement-specified-outside-xenops" . ?⚡))))
       (save-excursion (insert "replacement-specified-outside-xenops"))
       (xenops-mode)
       (font-lock-fontify-buffer)
