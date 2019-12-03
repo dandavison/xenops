@@ -1,9 +1,11 @@
-(require 'avy)
 (require 'cl)
+(require 'org)
+(require 'subr-x)
+
+(require 'avy)
 (require 'dash)
 (require 'dash-functional)
 (require 'f)
-(require 'org)
 (require 'preview)
 (require 's)
 

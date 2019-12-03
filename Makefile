@@ -1,10 +1,16 @@
+deps:
+	emacs \
+		-batch \
+		-l tests/setup/init.el \
+		-l tests/setup/install-deps.el
+
 test:
 	emacs \
 		-batch \
-		--eval '(package-initialize)' \
-		--eval '(require `use-package)' \
-		--eval '(use-package xenops :load-path "~/src/xenops")' \
+		-l tests/setup/init.el \
+		--eval "(add-to-list 'load-path \".\")" \
 		--eval '(setq ert-batch-backtrace-right-margin nil)' \
+		-l xenops.el \
 		-l tests/xenops.el \
 		-l tests/xenops-apply.el \
 		-l tests/xenops-util.el \
@@ -16,3 +22,5 @@ test:
 
 build:
 	@:
+
+.PHONY: deps test build
