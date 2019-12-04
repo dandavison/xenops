@@ -27,6 +27,7 @@
       (xenops-math-block-delimiter-lines-set-face)))))
 
 (defun xenops-math-activate ()
+  (make-directory xenops-cache-directory t)
   (setq mouse-drag-and-drop-region t)
   (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-around-advice)
   (advice-add fill-paragraph-function :after #'xenops-math-fill-paragraph-after-advice)
