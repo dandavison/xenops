@@ -87,10 +87,7 @@
 
 (defun xenops-math-reveal (element)
   (xenops-element-delete-overlays element)
-  (goto-char (plist-get element :begin-content))
-  (add-text-properties (plist-get element :begin)
-                       (plist-get element :end)
-                       '(cursor-sensor-functions (xenops-math-handle-element-exit))))
+  (goto-char (plist-get element :begin-content)))
 
 (defun xenops-math-image-increase-size (element)
   (xenops-math-image-change-size element xenops-math-image-change-size-factor))
