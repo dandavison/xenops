@@ -32,11 +32,13 @@
   (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-around-advice)
   (advice-add fill-paragraph-function :after #'xenops-math-fill-paragraph-after-advice)
   (font-lock-add-keywords nil (xenops-math-font-lock-keywords))
+  (cursor-sensor-mode +1)
   (add-to-list 'fill-nobreak-predicate #'xenops-math-parse-inline-element-at-point))
 
 (defun xenops-math-deactivate ()
   (advice-remove #'mouse-drag-and-drop-region #'xenops-math-mouse-drag-region-around-advice)
   (advice-remove fill-paragraph-function #'xenops-math-fill-paragraph-after-advice)
+  (cursor-sensor-mode -1)
   (font-lock-remove-keywords nil (xenops-math-font-lock-keywords)))
 
 (defun xenops-math-render (element &optional cached-only)
@@ -86,7 +88,6 @@
 (defun xenops-math-reveal (element)
   (xenops-element-delete-overlays element)
   (goto-char (plist-get element :begin-content))
-  (cursor-sensor-mode +1)
   (add-text-properties (plist-get element :begin)
                        (plist-get element :end)
                        '(cursor-sensor-functions (xenops-math-handle-element-exit))))
@@ -117,7 +118,17 @@
                   (apply #'append (xenops-elements-get 'block-math :delimiters)))))
 
 (defun xenops-math-block-math-font-lock-handler ()
-  (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch))
+  (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch)
+  (xenops-math-add-cursor-sensor-property))
+
+(defun xenops-math-inline-math-font-lock-handler ()
+  (xenops-math-add-cursor-sensor-property))
+
+(defun xenops-math-add-cursor-sensor-property ()
+  (if-let ((element (xenops-math-parse-element-at-point)))
+      (add-text-properties (plist-get element :begin)
+                           (plist-get element :end)
+                           '(cursor-sensor-functions (xenops-math-handle-element-exit)))))
 
 (defun xenops-math-handle-paste ()
   "If the text to be pasted is a math element then handle the paste.
@@ -168,8 +179,8 @@ If we are in a math element, then paste without the delimiters"
   ;; TODO: check window
   (if (eq event-type 'left)
       (-when-let (was-in (xenops-math-parse-element-at oldpos))
-        (cursor-sensor-mode -1)
-        (xenops-math-render was-in))))
+        (unless (xenops-element-get-image was-in)
+          (xenops-math-render was-in)))))
 
 (defun xenops-math-mouse-drag-region-around-advice (mouse-drag-region-fn start-event)
   "If point is in a math element, then cause mouse drag to appear to drag the associated image:

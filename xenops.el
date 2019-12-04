@@ -174,6 +174,7 @@
                        xenops-element-delete))))
     (inline-math
      . ((:delimiters . (("\\$" "\\$")))
+        (:font-lock-keywords . (((((0 (xenops-math-inline-math-font-lock-handler)))))))
         (:parser . xenops-math-parse-inline-element-at-point)
         (:handlers . block-math)))
     (image
