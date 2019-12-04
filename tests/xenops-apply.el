@@ -18,6 +18,13 @@ After." :type 'block-math))
   (xenops-apply-get-next-element--do-test
    "Before. $e^{2i\pi}$ After." :type 'inline-math))
 
+(ert-deftest xenops-apply-get-next-element--inline-math-with-newline ()
+  (xenops-apply-get-next-element--do-test
+   "Since $\partial{\dx}{\d\dot{x}} =
+  \frac{2x}{t^3}$, we have that $x(t)$ satisfies
+"
+   :type 'inline-math))
+
 (ert-deftest xenops-apply-get-next-element--src ()
   (xenops-apply-get-next-element--do-test
    "Before.
