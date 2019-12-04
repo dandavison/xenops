@@ -24,7 +24,7 @@
 (defun xenops-math-font-lock-keywords ()
   `((,(xenops-math-block-delimiter-lines-regexp)
      (0
-      (xenops-math-block-delimiter-lines-set-face)))))
+      (xenops-math-block-math-font-lock-handler)))))
 
 (defun xenops-math-activate ()
   (make-directory xenops-cache-directory t)
@@ -116,7 +116,7 @@
           (s-join "\\|"
                   (apply #'append (xenops-elements-get 'block-math :delimiters)))))
 
-(defun xenops-math-block-delimiter-lines-set-face ()
+(defun xenops-math-block-math-font-lock-handler ()
   (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch))
 
 (defun xenops-math-handle-paste ()
