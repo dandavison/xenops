@@ -286,7 +286,7 @@ buffer, when running in a headless emacs process."
               ;; match for first delimiter.
               (1+ pt))
              (setq element (xenops-math-parse-element-at-point))
-             (when element (xenops-math-copy element)))
+             (when element (xenops-element-copy element)))
            (when element
              (save-excursion (xenops-math-paste))))))
     (xenops-avy-do-at-math)))
