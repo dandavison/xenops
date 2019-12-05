@@ -11,7 +11,8 @@
          :org-babel-info org-babel-info))))
 
 (defvar xenops-minted-language-to-babel-language
-  '(("wolfram" . "mathematica")))
+  '(("python3" . "python")
+    ("wolfram" . "mathematica")))
 
 (defun xenops-minted-get-babel-language (language)
   (or (cdr (assoc language xenops-minted-language-to-babel-language))
