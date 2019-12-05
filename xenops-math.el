@@ -58,7 +58,8 @@
       (when (or cache-file-exists? (not cached-only))
         (unless cache-file-exists?
           (message "Xenops: creating file: %s" cache-file)
-          (let ((org-latex-packages-alist (xenops-math-get-latex-preamble-lines)))
+          (let ((org-latex-packages-alist (xenops-math-get-latex-preamble-lines))
+                (org-latex-default-packages-alist))
             (xenops-math-set-org-preview-latex-process-alist! element)
             (org-create-formula-image
              latex cache-file org-format-latex-options 'forbuffer xenops-math-process)))
