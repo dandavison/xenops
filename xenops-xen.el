@@ -59,6 +59,8 @@
     ("\\begin{quote}" . "“")
     ("\\end{quote}" . "”")
 
+    "\\url{\\([^}*\n]+\\)}"
+
     ("\\item" . "⁃")
     ("\\includegraphics" . "img")
 
@@ -93,6 +95,8 @@
    ((string-match "\\\\subsection" match)
     '(face font-latex-sectioning-3-face))
    ((string-match "\\\\section" match)
-    '(face font-latex-sectioning-2-face))))
+    '(face font-latex-sectioning-2-face))
+   ((string-match "\\\\url" match)
+    '(face underline))))
 
 (provide 'xenops-xen)
