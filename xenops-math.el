@@ -46,7 +46,7 @@
   (let ((beg (plist-get element :begin))
         (end (plist-get element :end)))
     (goto-char beg)
-    (unless (or (xenops-element-get-image-at-point)
+    (unless (or (xenops-parse-image-at (point))
                 (eq (plist-get element :begin-content)
                     (plist-get element :end-content)))
       (let* ((latex (buffer-substring-no-properties beg end))

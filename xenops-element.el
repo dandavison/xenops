@@ -29,14 +29,8 @@
   "The valid operations for an element of this type."
   (xenops-elements-get (plist-get el :type) :handlers))
 
-(defun xenops-element-get-image-at-point ()
-  (let ((display (get-char-property (point) 'display )))
-    (and (eq (car display) 'image) display)))
-
 (defun xenops-element-get-image (element)
-  (save-excursion
-    (goto-char (plist-get element :begin))
-    (xenops-element-get-image-at-point)))
+  (xenops-parse-image-at (plist-get element :begin)))
 
 (defun xenops-element-make-overlay (element)
   (let* ((beg (plist-get element :begin))

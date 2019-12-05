@@ -13,6 +13,10 @@ If point is in element, return parsed element as a plist."
       (point-max)))
    (xenops-elements-get type :delimiters)))
 
+(defun xenops-parse-image-at (pos)
+  (let ((display (get-char-property pos 'display )))
+    (and (eq (car display) 'image) display)))
+
 (defun xenops-parse-element-at-point-matching-delimiters (type delimiters lim-up lim-down)
   "If point is between regexps, return plist describing
   match. Like `org-between-regexps-p', but modified to return
