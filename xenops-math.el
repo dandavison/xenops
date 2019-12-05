@@ -42,30 +42,28 @@
   (font-lock-remove-keywords nil (xenops-math-font-lock-keywords)))
 
 (defun xenops-math-render (element &optional cached-only)
-  (xenops-math-set-org-preview-latex-process-alist! element)
-  (let ((beg (plist-get element :begin))
-        (end (plist-get element :end)))
-    (goto-char beg)
-    (unless (or (xenops-parse-image-at (point))
-                (eq (plist-get element :begin-content)
-                    (plist-get element :end-content)))
-      (let* ((latex (buffer-substring-no-properties beg end))
-             (image-type (plist-get (cdr (assq xenops-math-process
-                                               org-preview-latex-process-alist))
-                                    :image-output-type))
-             (margin (if (eq 'inline-math (plist-get element :type))
-                         0
-                       `(,xenops-math-image-margin . 0)))
-             (cache-file (xenops-math-compute-file-name latex image-type))
-             (cache-file-exists? (file-exists-p cache-file)))
-        (when (or cache-file-exists? (not cached-only))
-          (unless cache-file-exists?
-            (message "Xenops: creating file: %s" cache-file)
-            (let ((org-latex-packages-alist (xenops-math-get-latex-preamble-lines)))
-              (org-create-formula-image
-               latex cache-file org-format-latex-options 'forbuffer xenops-math-process)))
-          (xenops-element-delete-overlays element)
-          (xenops-math-make-overlay element cache-file image-type margin latex))))))
+  (unless (or (xenops-element-get-image element)
+              (eq (plist-get element :begin-content)
+                  (plist-get element :end-content)))
+    (let* ((latex (buffer-substring-no-properties (plist-get element :begin)
+                                                  (plist-get element :end)))
+           (image-type (plist-get (cdr (assq xenops-math-process
+                                             org-preview-latex-process-alist))
+                                  :image-output-type))
+           (margin (if (eq 'inline-math (plist-get element :type))
+                       0
+                     `(,xenops-math-image-margin . 0)))
+           (cache-file (xenops-math-compute-file-name latex image-type))
+           (cache-file-exists? (file-exists-p cache-file)))
+      (when (or cache-file-exists? (not cached-only))
+        (unless cache-file-exists?
+          (message "Xenops: creating file: %s" cache-file)
+          (let ((org-latex-packages-alist (xenops-math-get-latex-preamble-lines)))
+            (xenops-math-set-org-preview-latex-process-alist! element)
+            (org-create-formula-image
+             latex cache-file org-format-latex-options 'forbuffer xenops-math-process)))
+        (xenops-element-delete-overlays element)
+        (xenops-math-make-overlay element cache-file image-type margin latex)))))
 
 (defun xenops-math-get-latex-preamble-lines ()
   (let ((file (make-temp-file "xenops-math-" nil ".tex")))
