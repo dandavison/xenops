@@ -46,7 +46,9 @@
   (let ((beg (plist-get element :begin))
         (end (plist-get element :end)))
     (goto-char beg)
-    (unless (xenops-element-get-image-at-point)
+    (unless (or (xenops-element-get-image-at-point)
+                (eq (plist-get element :begin-content)
+                    (plist-get element :end-content)))
       (let* ((latex (buffer-substring-no-properties beg end))
              (image-type (plist-get (cdr (assq xenops-math-process
                                                org-preview-latex-process-alist))
