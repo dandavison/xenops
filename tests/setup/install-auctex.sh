@@ -3,18 +3,23 @@ set -eu
 dir="$1"
 cd "$dir"
 
-echo "apt-get update..."
-sudo apt-get update > /dev/null
+if [ $(uname) != Darwin ]; then
+    echo "apt-get update..."
+    sudo apt-get update > /dev/null
 
-echo "apt-get install..."
-sudo apt-get -y install \
-     texinfo \
-     texlive-binaries \
-     texlive-base \
-     texlive-latex-base > /dev/null
+    echo "apt-get install..."
+    sudo apt-get -y install \
+         texinfo \
+         texlive-binaries \
+         texlive-base \
+         texlive-latex-base > /dev/null
+fi
 
-echo "git clone auctex..."
-git clone git://git.savannah.gnu.org/auctex.git
+if [ ! -d auctex ]; then
+    echo "git clone auctex..."
+    git clone git://git.savannah.gnu.org/auctex.git
+fi
+
 
 echo "build auctex..."
 cd auctex
