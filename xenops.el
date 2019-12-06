@@ -10,6 +10,7 @@
 (require 's)
 
 (require 'xenops-apply)
+(require 'xenops-compat)
 (require 'xenops-element)
 (require 'xenops-elements)
 (require 'xenops-font)
