@@ -1,13 +1,15 @@
+EMACS ?= emacs
+
 deps:
 	mkdir -p /tmp/xenops-packages
 	bash tests/setup/install-auctex.sh /tmp/xenops-packages
-	emacs \
+	$(EMACS) \
 		-batch \
 		-l tests/setup/init.el \
 		-l tests/setup/install-deps.el
 
 test:
-	emacs \
+	$(EMACS) \
 		-batch \
 		-l tests/setup/init.el \
 		--eval "(add-to-list 'load-path \".\")" \
