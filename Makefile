@@ -1,4 +1,6 @@
 deps:
+	mkdir -p /tmp/xenops-packages
+	bash tests/setup/install-auctex.sh /tmp/xenops-packages
 	emacs \
 		-batch \
 		-l tests/setup/init.el \
@@ -9,6 +11,7 @@ test:
 		-batch \
 		-l tests/setup/init.el \
 		--eval "(add-to-list 'load-path \".\")" \
+		--eval "(add-to-list 'load-path \"/tmp/xenops-packages/auctex\")" \
 		--eval '(setq ert-batch-backtrace-right-margin nil)' \
 		-l xenops.el \
 		-l tests/xenops.el \
