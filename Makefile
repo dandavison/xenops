@@ -1,4 +1,4 @@
-deps: install_gnutls
+deps:
 	emacs \
 		-batch \
 		-l tests/setup/init.el \
@@ -24,22 +24,4 @@ test:
 build:
 	@:
 
-install_gnutls:
-ifeq ($(TRAVIS_OS_NAME),osx)
-#	GnuTLS can be upgraded with Homebrew instead of apt-get (which obviously does not exist on macOS)
-	@echo "Upgrade GnuTLS 3"
-	@if brew outdated --quiet | grep --quiet "gnutls"; then brew upgrade gnutls; fi
-else
-	@echo "Install GnuTLS 3"
-	@sudo apt-get -qq update
-	@sudo apt-get install -y build-essential nettle-dev libgmp-dev
-	@wget ftp://ftp.gnutls.org/gcrypt/gnutls/v3.1/gnutls-3.1.23.tar.xz
-	@tar -xf gnutls-3.1.23.tar.xz
-	@cd gnutls-3.1.23 \
-	  && ./configure $(SILENT) \
-	  && make -j$(MAKE_JOBS) $(SILENT) \
-	  && sudo make install $(SILENT) \
-	  && sudo ln -s /usr/local/lib/libgnutls.so.28 /usr/lib/libgnutls.so.28
-endif
-
-.PHONY: deps test build install_gnutls
+.PHONY: deps test build
