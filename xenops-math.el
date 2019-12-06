@@ -123,10 +123,37 @@
   (xenops-math-add-cursor-sensor-property))
 
 (defun xenops-math-add-cursor-sensor-property ()
+  "Arrange for math elements to be rendered whenever the cursor leaves the element.
+
+Suppose we have inline element 1$345$7 where the integers are the
+buffer positions of the corresponding characters. The following
+tables shows required behavior for cursor position transitions.
+
+| old pos | new pos | behavior      | notes                                   | implementation |
+|---------+---------+---------------+-----------------------------------------+----------------|
+|       4 |       3 | do not render | 3 is pos for inserting at element start |                |
+|       3 |       1 | render        |                                         |                |
+|       5 |       6 | do not render | 6 is pos for inserting at element end   |                |
+|       5 |       7 | render        |                                         |                |
+|       5 |       6 | do not render |                                         |                |
+
+The above is achieved by setting the `cursor-sensor-functions'
+property on positions 3-6 inclusive (which are the :begin-content
+and :end-content indices).
+
+In addition, we require the following text property inheritance behavior on insertion
+| pos | behavior                  | implementation                           |
+|-----+---------------------------+------------------------------------------|
+|   2 | do not inherit from right | front-nonsticky: default Emacs behaviour |
+| 3-6 | inherit from left         | rear sticky: default Emacs behaviour     |
+|   7 | do not inherit from left  | set rear-nonsticky on 6                  |
+"
   (if-let ((element (xenops-math-parse-element-at-point)))
-      (add-text-properties (plist-get element :begin)
-                           (plist-get element :end)
-                           '(cursor-sensor-functions (xenops-math-handle-element-exit)))))
+      (let ((beg (plist-get element :begin-content))
+            (end (1+ (plist-get element :end-content)))
+            (props '(cursor-sensor-functions (xenops-math-handle-element-exit))))
+        (add-text-properties beg end props)
+        (add-text-properties (1- end) end '(rear-nonsticky (cursor-sensor-functions))))))
 
 (defun xenops-math-handle-paste ()
   "If the text to be pasted is a math element then handle the paste.

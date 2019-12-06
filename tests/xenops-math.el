@@ -41,6 +41,24 @@
       (should
        (member "\\usepackage{amsmath}" preamble)))))
 
+(ert-deftest xenops-math-add-cursor-sensor-property ()
+  (with-temp-buffer
+    (xenops-mode)
+    (insert "1$345$7")
+    (font-lock-fontify-buffer)
+    (loop for (pos expected-properties) in
+          '((1 nil)
+            (2 nil)
+            (3 (cursor-sensor-functions (xenops-math-handle-element-exit)))
+            (4 (cursor-sensor-functions (xenops-math-handle-element-exit)))
+            (5 (cursor-sensor-functions (xenops-math-handle-element-exit)))
+            (6 (cursor-sensor-functions (xenops-math-handle-element-exit)
+                                        rear-nonsticky (cursor-sensor-functions)))
+            (7 nil))
+          do (loop for (key expected) in (-partition 2 expected-properties)
+                   do
+                   (should (equal (get-text-property pos key) expected))))))
+
 (setq xenops-test-math-single-file-contents "\\documentclass{article}
 \\usepackage{amsmath}
 \\newcommand{\\CommandInFile}{\\text{CommandInFileOutput}}
