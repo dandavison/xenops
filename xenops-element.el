@@ -52,6 +52,7 @@
     ov))
 
 (defun xenops-element-menu (event)
+  (interactive "e")
   (popup-menu
    `("Xenops"
      ["Edit" (xenops-reveal)])
