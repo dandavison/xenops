@@ -137,8 +137,10 @@ If we are in a math element, then paste without the delimiters"
           (progn
             (insert-for-yank
              (substring copied-text
-                        (plist-get element :begin-content)
-                        (plist-get element :end-content)))
+                        ;; `xenops-math-parse-element-from-string' returns 1-based indexes,
+                        ;; suitable for indexing into a buffer; string is 0-based.
+                        (1- (plist-get element :begin-content))
+                        (1- (plist-get element :end-content))))
             (rotate-yank-pointer 1))
         (save-excursion (yank))
         (xenops-math-render (xenops-math-parse-element-at-point))
