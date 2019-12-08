@@ -225,7 +225,8 @@ If we are in a math element, then paste without the delimiters"
           (setq odd-count t))
         (and odd-count
              (xenops-parse-element-at-point-matching-delimiters
-              'inline-math (list delimiter delimiter) (point-at-bol) (point-at-eol)))))))
+              'inline-math (list delimiter delimiter)
+              (point-at-bol) (or (save-excursion (re-search-forward delimiter nil t)) (point-max))))))))
 
 (defun xenops-math-set-org-preview-latex-process-alist! (element)
   (let* ((bounding-box (if (eq 'inline-math (plist-get element :type)) "1" "10"))
