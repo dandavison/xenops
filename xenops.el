@@ -10,6 +10,7 @@
 (require 's)
 
 (require 'xenops-apply)
+(require 'xenops-auctex)
 (require 'xenops-compat)
 (require 'xenops-element)
 (require 'xenops-elements)
@@ -100,6 +101,7 @@
     (if xenops-font-font-family (xenops-font-set-faces))
 
     (xenops-math-activate)
+    (xenops-auctex-activate)
     (xenops-xen-mode +1)
     (xenops-font-lock-activate)
 
@@ -116,6 +118,7 @@
         (goto-char (point-min))
         (xenops-reveal)))
     (xenops-math-deactivate)
+    (xenops-auctex-deactivate)
     (xenops-xen-mode -1))))
 
 (defun xenops-dwim (&optional arg)
