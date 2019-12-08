@@ -1,10 +1,11 @@
 (defun xenops-minted-parse-at-point ()
   (if-let (element (xenops-parse-element-at-point 'minted))
       (let* ((language (xenops-minted-get-babel-language (match-string 2)))
+             (parameters (match-string 3))
              (body (buffer-substring (plist-get element :begin-content)
                                      (plist-get element :end-content)))
-             (org-babel-info
-              (list language body '((:results . "latex replace")))))
+             (org-element `(src-block (:language ,language :parameters ,parameters :value ,body)))
+             (org-babel-info (org-babel-get-src-block-info 'light org-element)))
         (xenops-util-plist-update
          element
          :language language

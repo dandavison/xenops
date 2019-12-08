@@ -200,7 +200,7 @@
                      xenops-element-copy
                      xenops-element-delete))))
     (minted
-     . ((:delimiters . (("^[ \t]*\\\\begin{minted}\\({\\([^}]+\\)}\\)?"
+     . ((:delimiters . (("^[ \t]*\\\\begin{minted}\\({\\([^}]+\\)}[ \t]*\\)?\\([^\n]*\\)"
                          "^[ \t]*\\\\end{minted}")))
         (:font-lock-keywords . src)
         (:parser . xenops-minted-parse-at-point)
