@@ -1,14 +1,6 @@
 ;; This module contains copies of functions that Xenops uses from Emacs but that are not available
 ;; in all versions of Emacs that Xenops supports.
 
-(unless (fboundp 'cursor-sensor-mode)
-  (defun cursor-sensor-mode (&optional arg)
-    (message "cursor-sensor-mode is not available in your version
-             of Emacs. Therefore, Xenops will not render LaTeX
-             math content automatically when the cursor moves
-             away from the element. Please consider installing a
-             newer version of Emacs (https://www.gnu.org/software/emacs/download.html).")))
-
 (unless (fboundp 'image-property)
   (defun image-property (image property)
     "Return the value of PROPERTY in IMAGE.
