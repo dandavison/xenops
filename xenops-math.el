@@ -246,7 +246,7 @@ If we are in a math element, then paste without the delimiters"
   "If point is in inline math element, return plist describing match"
   (let ((delimiter (caar (xenops-elements-get 'inline-math :delimiters))))
     (save-excursion
-      (let ((odd-count (oddp (count-matches delimiter (point-at-bol) (point)))))
+      (let ((odd-count (cl-oddp (count-matches delimiter (point-at-bol) (point)))))
         (when (and (not odd-count) (looking-at (caar (xenops-elements-get 'inline-math :delimiters))))
           (forward-char)
           (setq odd-count t))
@@ -262,10 +262,11 @@ If we are in a math element, then paste without the delimiters"
                                                   :image-converter))))
     ;; TODO: this mutates the global variable!
     (plist-put org-format-latex-options :scale xenops-math-image-scale-factor)
-    (assert (and (string-match " -b \\([^ ]+\\) " dvisvgm-image-converter)
-                 (plist-put dvisvgm-process-plist
-                            :image-converter `(,(replace-match bounding-box t t
-                                                               dvisvgm-image-converter 1)))))))
+    (unless (string-match " -b \\([^ ]+\\) " dvisvgm-image-converter)
+      (error "Unable to set bounding box: unexpected value of `dvisvgm-image-converter'"))
+    (plist-put dvisvgm-process-plist
+               :image-converter `(,(replace-match bounding-box t t
+                                                  dvisvgm-image-converter 1)))))
 
 (defun xenops-math-make-overlay (element image-file image-type margin help-echo)
   (let ((ov (xenops-element-make-overlay element)))

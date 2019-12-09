@@ -1,4 +1,4 @@
-(require 'cl)
+(require 'cl-lib)
 (require 'org)
 (require 'subr-x)
 
@@ -219,15 +219,15 @@
 (defun xenops-font-lock-activate ()
   "Configure font-lock for all element types by adding entries to
 `font-lock-keywords`."
-  (loop for (type . _) in xenops-elements
-        do
-        (-if-let* ((keywords (xenops-elements-get type :font-lock-keywords)))
-            (loop for (regexps keywords) in (-zip (xenops-elements-get type :delimiters)
-                                                  keywords)
-                  do
-                  (loop for (regexp keyword) in (-zip regexps keywords)
+  (cl-loop for (type . _) in xenops-elements
+           do
+           (-if-let* ((keywords (xenops-elements-get type :font-lock-keywords)))
+               (cl-loop for (regexps keywords) in (-zip (xenops-elements-get type :delimiters)
+                                                        keywords)
                         do
-                        (font-lock-add-keywords nil `((,regexp ,keyword))))))))
+                        (cl-loop for (regexp keyword) in (-zip regexps keywords)
+                                 do
+                                 (font-lock-add-keywords nil `((,regexp ,keyword))))))))
 
 (defun xenops-ops-get (type key)
   "Return the value associated with KEY for operation type TYPE."

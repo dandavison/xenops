@@ -3,8 +3,8 @@
     (save-excursion (insert input-text))
     (let ((element (xenops-apply-get-next-element
                     (xenops-elements-delimiter-start-regexp) (point-max))))
-      (loop for (k v) in (-partition 2 expected-properties)
-            do (should (equal (plist-get element k) v))))))
+      (cl-loop for (k v) in (-partition 2 expected-properties)
+               do (should (equal (plist-get element k) v))))))
 
 (ert-deftest xenops-apply-get-next-element--block-math ()
   (xenops-apply-get-next-element--do-test

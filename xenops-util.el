@@ -34,7 +34,7 @@ is encountered. Return this value without further evaluations."
 (defun xenops-util-svg-resize (svg scale)
   "Return SVG data with height and width scaled by `scale'"
   (cl-flet ((resize (match)
-                    (destructuring-bind (size . units)
+                    (cl-destructuring-bind (size . units)
                         (xenops-util-svg-parse-length-or-percent (match-string 1 match))
                       (format "%f%s" (* scale size) units))))
     ;; We could parse as XML, but this is tempting.

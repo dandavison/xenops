@@ -1,6 +1,6 @@
 #!/usr/bin/env emacs --script
 (load-file "~/.emacs.d/init.el")
-(assert (car argv) "usage: xenops-cache-images <filename>")
+(unless (car argv) (error "usage: xenops-cache-images <filename>"))
 (find-file (car argv))
 (xenops-generate-images-in-headless-process)
 

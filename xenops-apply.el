@@ -36,7 +36,7 @@ the entire buffer."
                           (save-excursion (funcall handler el))))))
     (-if-let* ((el (xenops-apply-parse-at-point)))
         (handle el)
-      (destructuring-bind (beg end region-active)
+      (cl-destructuring-bind (beg end region-active)
           (if (region-active-p)
               `(,(region-beginning) ,(region-end) t)
             `(,(point-min) ,(point-max) nil))

@@ -13,10 +13,10 @@ TYPES. If TYPES is 'all, then all items under key KEY for any
 type."
   (-uniq
    (apply #'append
-          (loop for (type _) in xenops-elements
-                collecting (and (or (eq types 'all) (memq type types))
-                                (let ((val (xenops-elements-get type key)))
-                                  (if (listp val) val (list val))))))))
+          (cl-loop for (type _) in xenops-elements
+                   collecting (and (or (eq types 'all) (memq type types))
+                                   (let ((val (xenops-elements-get type key)))
+                                     (if (listp val) val (list val))))))))
 
 (defun xenops-elements-get-all (key)
   "Concatenated list of all items under key KEY for any element type."

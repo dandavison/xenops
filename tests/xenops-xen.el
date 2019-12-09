@@ -84,8 +84,8 @@ part of the public API."
     (cond
      ((listp (cdr displayed-text))
       (concat
-       (loop for (_ char) in (-partition 2 displayed-text)
-             collecting char)))
+       (cl-loop for (_ char) in (-partition 2 displayed-text)
+                collecting char)))
      ((stringp (cdr displayed-text))
       (cdr displayed-text))
      (t
