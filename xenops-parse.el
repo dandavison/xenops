@@ -21,13 +21,13 @@ If point is in element, return parsed element as a plist."
   "If point is between regexps, return plist describing
   match. Like `org-between-regexps-p', but modified to return
   more match data."
-  (-if-let (coords
-            (save-excursion
-              (when (looking-at (car (last delimiters)))
-                ;; This function will return nil if point is between delimiters separated by
-                ;; zero characters.
-                (left-char))
-              (xenops-parse-between-regexps? delimiters lim-down (point))))
+  (-if-let* ((coords
+              (save-excursion
+                (when (looking-at (car (last delimiters)))
+                  ;; This function will return nil if point is between delimiters separated by
+                  ;; zero characters.
+                  (left-char))
+                (xenops-parse-between-regexps? delimiters lim-down (point)))))
       (append coords `(:type ,type :delimiters ,delimiters))))
 
 (defun xenops-parse-between-regexps? (delimiters limit pos)

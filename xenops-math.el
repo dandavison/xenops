@@ -97,13 +97,13 @@
   (xenops-math-image-change-size element (/ 1 xenops-math-image-change-size-factor)))
 
 (defun xenops-math-image-change-size (element factor)
-  (-when-let (image (xenops-element-get-image element))
-    (when (eq (image-property image :type) 'svg)
-      (image-flush image)
-      (let* ((data (or (eval (image-property image :data))
-                       (prog1 (f-read-text (image-property image :file))
-                         (setf (image-property image :file) nil)))))
-        (setf (image-property image :data) (xenops-util-svg-resize data factor))))))
+  (-if-let* ((image (xenops-element-get-image element)))
+      (when (eq (image-property image :type) 'svg)
+        (image-flush image)
+        (let* ((data (or (eval (image-property image :data))
+                         (prog1 (f-read-text (image-property image :file))
+                           (setf (image-property image :file) nil)))))
+          (setf (image-property image :data) (xenops-util-svg-resize data factor))))))
 
 (defun xenops-math-image-reset-size (element)
   (xenops-math-reveal element)
@@ -148,7 +148,7 @@ In addition, we require the following text property inheritance behavior on inse
 | 3-6 | inherit from left         | rear sticky: default Emacs behaviour     |
 |   7 | do not inherit from left  | set rear-nonsticky on 6                  |
 "
-  (if-let ((element (xenops-math-parse-element-at-point)))
+  (-if-let* ((element (xenops-math-parse-element-at-point)))
       (let ((beg (plist-get element :begin-content))
             (end (1+ (plist-get element :end-content)))
             (props '(cursor-sensor-functions (xenops-math-handle-element-exit))))
@@ -159,19 +159,19 @@ In addition, we require the following text property inheritance behavior on inse
   "If the text to be pasted is a math element then handle the paste.
 If we are in a math element, then paste without the delimiters"
   (let ((copied-text (current-kill 0 'do-not-rotate)))
-    (-when-let (element (xenops-math-parse-element-from-string copied-text))
-      (if (xenops-math-parse-element-at-point)
-          (progn
-            (insert-for-yank
-             (substring copied-text
-                        ;; `xenops-math-parse-element-from-string' returns 1-based indexes,
-                        ;; suitable for indexing into a buffer; string is 0-based.
-                        (1- (plist-get element :begin-content))
-                        (1- (plist-get element :end-content))))
-            (rotate-yank-pointer 1))
-        (save-excursion (yank))
-        (xenops-math-render (xenops-math-parse-element-at-point))
-        t))))
+    (-if-let* ((element (xenops-math-parse-element-from-string copied-text)))
+        (if (xenops-math-parse-element-at-point)
+            (progn
+              (insert-for-yank
+               (substring copied-text
+                          ;; `xenops-math-parse-element-from-string' returns 1-based indexes,
+                          ;; suitable for indexing into a buffer; string is 0-based.
+                          (1- (plist-get element :begin-content))
+                          (1- (plist-get element :end-content))))
+              (rotate-yank-pointer 1))
+          (save-excursion (yank))
+          (xenops-math-render (xenops-math-parse-element-at-point))
+          t))))
 
 (defun xenops-math-paste ()
   (or (xenops-math-handle-paste) (yank)))
@@ -195,25 +195,25 @@ If we are in a math element, then paste without the delimiters"
 (defun xenops-math-parse-element-from-string (element-string)
   (with-temp-buffer
     (save-excursion (insert element-string))
-    (-when-let (element (xenops-math-parse-element-at-point))
-      (when (eq (- (plist-get element :end)
-                   (plist-get element :begin))
-                (length element-string))
-        element))))
+    (-if-let* ((element (xenops-math-parse-element-at-point)))
+        (when (eq (- (plist-get element :end)
+                     (plist-get element :begin))
+                  (length element-string))
+          element))))
 
 (defun xenops-math-handle-element-exit (window oldpos event-type)
   "Render a math element when point leaves it."
   ;; TODO: check window
   (if (eq event-type 'left)
-      (-when-let (was-in (xenops-math-parse-element-at oldpos))
-        (unless (xenops-element-get-image was-in)
-          (xenops-math-render was-in)))))
+      (-if-let* ((was-in (xenops-math-parse-element-at oldpos)))
+          (unless (xenops-element-get-image was-in)
+            (xenops-math-render was-in)))))
 
 (defun xenops-math-mouse-drag-region-around-advice (mouse-drag-region-fn start-event)
   "If point is in a math element, then cause mouse drag to appear to drag the associated image:
 1. Select the math element as the currently active region.
 2. Temporarily alter tooltip-show so that it displays the image."
-  (-if-let (element (xenops-math-parse-element-at (posn-point (event-start start-event))))
+  (-if-let* ((element (xenops-math-parse-element-at (posn-point (event-start start-event)))))
       (progn
         (push-mark (plist-get element :begin))
         (goto-char (plist-get element :end))

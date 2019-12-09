@@ -221,7 +221,7 @@
 `font-lock-keywords`."
   (loop for (type . _) in xenops-elements
         do
-        (if-let ((keywords (xenops-elements-get type :font-lock-keywords)))
+        (-if-let* ((keywords (xenops-elements-get type :font-lock-keywords)))
             (loop for (regexps keywords) in (-zip (xenops-elements-get type :delimiters)
                                                   keywords)
                   do

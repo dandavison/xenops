@@ -1,9 +1,9 @@
 (setq xenops-src-do-in-org-mode-header "* \n")
 
 (defun xenops-src-parse-at-point ()
-  (if-let ((element (xenops-parse-element-at-point 'src))
-           (org-element (xenops-src-do-in-org-mode (org-element-context)))
-           (org-babel-info (org-babel-get-src-block-info 'light org-element)))
+  (-if-let* ((element (xenops-parse-element-at-point 'src))
+             (org-element (xenops-src-do-in-org-mode (org-element-context)))
+             (org-babel-info (org-babel-get-src-block-info 'light org-element)))
       (xenops-util-plist-update
        element
        :type 'src
@@ -59,7 +59,7 @@ f")
           (xenops-src-execute-src-block element)
           (save-excursion
             (search-forward "#+RESULTS:\n")
-            (-if-let (element (xenops-math-parse-block-element-at-point))
+            (-if-let* ((element (xenops-math-parse-block-element-at-point)))
                 (xenops-math-render element))))
       (xenops-src-execute-src-block element))))
 
@@ -78,11 +78,11 @@ f")
            ,@body)))))
 
 (defun xenops-src-apply-syntax-highlighting ()
-  (when-let* ((element (or (xenops-minted-parse-at-point)
-                           (xenops-src-parse-at-point)))
-              (lang (plist-get element :language))
-              (beg (plist-get element :begin-content))
-              (end (plist-get element :end-content)))
+  (-when-let* ((element (or (xenops-minted-parse-at-point)
+                            (xenops-src-parse-at-point)))
+               (lang (plist-get element :language))
+               (beg (plist-get element :begin-content))
+               (end (plist-get element :end-content)))
     (org-src-font-lock-fontify-block lang beg end)
     (add-face-text-property beg end 'fixed-pitch)))
 

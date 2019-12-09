@@ -12,9 +12,9 @@
   `(defun ,(intern (concat "xenops-" (symbol-name op) "-at-point")) ()
      ,docstring
      (interactive)
-     (if-let ((el (xenops-apply-parse-at-point))
-              (handlers (xenops-ops-get ',op :handlers))
-              (handler (xenops-element-dispatch-operation el handlers)))
+     (-if-let* ((el (xenops-apply-parse-at-point))
+                (handlers (xenops-ops-get ',op :handlers))
+                (handler (xenops-element-dispatch-operation el handlers)))
          (funcall handler el))))
 
 (defun xenops-apply (op &optional pred)
@@ -32,9 +32,9 @@ returns non-nil."
 operated on is either the element at point, the active region, or
 the entire buffer."
   (cl-flet ((handle (lambda (el)
-                      (if-let ((handler (xenops-element-dispatch-operation el handlers)))
+                      (-if-let* ((handler (xenops-element-dispatch-operation el handlers)))
                           (save-excursion (funcall handler el))))))
-    (if-let ((el (xenops-apply-parse-at-point)))
+    (-if-let* ((el (xenops-apply-parse-at-point)))
         (handle el)
       (destructuring-bind (beg end region-active)
           (if (region-active-p)
@@ -57,10 +57,10 @@ the entire buffer."
   "If there is another element, return it and leave point after it.
 An element is a plist containing data about a regexp match for a
 section of the buffer that xenops can do something to."
-  (if-let ((_ (re-search-forward start-regexp end t))
-           (_ (goto-char (match-beginning 0)))
-           (element (xenops-apply-parse-at-point parse-at-point-fns))
-           (_ (goto-char (plist-get element :end))))
+  (-if-let* ((_ (re-search-forward start-regexp end t))
+             (_ (goto-char (match-beginning 0)))
+             (element (xenops-apply-parse-at-point parse-at-point-fns))
+             (_ (goto-char (plist-get element :end))))
       element))
 
 (defun xenops-apply-parse-at-point (&optional parse-at-point-fns)

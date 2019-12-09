@@ -1,5 +1,5 @@
 (defun xenops-minted-parse-at-point ()
-  (if-let (element (xenops-parse-element-at-point 'minted))
+  (-if-let* ((element (xenops-parse-element-at-point 'minted)))
       (let* ((language (xenops-minted-get-babel-language (match-string 2)))
              (parameters (match-string 3))
              (body (buffer-substring (plist-get element :begin-content)

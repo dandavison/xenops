@@ -23,7 +23,7 @@ non-nil, or nil if no such index exists."
 is encountered. Return this value without further evaluations."
   (catch :result
     (dolist (el list)
-      (-if-let (result (funcall fn el))
+      (-if-let* ((result (funcall fn el)))
           (throw :result result)))))
 
 (defun xenops-util-plist-update (plist &rest args)
