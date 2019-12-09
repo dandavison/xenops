@@ -13,8 +13,7 @@
         (list (if melpa-stable
                   '("melpa-stable" . "https://stable.melpa.org/packages/")
                 '("melpa" . "https://melpa.org/packages/"))))
-  (package-refresh-contents)
-  t)
+  (package-refresh-contents))
 
 (defun xenops-package-install (package)
   (interactive "Spackage: ")
@@ -22,8 +21,7 @@
       (message "%S: OK" package)
     (progn
       (package-install package)
-      (message "%S: ...OK" package)
-      t)))
+      (message "%S: ...OK" package))))
 
 (defun xenops-dependencies-check-packages ()
   (save-window-excursion
