@@ -20,6 +20,31 @@
         (funcall execute-language-fn element)
       (xenops-src-execute-src-block element))))
 
+(defun xenops-src-execute-src-block:python (element)
+  "Execute python src block, with special setup if :sympy header argument is set."
+  (let ((info (plist-get element :org-babel-info)))
+    (if (cdr (assq :sympy (nth 2 info)))
+        (xenops-src-execute-src-block:python-sympy element)
+      (xenops-src-execute-src-block element))))
+
+(defun xenops-src-execute-src-block:python-sympy (element)
+  "Execute python sympy src block. Add an `import * from sympy` line and,
+if `:results latex`, arrange for sympy to return the results as
+LaTeX."
+  (let ((org-babel-python-wrapper-method
+         (concat "from sympy import *\n" org-babel-python-wrapper-method)))
+    (if (xenops-src-latex-results? element)
+        (let* ((info (plist-get element :org-babel-info))
+               (body (substring-no-properties (nth 1 info)))
+               (lines (s-split "\n" body t))
+               (last-line (car (last lines))))
+          (when (string-match "[ \t]*return[ \t]*\\(.+\\)" last-line)
+            (setq lines (push "from sympy import latex as __sympy_latex__" lines))
+            (setf (car (last lines))
+                  (replace-match "return __sympy_latex__(\\1)" t nil last-line))
+            (setf (nth 1 info) (s-join "\n" lines)))))
+    (xenops-src-execute-src-block element)))
+
 (defun xenops-src-execute-src-block:mathematica (element)
   "Execute mathematica src block. If `:results latex`, arrange
 for mathematica to return the result as LaTeX."
