@@ -97,3 +97,20 @@
   d & d & e & a & b & c
 \\end{tabular}\\\\
 " 18 'table))
+
+(ert-deftest xenops-render--table-R ()
+  (xenops-render--do-image-test
+   "% latex table generated in R 3.6.1 by xtable 1.8-4 package
+% Tue Dec 10 23:53:04 2019
+\\begin{table}[ht]
+\\centering
+\\begin{tabular}{rrrrr}
+  \\hline
+ & Estimate & Std. Error & t value & Pr($>$$|$t$|$) \\\\
+  \\hline
+(Intercept) & -0.2814 & 0.1055 & -2.67 & 0.0090 \\\\
+  x & 0.9928 & 0.1014 & 9.79 & 0.0000 \\\\
+   \\hline
+\\end{tabular}
+\\end{table}
+" 87 'table))

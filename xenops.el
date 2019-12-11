@@ -182,7 +182,9 @@
         (:parser . xenops-math-parse-inline-element-at-point)
         (:handlers . block-math)))
     (table
-     . ((:delimiters . (("^[ \t]*\\\\begin{tabular}"
+     . ((:delimiters . (("^[ \t]*\\\\begin{table}"
+                         "^[ \t]*\\\\end{table}")
+                        ("^[ \t]*\\\\begin{tabular}"
                          "^[ \t]*\\\\end{tabular}")))
         (:parser . xenops-math-parse-table-at-point)
         (:handlers . block-math)))
