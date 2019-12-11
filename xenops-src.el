@@ -66,13 +66,24 @@ post-process by replacing the org-mode LaTeX export block (see
       (goto-char (plist-get element :end))
       (insert result)))
   (if (xenops-src-latex-results? element)
+      (xenops-src-post-process-latex-result element)))
+
+(defun xenops-src-post-process-latex-result (element)
+  (let ((lang (downcase (plist-get element :language))))
+    (cond
+     ((member lang '("python" "mathematica"))
       (save-excursion
         (when (re-search-forward
                "#\\+RESULTS:\n#\\+BEGIN_EXPORT latex\\(\\(\n.*?\\)*\\)#\\+END_EXPORT\n" nil t)
           (replace-match "\\\\begin{align*}\\1\\\\end{align*}" t)
           (backward-char)
           (-if-let* ((element (xenops-math-parse-block-element-at-point)))
-              (xenops-math-render element))))))
+              (xenops-math-render element)))))
+     ((member lang '("r"))
+      (save-excursion
+        (when (search-forward "\\begin{tabular}" nil t)
+          (-if-let* ((element (xenops-math-parse-block-element-at-point)))
+              (xenops-math-render element))))))))
 
 (defun xenops-src-latex-results? (element)
   (let* ((info (plist-get element :org-babel-info))
