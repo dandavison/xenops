@@ -13,9 +13,8 @@
      ,docstring
      (interactive)
      (-if-let* ((el (xenops-apply-parse-at-point))
-                (handlers (xenops-ops-get ',op :handlers))
-                (handler (xenops-element-dispatch-operation el handlers)))
-         (funcall handler el))))
+                (handlers (xenops-ops-get ',op :handlers)))
+         (xenops-element-dispatch el handlers))))
 
 (defun xenops-apply (op &optional pred)
   "Apply operation type OP-TYPE to any elements encountered. The region
@@ -31,9 +30,8 @@ returns non-nil."
   "Apply HANDLERS to any elements encountered. The region
 operated on is either the element at point, the active region, or
 the entire buffer."
-  (cl-flet ((handle (lambda (el)
-                      (-if-let* ((handler (xenops-element-dispatch-operation el handlers)))
-                          (save-excursion (funcall handler el))))))
+  (cl-flet ((handle (lambda (el) (save-excursion
+                              (xenops-element-dispatch el handlers)))))
     (-if-let* ((el (xenops-apply-parse-at-point)))
         (handle el)
       (cl-destructuring-bind (beg end region-active)
