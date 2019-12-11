@@ -166,9 +166,7 @@
 (defvar xenops-elements
   `((block-math
      .  ((:delimiters . (("^[ \t]*\\\\begin{align\\*?}"
-                          "^[ \t]*\\\\end{align\\*?}")
-                         ("^[ \t]*\\\\begin{tabular}"
-                          "^[ \t]*\\\\end{tabular}")))
+                          "^[ \t]*\\\\end{align\\*?}")))
          (:parser . xenops-math-parse-block-element-at-point)
          (:handlers . (xenops-math-render
                        xenops-math-regenerate
@@ -182,6 +180,11 @@
      . ((:delimiters . (("\\$" "\\$")))
         (:font-lock-keywords . (((((0 (xenops-math-inline-math-font-lock-handler)))))))
         (:parser . xenops-math-parse-inline-element-at-point)
+        (:handlers . block-math)))
+    (table
+     . ((:delimiters . (("^[ \t]*\\\\begin{tabular}"
+                         "^[ \t]*\\\\end{tabular}")))
+        (:parser . xenops-math-parse-table-at-point)
         (:handlers . block-math)))
     (image
      . ((:delimiters . (("[ \t]*\\\\includegraphics\\(\\[[^]]+\\]\\)?{\\([^}]+\\)}")))

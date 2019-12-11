@@ -113,7 +113,7 @@
   "A regexp matching the start or end line of any block math element."
   (format "\\(%s\\)"
           (s-join "\\|"
-                  (apply #'append (xenops-elements-get 'block-math :delimiters)))))
+                  (apply #'append (xenops-elements-get-for-types :delimiters '(block-math table))))))
 
 (defun xenops-math-block-math-font-lock-handler ()
   (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch)
@@ -241,6 +241,9 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-parse-block-element-at-point ()
   (xenops-parse-element-at-point 'block-math))
+
+(defun xenops-math-parse-table-at-point ()
+  (xenops-parse-element-at-point 'table))
 
 (defun xenops-math-parse-inline-element-at-point ()
   "If point is in inline math element, return plist describing match"
