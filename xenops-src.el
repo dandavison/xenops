@@ -69,21 +69,16 @@ post-process by replacing the org-mode LaTeX export block (see
       (xenops-src-post-process-latex-result element)))
 
 (defun xenops-src-post-process-latex-result (element)
-  (let ((lang (downcase (plist-get element :language))))
-    (cond
-     ((member lang '("python" "mathematica"))
-      (save-excursion
-        (when (re-search-forward
-               "#\\+RESULTS:\n#\\+BEGIN_EXPORT latex\\(\\(\n.*?\\)*\\)#\\+END_EXPORT\n" nil t)
-          (replace-match "\\\\begin{align*}\\1\\\\end{align*}" t)
-          (backward-char)
-          (-if-let* ((element (xenops-math-parse-block-element-at-point)))
-              (xenops-math-render element)))))
-     ((member lang '("r"))
-      (save-excursion
-        (when (search-forward "\\begin{tabular}" nil t)
-          (-if-let* ((element (xenops-math-parse-block-element-at-point)))
-              (xenops-math-render element))))))))
+  (let* ((lang (downcase (plist-get element :language)))
+         (wrap-in-align-environment (member lang '("python" "mathematica"))))
+    (save-excursion
+      (when (re-search-forward
+             "#\\+RESULTS:\n#\\+BEGIN_EXPORT latex\\(\\(\n.*?\\)*\\)#\\+END_EXPORT\n" nil t)
+        (replace-match
+         (if wrap-in-align-environment "\\\\begin{align*}\\1\\\\end{align*}" "\\1") t)))
+    (save-excursion
+      (-if-let* ((element (xenops-apply-get-next-element)))
+          (xenops-element-do element 'render)))))
 
 (defun xenops-src-latex-results? (element)
   (let* ((info (plist-get element :org-babel-info))
