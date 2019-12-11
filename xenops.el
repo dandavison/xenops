@@ -80,13 +80,12 @@
     (define-key xenops-mode-map (kbd "s-=") #'xenops-increase-size)
     (define-key xenops-mode-map (kbd "s-_") #'xenops-decrease-size)
 
-    (define-key xenops-rendered-element-keymap "\M-w" #'xenops-copy-at-point)
-    (define-key xenops-rendered-element-keymap [(backspace)] #'xenops-delete-at-point)
     (define-key xenops-rendered-element-keymap [(return)] #'xenops-reveal-at-point)
-    (define-key xenops-rendered-element-keymap [(super c)] #'xenops-copy-at-point)
-    (define-key xenops-rendered-element-keymap [(super x)] #'xenops-delete-at-point)
-    (define-key xenops-rendered-element-keymap [(ctrl k)] #'xenops-delete-at-point)
-    (define-key xenops-rendered-element-keymap [(ctrl w)] #'xenops-delete-at-point)
+    (define-key xenops-rendered-element-keymap [remap kill-ring-save] #'xenops-copy-at-point)
+
+    (dolist (cmd '(delete-char delete-backward-char kill-line kill-region))
+      (define-key xenops-rendered-element-keymap `[remap ,cmd] #'xenops-delete-at-point))
+
     (define-key xenops-rendered-element-keymap "+" #'xenops-increase-size)
     (define-key xenops-rendered-element-keymap "-" #'xenops-decrease-size)
     (define-key xenops-rendered-element-keymap "0" #'xenops-reset-size)
