@@ -43,8 +43,7 @@ the entire buffer."
         (save-excursion
           (goto-char beg)
           (let ((parse-at-point-fns (xenops-elements-get-all :parser)))
-            (while (setq el (xenops-apply-get-next-element
-                             (xenops-elements-delimiter-start-regexp) end parse-at-point-fns))
+            (while (setq el (xenops-apply-get-next-element nil end parse-at-point-fns))
               (and el
                    (or (null pred) (funcall pred el))
                    (handle el)))))
@@ -53,15 +52,18 @@ the entire buffer."
                                                           xenops-math-image-decrease-size)))
              (deactivate-mark))))))
 
-(defun xenops-apply-get-next-element (start-regexp end &optional parse-at-point-fns)
+(defun xenops-apply-get-next-element (&optional start-regexp end parse-at-point-fns)
   "If there is another element, return it and leave point after it.
 An element is a plist containing data about a regexp match for a
 section of the buffer that xenops can do something to."
-  (-if-let* ((_ (re-search-forward start-regexp end t))
-             (_ (goto-char (match-beginning 0)))
-             (element (xenops-apply-parse-at-point parse-at-point-fns))
-             (_ (goto-char (plist-get element :end))))
-      element))
+  (let ((start-regexp (or start-regexp (xenops-elements-delimiter-start-regexp)))
+        (end (or end (point-max)))
+        (parse-at-point-fns (or parse-at-point-fns (xenops-elements-get-all :parser))))
+    (-if-let* ((_ (re-search-forward start-regexp end t))
+               (_ (goto-char (match-beginning 0)))
+               (element (xenops-apply-parse-at-point parse-at-point-fns))
+               (_ (goto-char (plist-get element :end))))
+        element)))
 
 (defun xenops-apply-parse-at-point (&optional parse-at-point-fns)
   (xenops-util-first-result #'funcall (or parse-at-point-fns
