@@ -67,7 +67,7 @@
     "\\\\emph{\\([^\n}]+\\)}"
     "\\\\textbf{\\([^\n}]+\\)}"
     "\\\\textit{\\([^\n}]+\\)}"
-    "\\\\\\(?:sub\\)*section\\*?{\\([^\n}]+\\)}"
+    ("\\\\\\(?:sub\\)*section\\*?{\\([^\n}]+\\)}" . xenops-xen-section-title-formatter)
     "{\\\\bf +\\([^\n}]+\\)}"
     "{\\\\it +\\([^\n}]+\\)}"))
 
@@ -82,6 +82,17 @@
    ((member env '("align" "src" "minted")) "⚡")
    ((member env '("proof")) "□")
    (t "┘")))
+
+(defun xenops-xen-section-title-formatter (title)
+  (let* ((match (match-string 0))
+         (indent (cond
+                  ((string-match "^\\\\subsubsection" match)
+                   8)
+                  ((string-match "^\\\\subsection" match)
+                   4)
+                  ((string-match "^\\\\section" match)
+                   0))))
+    (format "%s%s" (s-repeat indent " ") title)))
 
 (defun xenops-xen-style-regexp-rules-get-text-properties (match)
   "An implementation of `style-regexp-rules-get-text-properties'."

@@ -57,7 +57,7 @@
     (should (equal
              (style-composition-to-displayed-string
               (plist-get (text-properties-at (point)) 'composition))
-             "Section title"))))
+             "    Section title"))))
 
 (defun style-composition-to-displayed-string (composition)
   "Return string corresponding to composition text property.
