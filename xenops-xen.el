@@ -4,7 +4,7 @@
   "Minimal visual appearance for a Xenops LaTeX buffer.
 
 \\{xenops-xen-mode-map}"
-  :lighter " xen"
+  :lighter nil
   (cond
    (xenops-xen-mode
     (setq style-rules xenops-xen-style-rules
