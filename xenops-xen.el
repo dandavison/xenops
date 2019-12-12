@@ -74,14 +74,14 @@
 (defun xenops-xen-begin-latex-environment-formatter (env)
   (cond
    ((member env '("src" "minted" "align")) "⚡")
-   ((member env '("enumerate" "itemize" "mdframed")) "┐")
+   ((member env '("enumerate" "itemize" "mdframed")) " ")
    (t (upcase-initials env))))
 
 (defun xenops-xen-end-latex-environment-formatter (env)
   (cond
    ((member env '("align" "src" "minted")) "⚡")
    ((member env '("proof")) "□")
-   (t "┘")))
+   (t " ")))
 
 (defun xenops-xen-section-title-formatter (title)
   (let* ((match (match-string 0))
