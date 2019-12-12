@@ -1,6 +1,7 @@
 (ert-deftest xenops-image-get-file-name-suggestion ()
   (with-temp-buffer
-    (cl-letf (((symbol-function 'buffer-file-name) (lambda () "my-file")))
+    (cl-letf* (((symbol-function 'buffer-name) (lambda () "my-file.tex"))
+               ((symbol-function 'buffer-file-name) (lambda () (concat "/a/b/c/" (buffer-name)))))
       (insert "
 \\section{sec1}
 

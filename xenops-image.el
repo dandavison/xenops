@@ -49,21 +49,18 @@ pasted from the system clipboard.")
   (interactive)
   (let ((temp-file (make-temp-file "xenops-image-from-clipboard-"))
         (output-file))
-    (with-temp-buffer
-      ;; TODO: I think Emacs can do this natively without pngpaste
-      ;; See `gui-selection-value'.
-      (let ((exit-status
-             (call-process xenops-image-pngpaste-executable nil `(:file ,temp-file) nil "-")))
-        (if (= exit-status 0)
-            (let ((file-name-suggestion (xenops-image-get-file-name-suggestion
-                                         (substring (sha1 (f-read-bytes temp-file)) 0 4)
-                                         "png")))
-              (setq output-file
-                    (read-file-name "Save image as: "
-                                    (or xenops-image-directory default-directory)
-                                    nil nil file-name-suggestion))
-              (when (file-exists-p output-file) (error "File exists: %s" output-file))
-              (copy-file temp-file output-file t)))))
+    (let ((exit-status
+           (call-process xenops-image-pngpaste-executable nil `(:file ,temp-file) nil "-")))
+      (if (= exit-status 0)
+          (let ((file-name-suggestion (xenops-image-get-file-name-suggestion
+                                       (substring (sha1 (f-read-bytes temp-file)) 0 4)
+                                       "png")))
+            (setq output-file
+                  (read-file-name "Save image as: "
+                                  (or xenops-image-directory default-directory)
+                                  nil nil file-name-suggestion))
+            (when (file-exists-p output-file) (error "File exists: %s" output-file))
+            (copy-file temp-file output-file t))))
     (when output-file
       (save-excursion
         (insert (format xenops-image-latex-template
@@ -83,10 +80,11 @@ pasted from the system clipboard.")
                     headings))
         (setq pos (point))
         (outline-up-heading 1))
-      (format "%s--%s--%s.%s"
-              (f-base (buffer-file-name))
-              (s-join "--" headings)
-              identifier
+      (format "%s.%s"
+              (s-join "--"
+                      (append (list (f-base (buffer-name)))
+                              headings
+                              (list identifier)))
               extension))))
 
 (provide 'xenops-image)
