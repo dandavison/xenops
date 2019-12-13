@@ -19,6 +19,7 @@
 (require 'xenops-image)
 (require 'xenops-math)
 (require 'xenops-minted)
+(require 'xenops-overlay)
 (require 'xenops-parse)
 (require 'xenops-src)
 (require 'xenops-util)

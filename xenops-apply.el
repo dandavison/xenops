@@ -64,7 +64,13 @@ section of the buffer that xenops can do something to."
         element)))
 
 (defun xenops-apply-parse-at-point (&optional parse-at-point-fns)
-  (xenops-util-first-result #'funcall (or parse-at-point-fns
-                                          (xenops-elements-get-all :parser))))
+  "Return the element at point if there is one."
+  ;; If there's a xenops overlay at point, then the user will expect that element to be returned,
+  ;; even if point somehow isn't actually on the element.
+  (-if-let* ((ov (and (not parse-at-point-fns) (xenops-overlay-at-point))))
+      (save-excursion (goto-char (overlay-start ov))
+                      (xenops-apply-get-next-element nil (overlay-end ov)))
+    (xenops-util-first-result #'funcall (or parse-at-point-fns
+                                            (xenops-elements-get-all :parser)))))
 
 (provide 'xenops-apply)
