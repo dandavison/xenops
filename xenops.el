@@ -99,8 +99,7 @@
     (xenops-util-define-key-with-fallback "\C-y" #'xenops-handle-paste)
     (xenops-util-define-key-with-fallback "\"" #'xenops-insert-quote)
 
-    (if xenops-font-font-family (xenops-font-set-faces))
-
+    (xenops-font-activate)
     (xenops-math-activate)
     (xenops-auctex-activate)
     (xenops-xen-mode +1)

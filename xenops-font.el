@@ -3,6 +3,9 @@
   code elements in a Xenops buffer. To make this take effect,
   call `xenops-font-set-faces' or restart `xenops-mode'.")
 
+(defun xenops-font-activate ()
+  (if xenops-font-font-family (xenops-font-set-faces)))
+
 (defun xenops-font-set-faces ()
   (interactive)
   (face-remap-add-relative 'variable-pitch :family xenops-font-font-family)
