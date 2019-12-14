@@ -152,7 +152,7 @@ In addition, we require the following text property inheritance behavior on inse
   (-if-let* ((element (xenops-math-parse-element-at-point)))
       (let ((beg (plist-get element :begin-content))
             (end (1+ (plist-get element :end-content)))
-            (props '(cursor-sensor-functions (xenops-math-handle-element-exit))))
+            (props '(cursor-sensor-functions (xenops-math-handle-element-transgression))))
         (add-text-properties beg end props)
         (add-text-properties (1- end) end '(rear-nonsticky (cursor-sensor-functions))))))
 
@@ -202,7 +202,7 @@ If we are in a math element, then paste without the delimiters"
                   (length element-string))
           element))))
 
-(defun xenops-math-handle-element-exit (window oldpos event-type)
+(defun xenops-math-handle-element-transgression (window oldpos event-type)
   "Render a math element when point leaves it."
   ;; TODO: check window
   (if (eq event-type 'left)
