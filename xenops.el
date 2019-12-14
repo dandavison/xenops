@@ -247,7 +247,18 @@
 (defun xenops-handle-paste ()
   (interactive)
   (or (xenops-math-handle-paste)
-      (xenops-image-handle-paste)))
+      (xenops-image-handle-paste)
+      (xenops-handle-paste-default)))
+
+(defun xenops-handle-paste-default ()
+  (let ((pos (point)))
+    (call-interactively #'yank)
+    (unless (xenops-apply-parse-at-point)
+      (save-excursion
+        (push-mark (point) t t)
+        (goto-char pos)
+        (xenops-render)))
+    t))
 
 (defun xenops-render-async ()
   "Run `xenops-render' on the current buffer's file, asynchronously."
