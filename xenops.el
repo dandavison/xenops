@@ -97,6 +97,7 @@
 
     (xenops-util-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
     (xenops-util-define-key-with-fallback "\C-y" #'xenops-handle-paste)
+    (xenops-util-define-key-with-fallback "\"" #'xenops-insert-quote)
 
     (if xenops-font-font-family (xenops-font-set-faces))
 
@@ -259,6 +260,11 @@
         (goto-char pos)
         (xenops-render)))
     t))
+
+(defun xenops-insert-quote ()
+  (interactive)
+  (if (xenops-apply-parse-at-point)
+      (insert "\"")))
 
 (defun xenops-render-async ()
   "Run `xenops-render' on the current buffer's file, asynchronously."
