@@ -60,7 +60,7 @@
             (message "Xenops: creating file: %s" cache-file)
             (let ((org-latex-packages-alist (xenops-math-get-latex-preamble-lines))
                   (org-latex-default-packages-alist))
-              (xenops-math-set-org-preview-latex-process-alist! element)
+              (xenops-math-set-org-preview-latex-process-alist! image-type element)
               (org-create-formula-image
                latex cache-file org-format-latex-options 'forbuffer xenops-math-process)))
           (xenops-element-delete-overlays element)
@@ -99,6 +99,7 @@
 (defun xenops-math-image-change-size (element factor)
   (-if-let* ((image (xenops-element-get-image element)))
       (when (eq (image-property image :type) 'svg)
+        ;; TODO: other image types
         (image-flush image)
         (let* ((data (or (eval (image-property image :data))
                          (prog1 (f-read-text (image-property image :file))
@@ -221,6 +222,7 @@ If we are in a math element, then paste without the delimiters"
               (image-tooltip (propertize " "
                                          'display
                                          ;; TODO: the file path should be stored somewhere, not recomputed.
+                                         ;; TODO: detect image type
                                          `(image . (:file ,(xenops-math-get-cache-file element) :type svg)))))
           (cl-letf (((symbol-function 'mouse-posn-property)
                      (lambda (&rest args) 'region))
@@ -258,18 +260,19 @@ If we are in a math element, then paste without the delimiters"
               'inline-math (list delimiter delimiter)
               (point-at-bol) (or (save-excursion (re-search-forward delimiter nil t)) (point-max))))))))
 
-(defun xenops-math-set-org-preview-latex-process-alist! (element)
-  (let* ((bounding-box (if (eq 'inline-math (plist-get element :type)) "1" "10"))
-         (dvisvgm-process-plist (cdr (assoc 'dvisvgm org-preview-latex-process-alist)))
-         (dvisvgm-image-converter (car (plist-get dvisvgm-process-plist
-                                                  :image-converter))))
-    ;; TODO: this mutates the global variable!
-    (plist-put org-format-latex-options :scale xenops-math-image-scale-factor)
-    (unless (string-match " -b \\([^ ]+\\) " dvisvgm-image-converter)
-      (error "Unable to set bounding box: unexpected value of `dvisvgm-image-converter'"))
-    (plist-put dvisvgm-process-plist
-               :image-converter `(,(replace-match bounding-box t t
-                                                  dvisvgm-image-converter 1)))))
+(defun xenops-math-set-org-preview-latex-process-alist! (image-type element)
+  ;; TODO: this mutates the global variable!
+  (plist-put org-format-latex-options :scale xenops-math-image-scale-factor)
+  (if (string-equal image-type "svg")
+      (let* ((bounding-box (if (eq 'inline-math (plist-get element :type)) "1" "10"))
+             (dvisvgm-process-plist (cdr (assoc 'dvisvgm org-preview-latex-process-alist)))
+             (dvisvgm-image-converter (car (plist-get dvisvgm-process-plist
+                                                      :image-converter))))
+        (unless (string-match " -b \\([^ ]+\\) " dvisvgm-image-converter)
+          (error "Unable to set bounding box: unexpected value of `dvisvgm-image-converter'"))
+        (plist-put dvisvgm-process-plist
+                   :image-converter `(,(replace-match bounding-box t t
+                                                      dvisvgm-image-converter 1))))))
 
 (defun xenops-math-make-overlay (element image-file image-type margin help-echo)
   (let ((ov (xenops-element-make-overlay element)))
