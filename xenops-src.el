@@ -65,8 +65,10 @@ post-process by replacing the org-mode LaTeX export block (see
       ;; TODO: `Use org-babel-insert-result'
       (goto-char (plist-get element :end))
       (insert result)))
-  (if (xenops-src-latex-results? element)
-      (xenops-src-post-process-latex-result element)))
+  (cond ((xenops-src-latex-results? element)
+         (xenops-src-post-process-latex-result element))
+        ((xenops-src-image-results? element)
+         (xenops-src-post-process-image-result element))))
 
 (defun xenops-src-post-process-latex-result (element)
   (let* ((lang (downcase (plist-get element :language)))
@@ -80,10 +82,28 @@ post-process by replacing the org-mode LaTeX export block (see
       (-if-let* ((element (xenops-apply-get-next-element)))
           (xenops-element-do element 'render)))))
 
-(defun xenops-src-latex-results? (element)
+(defun xenops-src-post-process-image-result (element)
+  (let* ((lang (downcase (plist-get element :language)))
+         (wrap-in-align-environment (member lang '("python" "mathematica"))))
+    (save-excursion
+      (when (re-search-forward
+             "#\\+RESULTS:\n\\[\\[file:\\([^]\n]+\\)\\]\\]" nil t)
+        (replace-match
+         "\\\\includegraphics{\\1}" t)))
+    (save-excursion
+      (-if-let* ((element (xenops-apply-get-next-element)))
+          (xenops-element-do element 'render)))))
+
+(defun xenops-src-org-babel-result-params (element)
   (let* ((info (plist-get element :org-babel-info))
          (result-params (cdr (assq :results (nth 2 info)))))
-    (member "latex" (split-string (downcase result-params)))))
+    (split-string (downcase result-params))))
+
+(defun xenops-src-latex-results? (element)
+  (member "latex" (xenops-src-org-babel-result-params element)))
+
+(defun xenops-src-image-results? (element)
+  (member "graphics" (xenops-src-org-babel-result-params element)))
 
 (defun xenops-src-execute-parsed-src-block (info)
   "Execute an org-babel src block from the parsed data structure
@@ -93,7 +113,7 @@ buffer, as a string."
     (org-mode)
     ;; TODO: Execute the block based on parsed `info' without writing it into the buffer.
     (insert (org-babel-exp-code info 'block))
-    (org-babel-execute-src-block t info)
+    (org-babel-execute-src-block 'ignore-cached info)
     (buffer-substring (point) (point-max))))
 
 (defmacro xenops-src-do-in-org-mode (&rest body)
