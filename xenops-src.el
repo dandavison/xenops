@@ -54,10 +54,18 @@ LaTeX."
 (defun xenops-src-execute-src-block:mathematica (element)
   "Execute mathematica src block. If `:results latex`, arrange
 for mathematica to return the result as LaTeX."
-  (if (xenops-src-latex-results? element)
-      (let* ((info (plist-get element :org-babel-info))
-             (body (nth 1 info)))
-        (setf (nth 1 info) (concat body " // TeXForm // ToString" ))))
+  (let* ((info (plist-get element :org-babel-info))
+         (body (nth 1 info)))
+    (cond ((xenops-src-latex-results? element)
+           (setf (nth 1 info) (concat body " // TeXForm // ToString" )))
+          ((xenops-src-image-results? element)
+           (let* ((file (or (cdr (assq :file (nth 2 info)))
+                            (xenops-image-suggest-file-name ".png")))
+                  (lines (s-split "\n" body t))
+                  (last-line (car (last lines))))
+             (setf (car (last lines))
+                   (format "Export[\"%s\", %s, ImageResolution -> 144]" file last-line))
+             (setf (nth 1 info) (s-join "\n" lines))))))
   (let ((org-babel-mathematica-command
          (if xenops-src-mathematica-use-wolframscript
              "wolframscript -file"
