@@ -1,4 +1,4 @@
-(ert-deftest xenops-image-get-file-name-suggestion ()
+(ert-deftest xenops-image-suggest-file-name ()
   (with-temp-buffer
     (cl-letf* (((symbol-function 'buffer-name) (lambda () "my-file.tex"))
                ((symbol-function 'buffer-file-name) (lambda () (concat "/a/b/c/" (buffer-name)))))
@@ -14,5 +14,5 @@
 \\subsubsection{SubSubsec2}
 hello
 ")
-      (should (equal (xenops-image-get-file-name-suggestion "hash" "png")
+      (should (equal (xenops-image-suggest-file-name "hash" "png")
                      "my-file--sec1--subsec-2--subsubsec2--hash.png")))))
