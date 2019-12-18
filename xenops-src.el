@@ -1,3 +1,9 @@
+(defvar xenops-src-mathematica-use-wolframscript t
+  "If non-nil then use the `wolframscript` executable to execute
+mathematica code; otherwise use `MathematicaScript`. Note that
+graphics cannot be saved to file reliably using MathematicaScript
+under some OSs / Mathematica versions.")
+
 (setq xenops-src-do-in-org-mode-header "* \n")
 
 (defun xenops-src-parse-at-point ()
@@ -52,7 +58,11 @@ for mathematica to return the result as LaTeX."
       (let* ((info (plist-get element :org-babel-info))
              (body (nth 1 info)))
         (setf (nth 1 info) (concat body " // TeXForm // ToString" ))))
-  (xenops-src-execute-src-block element))
+  (let ((org-babel-mathematica-command
+         (if xenops-src-mathematica-use-wolframscript
+             "wolframscript -file"
+           org-babel-mathematica-command)))
+    (xenops-src-execute-src-block element)))
 
 (defun xenops-src-execute-src-block (element)
   "Execute the src block in a temporary org-mode buffer and
