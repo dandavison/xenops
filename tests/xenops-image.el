@@ -14,5 +14,5 @@
 \\subsubsection{SubSubsec2}
 hello
 ")
-      (should (equal (xenops-image-suggest-file-name "hash" "png")
+      (should (equal (xenops-image-suggest-file-name "--hash.png")
                      "my-file--sec1--subsec-2--subsubsec2--hash.png")))))
