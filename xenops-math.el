@@ -102,9 +102,11 @@
         ;; TODO: other image types
         (image-flush image)
         (let* ((data (or (eval (image-property image :data))
-                         (prog1 (f-read-text (image-property image :file))
-                           (setf (image-property image :file) nil)))))
-          (setf (image-property image :data) (xenops-util-svg-resize data factor))))))
+                         (and (f-exists? (image-property image :file))
+                              (prog1 (f-read-text (image-property image :file))
+                                (setf (image-property image :file) nil))))))
+          (if data
+              (setf (image-property image :data) (xenops-util-svg-resize data factor)))))))
 
 (defun xenops-math-image-reset-size (element)
   (xenops-math-reveal element)

@@ -45,7 +45,7 @@ operated on is either the active region, or the entire buffer."
           (while (setq el (xenops-apply-get-next-element nil end parse-at-point-fns))
             (and el
                  (or (null pred) (funcall pred el))
-                 (handle el)))))
+                 (ignore-errors (handle el))))))
       ;; Hack: This should be abstracted.
       (and region-active (not (-intersection handlers '(xenops-math-image-increase-size
                                                         xenops-math-image-decrease-size)))
