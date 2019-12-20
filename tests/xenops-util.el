@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (ert-deftest xenops-util-first-index ()
   (should (equal (xenops-util-first-index '(nil))
                  nil))

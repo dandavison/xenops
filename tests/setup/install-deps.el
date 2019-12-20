@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 ;; Based on https://github.com/abo-abo/swiper/blob/master/targets/install-deps.el
 
 (defconst xenops-dependencies

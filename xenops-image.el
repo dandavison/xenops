@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (defvar xenops-image-width 512)
 
 (defvar xenops-image-directory nil

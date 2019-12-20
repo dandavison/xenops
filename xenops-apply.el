@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (defmacro xenops-define-apply-command (op-type docstring)
   `(defun ,(intern (concat "xenops-" (symbol-name op-type))) ()
      ,(concat docstring " "

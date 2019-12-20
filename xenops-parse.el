@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (defun xenops-parse-element-at-point (type)
   "A base `parse-at-point` implementation that is used by some
 concrete element types. It is not expected to work for all

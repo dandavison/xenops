@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (defun xenops-minted-parse-at-point ()
   (-if-let* ((element (xenops-parse-element-at-point 'minted)))
       (let* ((language (xenops-minted-get-babel-language (match-string 2)))

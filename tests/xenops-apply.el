@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (defun xenops-apply-get-next-element--do-test (input-text &rest expected-properties)
   (with-temp-buffer
     (save-excursion (insert input-text))

@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (require 'cl-lib)
 (require 'org)
 (require 'subr-x)

@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (ert-deftest xenops-xen-prettify-symbols-replacement ()
   "An entry in  `prettify-symbols-alist' set outside xenops should be honored."
   (with-temp-buffer

@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (ert-deftest xenops-elements-get--handlers ()
   (let ((inline-math-handlers (xenops-elements-get 'inline-math :handlers))
         (block-math-handlers (xenops-elements-get 'block-math :handlers)))

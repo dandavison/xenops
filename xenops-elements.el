@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (defun xenops-elements-get (type key)
   "The value associated with KEY for element type TYPE."
   (xenops-get xenops-elements type key))

@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 ;; Terminology
 ;;
 ;; | math element   | either an inline element or a block element    |

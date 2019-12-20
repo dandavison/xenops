@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (defun xenops-overlay-at-point ()
   (--first (overlay-get it 'xenops-overlay-type) (overlays-at (point))))
 

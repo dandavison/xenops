@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (defvar xenops-src-mathematica-use-wolframscript t
   "If non-nil then use the `wolframscript` executable to execute
 mathematica code; otherwise use `MathematicaScript`. Note that

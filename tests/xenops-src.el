@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (defmacro xenops-src-execute-and-do (src-block &rest body)
   `(with-temp-buffer
      (save-excursion (insert ,src-block))

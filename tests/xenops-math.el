@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (ert-deftest xenops-math-parse-inline-math-from-string ()
   (should (equal (xenops-math-parse-element-from-string "$x$")
                  '(:begin 1 :begin-content 2 :end-content 3 :end 4 :type inline-math

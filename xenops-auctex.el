@@ -1,5 +1,6 @@
 ;; -*- lexical-binding: t -*-
 
+
 (setq xenops-auctex-electric-insert-commands
       #'(LaTeX-insert-left-brace TeX-insert-sub-or-superscript))
 

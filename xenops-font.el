@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (defvar xenops-font-font-family nil
   "The font family used for all text other than math and source
   code elements in a Xenops buffer. To make this take effect,

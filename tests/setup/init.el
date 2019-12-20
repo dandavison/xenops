@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (setq melpa-stable (getenv "MELPA_STABLE"))
 (setq xenops-package-dir "/tmp/xenops-packages"
       package-user-dir (concat xenops-package-dir

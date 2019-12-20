@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (ert-deftest xenops-image-suggest-file-name ()
   (with-temp-buffer
     (cl-letf* (((symbol-function 'buffer-name) (lambda () "my-file.tex"))

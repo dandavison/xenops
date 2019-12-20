@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 ;; Generic operations on an element. Functions in this file should determine behavior based on the
 ;; type of the element and requested operations, by consulting the `xenops-elements' and
 ;; `xenops-ops' data structures. They should not directly call functions that are specific to

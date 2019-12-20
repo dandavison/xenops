@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (defmacro xenops-util-define-key-with-fallback (key handler &optional fallback-key)
   "Bind `handler' to `key' in `xenops-mode-map' such that if
 `handler' returns `nil', then the function is called that would

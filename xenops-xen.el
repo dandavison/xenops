@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (require 'style)
 
 (define-minor-mode xenops-xen-mode

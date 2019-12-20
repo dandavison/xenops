@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (defun xenops-text-footnote-render (element)
   (let ((ov (xenops-element-make-overlay element)))
     (overlay-put ov 'display "[footnote]")

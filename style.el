@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 ;; This module implements a self-contained minor mode `style-mode' which is essentially an
 ;; extension of `prettify-symbols-mode'.
 

@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 ;; This module contains copies of functions that Xenops uses from Emacs but that are not available
 ;; in all versions of Emacs that Xenops supports.
 
