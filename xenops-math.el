@@ -255,7 +255,8 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-parse-element-at-point ()
   (or (xenops-math-parse-inline-element-at-point)
-      (xenops-math-parse-block-element-at-point)))
+      (xenops-math-parse-block-element-at-point)
+      (xenops-math-parse-table-at-point)))
 
 (defun xenops-math-parse-block-element-at-point ()
   (xenops-parse-element-at-point 'block-math))
