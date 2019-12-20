@@ -58,15 +58,27 @@
              (cache-file (xenops-math-compute-file-name latex image-type))
              (cache-file-exists? (file-exists-p cache-file)))
         (when (or cache-file-exists? (not cached-only))
-          (unless cache-file-exists?
-            (message "Xenops: creating file: %s" cache-file)
-            (let ((org-latex-packages-alist (xenops-math-get-latex-preamble-lines))
-                  (org-latex-default-packages-alist))
-              (xenops-math-set-org-preview-latex-process-alist! image-type element)
-              (org-create-formula-image
-               latex cache-file org-format-latex-options 'forbuffer xenops-math-process)))
-          (xenops-element-delete-overlays element)
-          (xenops-math-make-overlay element cache-file image-type margin latex))))))
+          (if cache-file-exists?
+              (progn (xenops-element-delete-overlays element)
+                     (xenops-math-make-overlay element cache-file image-type margin latex))
+            (xenops-math-render-sync element latex image-type margin cache-file)))))))
+
+(defun xenops-math-render-sync (element latex image-type margin cache-file)
+  (message "Xenops: creating file: %s" cache-file)
+  (xenops-element-create-marker element)
+  (let ((org-latex-packages-alist (xenops-math-get-latex-preamble-lines))
+        (org-latex-default-packages-alist))
+    (xenops-math-set-org-preview-latex-process-alist! image-type element)
+    (xenops-create-formula-image-sync
+     latex cache-file org-format-latex-options 'forbuffer xenops-math-process
+     (lambda ()
+       (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
+         (xenops-element-delete-overlays element)
+         (xenops-math-make-overlay element cache-file image-type margin latex))))))
+
+(defun xenops-create-formula-image-sync  (string tofile options buffer processing-type callback)
+  (org-create-formula-image string tofile options buffer processing-type)
+  (funcall callback))
 
 (defun xenops-math-get-latex-preamble-lines ()
   (let ((file (make-temp-file "xenops-math-" nil ".tex")))
