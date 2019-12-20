@@ -1,22 +1,10 @@
 (defun xenops-elements-get (type key)
-  "Return the value associated with KEY for element type TYPE."
-  (let ((value (cdr (assq key (cdr (assq type xenops-elements))))))
-    (if (and (symbolp value) (assq value xenops-elements))
-        ;; Instead of a real entry, an element type may name another element type, meaning: use
-        ;; that element type's entry.
-        (xenops-elements-get value key)
-      value)))
+  "The value associated with KEY for element type TYPE."
+  (xenops-get xenops-elements type key))
 
 (defun xenops-elements-get-for-types (types key)
-  "Concatenated list of all items under key KEY for any type in
-TYPES. If TYPES is 'all, then all items under key KEY for any
-type."
-  (-uniq
-   (apply #'append
-          (cl-loop for (type _) in xenops-elements
-                   collecting (and (or (eq types 'all) (memq type types))
-                                   (let ((val (xenops-elements-get type key)))
-                                     (if (listp val) val (list val))))))))
+  "Concatenated list of values associated with KEY for elements of types TYPES."
+  (xenops-get-for-types xenops-elements types key))
 
 (defun xenops-elements-get-all (key)
   "Concatenated list of all items under key KEY for any element type."

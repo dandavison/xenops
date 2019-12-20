@@ -221,6 +221,25 @@
         (:handlers . (xenops-src-execute)))))
   "Element-specific operation handlers, regexps, and parsers, grouped by element type.")
 
+(defun xenops-get (data type key)
+  "Return the value associated with KEY for entry TYPE in DATA."
+  (let ((value (cdr (assq key (cdr (assq type data))))))
+    (if (and (symbolp value) (assq value data))
+        ;; Instead of a real value, a type may name another type, meaning: use that type's entry.
+        (xenops-get data value key)
+      value)))
+
+(defun xenops-get-for-types (data types key)
+  "Concatenated list of all items under key KEY for any type in
+TYPES. If TYPES is 'all, then all items under key KEY for any
+type."
+  (-uniq
+   (apply #'append
+          (cl-loop for (type _) in data
+                   collecting (and (or (eq types 'all) (memq type types))
+                                   (let ((val (xenops-get data type key)))
+                                     (if (listp val) val (list val))))))))
+
 (defun xenops-font-lock-activate ()
   "Configure font-lock for all element types by adding entries to
 `font-lock-keywords`."
@@ -234,9 +253,13 @@
                                  do
                                  (font-lock-add-keywords nil `((,regexp ,keyword))))))))
 
-(defun xenops-ops-get (type key)
-  "Return the value associated with KEY for operation type TYPE."
-  (cdr (assq key (cdr (assq type xenops-ops)))))
+(defun xenops-ops-get (op key)
+  "The value associated with KEY for operation OP."
+  (xenops-get xenops-ops op key))
+
+(defun xenops-ops-get-for-ops (ops key)
+  "Concatenated list of values associated with KEY for operations OPS."
+  (xenops-get-for-types xenops-ops ops key))
 
 (defun xenops-render-if-cached ()
   (let ((fn (symbol-function 'xenops-math-render)))

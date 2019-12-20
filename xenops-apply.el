@@ -6,7 +6,7 @@
 2. Elements in the active region, if there is an active region.
 3. All elements in the buffer.")
      (interactive)
-     (xenops-apply ',op-type)))
+     (xenops-apply '(,op-type))))
 
 (defmacro xenops-define-apply-at-point-command (op docstring)
   `(defun ,(intern (concat "xenops-" (symbol-name op) "-at-point")) ()
@@ -16,39 +16,48 @@
                 (handlers (xenops-ops-get ',op :handlers)))
          (xenops-element-dispatch el handlers))))
 
-(defun xenops-apply (op &optional pred)
-  "Apply operation type OP-TYPE to any elements encountered. The region
-operated on is either the element at point, the active region, or
-the entire buffer.
+(defun xenops-apply (ops &optional pred)
+  "Apply operation types OPS to any elements encountered. The
+region operated on is either the active region, or the entire
+buffer.
 
 Optional argument PRED is a function taking an element plist as
 its only argument. The element will be operated on iff PRED
 returns non-nil."
-  (xenops-apply-handlers (xenops-ops-get op :handlers) pred))
+  (xenops-apply-handlers (xenops-ops-get-for-ops ops :handlers) pred))
+
+(defun xenops-apply-at-point (ops &optional pred)
+  "Apply operation types OPS to element at point, if there is one."
+  (xenops-apply-handlers-at-point (xenops-ops-get-for-ops ops :handlers) pred))
 
 (defun xenops-apply-handlers (handlers &optional pred)
   "Apply HANDLERS to any elements encountered. The region
-operated on is either the element at point, the active region, or
-the entire buffer."
+operated on is either the active region, or the entire buffer."
   (cl-flet ((handle (lambda (el) (save-excursion
                               (xenops-element-dispatch el handlers)))))
-    (-if-let* ((el (xenops-apply-parse-at-point)))
-        (handle el)
-      (cl-destructuring-bind (beg end region-active)
-          (if (region-active-p)
-              `(,(region-beginning) ,(region-end) t)
-            `(,(point-min) ,(point-max) nil))
-        (save-excursion
-          (goto-char beg)
-          (let ((parse-at-point-fns (xenops-elements-get-all :parser)))
-            (while (setq el (xenops-apply-get-next-element nil end parse-at-point-fns))
-              (and el
-                   (or (null pred) (funcall pred el))
-                   (handle el)))))
-        ;; Hack: This should be abstracted.
-        (and region-active (not (-intersection handlers '(xenops-math-image-increase-size
-                                                          xenops-math-image-decrease-size)))
-             (deactivate-mark))))))
+    (cl-destructuring-bind (beg end region-active)
+        (if (region-active-p)
+            `(,(region-beginning) ,(region-end) t)
+          `(,(point-min) ,(point-max) nil))
+      (save-excursion
+        (goto-char beg)
+        (let ((parse-at-point-fns (xenops-elements-get-all :parser)))
+          (while (setq el (xenops-apply-get-next-element nil end parse-at-point-fns))
+            (and el
+                 (or (null pred) (funcall pred el))
+                 (handle el)))))
+      ;; Hack: This should be abstracted.
+      (and region-active (not (-intersection handlers '(xenops-math-image-increase-size
+                                                        xenops-math-image-decrease-size)))
+           (deactivate-mark)))))
+
+(defun xenops-apply-handlers-at-point (handlers &optional pred)
+  "Apply HANDLERS to element point if there is one."
+  (cl-flet ((handle (lambda (el) (save-excursion
+                              (xenops-element-dispatch el handlers)))))
+    (-when-let* ((el (xenops-apply-parse-at-point)))
+      (handle el)
+      t)))
 
 (defun xenops-apply-get-next-element (&optional start-regexp end parse-at-point-fns)
   "If there is another element, return it and leave point after it.
