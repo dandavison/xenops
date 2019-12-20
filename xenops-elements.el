@@ -7,7 +7,7 @@
         (xenops-elements-get value key)
       value)))
 
-(defun xenops-elements-get-for-types (key types)
+(defun xenops-elements-get-for-types (types key)
   "Concatenated list of all items under key KEY for any type in
 TYPES. If TYPES is 'all, then all items under key KEY for any
 type."
@@ -20,12 +20,12 @@ type."
 
 (defun xenops-elements-get-all (key)
   "Concatenated list of all items under key KEY for any element type."
-  (xenops-elements-get-for-types key 'all))
+  (xenops-elements-get-for-types 'all key))
 
 (defun xenops-elements-delimiter-start-regexp (&optional types)
   "A regexp matching the start of any element."
   (format "\\(%s\\)"
           (s-join "\\|"
-                  (mapcar #'car (xenops-elements-get-for-types :delimiters (or types 'all))))))
+                  (mapcar #'car (xenops-elements-get-for-types (or types 'all) :delimiters)))))
 
 (provide 'xenops-elements)

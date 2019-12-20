@@ -114,7 +114,7 @@
   "A regexp matching the start or end line of any block math element."
   (format "\\(%s\\)"
           (s-join "\\|"
-                  (apply #'append (xenops-elements-get-for-types :delimiters '(block-math table))))))
+                  (apply #'append (xenops-elements-get-for-types '(block-math table) :delimiters)))))
 
 (defun xenops-math-block-math-font-lock-handler ()
   (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch)
