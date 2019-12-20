@@ -57,6 +57,9 @@
 (xenops-define-apply-at-point-command reveal
                                       "Reveal the element at point.")
 
+(xenops-define-apply-at-point-command regenerate
+                                      "Regenerate the element at point.")
+
 (xenops-define-apply-at-point-command copy
                                       "Copy the element at point.")
 
@@ -125,12 +128,12 @@
   (interactive "P")
   (cond
    ((equal arg '(16))
-    (xenops-regenerate))
+    (or (xenops-regenerate-at-point)
+        (xenops-regenerate)))
    ((equal arg '(4))
     (xenops-reveal))
-   (t (xenops-apply-handlers
-       (append (xenops-ops-get 'render :handlers)
-               (xenops-ops-get 'execute :handlers))))))
+   (t (or (xenops-apply-at-point '(render execute))
+          (xenops-render)))))
 
 (defvar xenops-ops
   '((render
