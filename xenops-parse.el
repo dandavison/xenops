@@ -27,10 +27,10 @@ If point is in element, return parsed element as a plist."
                   ;; This function will return nil if point is between delimiters separated by
                   ;; zero characters.
                   (left-char))
-                (xenops-parse-between-regexps? delimiters lim-down (point)))))
+                (xenops-parse-between-regexps? delimiters lim-up lim-down (point)))))
       (append coords `(:type ,type :delimiters ,delimiters))))
 
-(defun xenops-parse-between-regexps? (delimiters limit pos)
+(defun xenops-parse-between-regexps? (delimiters lim-up lim-down pos)
   "Based on `org-between-regexps-p'."
   (save-excursion
     (let (beg-beg beg-end end-beg end-end)
@@ -42,7 +42,7 @@ If point is in element, return parsed element as a plist."
               (goto-char (match-end 0))
               (setq beg-end (point))
               (skip-chars-forward " \t\n")
-              (re-search-forward (car (last delimiters)) limit t)
+              (re-search-forward (car (last delimiters)) lim-down t)
               (> (setq end-end (match-end 0)) pos)
               (goto-char (match-beginning 0))
               (setq end-beg (point))
