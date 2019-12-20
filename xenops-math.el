@@ -77,7 +77,18 @@
          (xenops-math-make-overlay element cache-file image-type margin latex))))))
 
 (defun xenops-create-formula-image-sync  (string tofile options buffer processing-type callback)
-  (org-create-formula-image string tofile options buffer processing-type)
+  (let ((dummy-file (make-temp-file "xenops-create-formula-image-dummy-file-"))
+        org-compile-file-args)
+    (cl-letf (((symbol-function 'org-compile-file)
+               (lambda (&rest args)
+                 (push args org-compile-file-args)
+                 dummy-file)))
+      (org-create-formula-image string tofile options buffer processing-type))
+    (cl-destructuring-bind (latex-compiler-args image-converter-args) (nreverse org-compile-file-args)
+      (let* ((image-input-file (apply #'org-compile-file latex-compiler-args))
+             (image-converter-args (apply #'list image-input-file (cdr image-converter-args)))
+             (image-output-file (apply #'org-compile-file image-converter-args)))
+        (copy-file image-output-file tofile 'replace))))
   (funcall callback))
 
 (defun xenops-math-get-latex-preamble-lines ()
@@ -289,7 +300,9 @@ If we are in a math element, then paste without the delimiters"
           (error "Unable to set bounding box: unexpected value of `dvisvgm-image-converter'"))
         (plist-put dvisvgm-process-plist
                    :image-converter `(,(replace-match bounding-box t t
-                                                      dvisvgm-image-converter 1))))))
+                                                      dvisvgm-image-converter 1)))
+        (plist-put dvisvgm-process-plist
+                   :post-clean '("__dummy__")))))
 
 (defun xenops-math-make-overlay (element image-file image-type margin help-echo)
   (let ((ov (xenops-element-make-overlay element)))
