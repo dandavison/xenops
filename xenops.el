@@ -4,6 +4,7 @@
 (require 'org)
 (require 'subr-x)
 
+(require 'aio)
 (require 'avy)
 (require 'dash)
 (require 'dash-functional)

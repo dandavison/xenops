@@ -17,7 +17,7 @@
     (funcall callback)))
 
 (defmacro xenops-render--do-test (buffer-contents &rest body)
-  `(cl-letf (((symbol-function 'xenops-create-formula-image-sync)
+  `(cl-letf (((symbol-function 'xenops-create-formula-image-async)
               #'xenops-test-mock-xenops-create-formula-image))
      (let ((xenops-cache-directory (make-temp-file "xenops-test-" 'dir))
            ;; We are relying on this file being treated as its own master file by

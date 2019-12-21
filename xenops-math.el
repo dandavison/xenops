@@ -49,54 +49,74 @@
                                                          (plist-get element :end-content)))))
     (let ((latex (buffer-substring-no-properties (plist-get element :begin)
                                                  (plist-get element :end))))
-      (let* ((image-type (plist-get (cdr (assq xenops-math-process
-                                               org-preview-latex-process-alist))
-                                    :image-output-type))
+      ;; The name "image-type" is bound by image-mode and this interferes with the closure.
+      (let* ((-image-type (plist-get (cdr (assq xenops-math-process
+                                                org-preview-latex-process-alist))
+                                     :image-output-type))
              (margin (if (eq 'inline-math (plist-get element :type))
                          0
                        `(,xenops-math-image-margin . 0)))
-             (cache-file (xenops-math-compute-file-name latex image-type))
-             (cache-file-exists? (file-exists-p cache-file)))
-        (when (or cache-file-exists? (not cached-only))
-          (if cache-file-exists?
-              (progn (xenops-element-delete-overlays element)
-                     (xenops-math-make-overlay element cache-file image-type margin latex))
-            (xenops-math-render-sync element latex image-type margin cache-file)))))))
+             (cache-file (xenops-math-compute-file-name latex -image-type))
+             (cache-file-exists? (file-exists-p cache-file))
+             (insert-image (lambda (element)
+                             (xenops-element-delete-overlays element)
+                             (xenops-math-make-overlay element cache-file -image-type margin latex))))
+        (cond
+         (cache-file-exists?
+          (funcall insert-image element))
+         ((not cached-only)
+          (xenops-math-render-async element latex -image-type cache-file insert-image)))))))
 
-(defun xenops-math-render-sync (element latex image-type margin cache-file)
-  (message "Xenops: creating file: %s" cache-file)
+(defun xenops-math-render-async (element latex image-type cache-file insert-image)
   (xenops-element-create-marker element)
   (let ((org-latex-packages-alist (xenops-math-get-latex-preamble-lines))
         (org-latex-default-packages-alist))
     (xenops-math-set-org-preview-latex-process-alist! image-type element)
-    (xenops-create-formula-image-sync
+    (xenops-create-formula-image-async
      latex cache-file org-format-latex-options 'forbuffer xenops-math-process
      (lambda ()
        (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-         (xenops-element-delete-overlays element)
-         (xenops-math-make-overlay element cache-file image-type margin latex))))))
+         (funcall insert-image element))))))
 
-(defun xenops-create-formula-image-sync  (string tofile options buffer processing-type callback)
+(aio-defun xenops-create-formula-image-async  (string tofile options buffer processing-type callback)
+  "
+1. Call `org-create-formula-image' with `org-compile-file' overriden, to collect arguments to `org-compile-file'.
+2. Call `org-compile-file' with `shell-command' overriden, to collect arguments to `shell-command'.
+3. Run shell commands as an async chain.
+"
   (let ((dummy-file (make-temp-file "xenops-create-formula-image-dummy-file-"))
         org-compile-file-args)
     (cl-letf (((symbol-function 'org-compile-file)
                (lambda (&rest args)
                  (push args org-compile-file-args)
                  dummy-file)))
-      (org-create-formula-image string tofile options buffer processing-type))
+      (aio-await (aio-with-async (org-create-formula-image string tofile options buffer processing-type))))
     (cl-destructuring-bind (latex-compiler-args image-converter-args) (nreverse org-compile-file-args)
-      (let (shell-command-args (orig-fn (symbol-function 'shell-command)))
+      (let ((orig-fn (symbol-function 'shell-command))
+            shell-command-args )
         (cl-letf (((symbol-function 'shell-command)
                    (lambda (&rest args)
-                     (push args shell-command-args)
-                     (apply orig-fn args))))
+                     (push args shell-command-args))))
           (let* ((image-input-file (apply #'org-compile-file latex-compiler-args))
                  (image-converter-args (apply #'list image-input-file (cdr image-converter-args)))
                  (image-output-file (apply #'org-compile-file image-converter-args)))
-            (dolist (arg shell-command-args)
-              (message "shell-command: %S" arg))
-            (copy-file image-output-file tofile 'replace)
-            (funcall callback)))))))
+            (dolist (args (nreverse shell-command-args))
+              (aio-await (apply #'xenops-aio-shell-command args)))
+            (aio-await (aio-with-async (copy-file image-output-file tofile 'replace)))
+            (aio-await (aio-with-async (funcall callback)))))))))
+
+(defun xenops-aio-shell-command (shell-command &optional output-buffer error-buffer)
+  (let ((promise (aio-promise))
+        (value-function (lambda () (message "xenops-aio: promise resolved: %s" shell-command))))
+    (let ((sentinel (lambda (process event)
+                      (aio-resolve promise value-function)))
+          (name (format "xenops-aio--shell-command-%s"
+                        (sha1 (prin1-to-string shell-command)))))
+      (prog1 promise
+        (make-process
+         :name name
+         :command (split-string shell-command)
+         :sentinel sentinel)))))
 
 (defun xenops-math-get-latex-preamble-lines ()
   (let ((file (make-temp-file "xenops-math-" nil ".tex")))
@@ -239,6 +259,7 @@ If we are in a math element, then paste without the delimiters"
 (defun xenops-math-handle-element-transgression (window oldpos event-type)
   "Render a math element when point leaves it."
   ;; TODO: check window
+  (message "xenops-math-handle-element-transgression")
   (if (eq event-type 'left)
       (-if-let* ((was-in (xenops-math-parse-element-at oldpos)))
           (unless (xenops-element-get-image was-in)

@@ -4,7 +4,8 @@
 
 (defconst xenops-dependencies
   ;; auctex is installed separately
-  '(avy
+  '(aio
+    avy
     dash
     dash-functional
     f
