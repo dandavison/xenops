@@ -15,8 +15,9 @@ if [ $(uname) != Darwin ]; then
          texlive-latex-base > /dev/null
 fi
 
-if [ ! -d auctex ]; then
+if [ ! -f auctex/.git ]; then
     echo "git clone auctex..."
+    rm -fr auctex
     git clone git://git.savannah.gnu.org/auctex.git
 fi
 
