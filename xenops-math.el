@@ -73,53 +73,51 @@
         (org-latex-default-packages-alist))
     (xenops-math-set-org-preview-latex-process-alist! image-type element)
     (xenops-create-formula-image-async
-     latex cache-file org-format-latex-options 'forbuffer xenops-math-process
+     latex cache-file (if (eq 'inline-math (plist-get element :type)) "1" "10")
      (lambda ()
        (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
          (funcall insert-image element))))))
 
-(aio-defun xenops-create-formula-image-async  (string tofile options buffer processing-type callback)
-  "
-1. Call `org-create-formula-image' with `org-compile-file' overriden, to collect arguments to `org-compile-file'.
-2. Call `org-compile-file' with `shell-command' overriden, to collect arguments to `shell-command'.
-3. Run shell commands as an async chain.
-"
-  (let ((dummy-file (make-temp-file "xenops-create-formula-image-dummy-file-"))
-        org-compile-file-args)
-    (cl-letf (((symbol-function 'org-compile-file)
-               (lambda (&rest args)
-                 (push args org-compile-file-args)
-                 dummy-file)))
-      (aio-await (aio-with-async (org-create-formula-image string tofile options buffer processing-type))))
-    (cl-destructuring-bind (latex-compiler-args image-converter-args) (nreverse org-compile-file-args)
-      (let ((orig-fn (symbol-function 'shell-command))
-            shell-command-args )
-        (cl-letf (((symbol-function 'shell-command)
-                   (lambda (&rest args)
-                     (push args shell-command-args))))
-          (let* ((image-input-file (apply #'org-compile-file latex-compiler-args))
-                 (image-converter-args (apply #'list image-input-file (cdr image-converter-args)))
-                 (image-output-file (apply #'org-compile-file image-converter-args)))
-            (dolist (args (nreverse shell-command-args))
-              (aio-await (apply #'xenops-aio-shell-command args)))
-            (aio-await (aio-with-async (copy-file image-output-file tofile 'replace)))
-            (aio-await (aio-with-async (funcall callback)))))))))
+(aio-defun xenops-create-formula-image-async (latex image-cache-file bounding-box callback)
+  "Create IMAGE-CACHE-FILE from LATEX source string and call CALLBACK."
+  (let ((dir temporary-file-directory)
+        (base-name (f-base image-cache-file) ext))
+    (cl-flet ((make-file-name (lambda (ext) (f-join dir (concat base-name ext)))))
+      (let* ((tex-file (make-file-name ".tex"))
+             (dvi-file (make-file-name ".dvi"))
+             (svg-file (make-file-name ".svg"))
+             (latex-header (org-latex-make-preamble
+                            (org-export-get-environment (org-export-get-backend 'latex))
+                            org-format-latex-header
+                            'snippet))
+             (commands
+              `(("latex" "-interaction" "nonstopmode" "-output-directory" ,dir ,tex-file)
+                ("dvisvgm" ,dvi-file "-n" "-b" ,bounding-box "-c" "1.2531428571428573" "-o" ,svg-file))))
+        (aio-await (aio-with-async
+                     (with-temp-file tex-file
+                       (insert (format "%s\\begin{document}\n%s\n\\end{document}\n"
+                                       latex-header
+                                       latex)))))
+        (dolist (command commands)
+          (aio-await (funcall #'xenops-aio-subprocess command)))
+        (aio-await (aio-with-async (copy-file svg-file image-cache-file 'replace))))))
+  (aio-await (aio-with-async (funcall callback))))
 
-(defun xenops-aio-shell-command (shell-command &optional output-buffer error-buffer)
+(defun xenops-aio-subprocess (command &optional output-buffer error-buffer)
   (let ((promise (aio-promise))
-        (value-function (lambda () (message "xenops-aio: promise resolved: %s" shell-command))))
+        (value-function (lambda () (message "xenops-aio: promise resolved: %s" (s-join " " command)))))
     (let ((sentinel (lambda (process event)
                       (aio-resolve promise value-function)))
-          (name (format "xenops-aio--shell-command-%s"
-                        (sha1 (prin1-to-string shell-command)))))
+          (name (format "xenops-aio-subprocess-%s"
+                        (sha1 (prin1-to-string command)))))
       (prog1 promise
         (make-process
          :name name
-         :command (split-string shell-command)
+         :command command
          :sentinel sentinel)))))
 
 (defun xenops-math-get-latex-preamble-lines ()
-  (let ((file (make-temp-file "xenops-math-" nil ".tex")))
+  (let ((file (make-temp-file "xenops-math-TeX-region-create" nil ".tex")))
     (TeX-region-create file "" (buffer-file-name) 0)
     (with-temp-buffer
       (insert-file-contents file)
