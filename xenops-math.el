@@ -100,9 +100,16 @@
                              org-format-latex-header
                              'snippet)))
          (with-temp-file tex-file
-           (insert (format "%s\\begin{document}\n%s\n\\end{document}\n"
-                           latex-header
-                           latex))))))
+           (destructuring-bind (fg bg) (xenops-math-get-latex-colors)
+             (insert latex-header
+                     "\n\\begin{document}\n"
+                     "\\definecolor{fg}{rgb}{" fg "}\n"
+                     "\\definecolor{bg}{rgb}{" bg "}\n"
+                     "\n\\pagecolor{bg}\n"
+                     "\n{\\color{fg}\n"
+                     latex
+                     "\n}\n"
+                     "\n\\end{document}\n"))))))
     (dolist (command commands)
       (aio-await (funcall #'xenops-aio-subprocess command)))
     (aio-await (aio-with-async (copy-file svg-file cache-file 'replace)))
@@ -123,6 +130,31 @@
          :name name
          :command command
          :sentinel sentinel)))))
+
+(defun xenops-math-get-latex-colors ()
+  (let* ((face (face-at-point))
+         (fg
+          (let ((color (plist-get org-format-latex-options :foreground)))
+            (if (eq color 'auto)
+                (and face (face-attribute face :foreground nil 'default))
+              color)))
+         (bg
+          (let ((color (plist-get org-format-latex-options :background)))
+            (if (eq color 'auto)
+                (and face (face-attribute face :background nil 'default))
+              color)))
+
+         (fg (or fg "Black"))
+         (bg (or bg "Transparent"))
+
+         (fg (if (eq fg 'default)
+                 (org-latex-color :foreground)
+               (org-latex-color-format fg)))
+         (bg (if (eq bg 'default)
+                 (org-latex-color :background)
+               (org-latex-color-format
+                (if (string= bg "Transparent") "white" bg)))))
+    (list fg bg)))
 
 (defun xenops-math-get-latex-preamble-lines ()
   (let ((file (make-temp-file "xenops-math-TeX-region-create" nil ".tex")))
@@ -336,7 +368,7 @@ If we are in a math element, then paste without the delimiters"
          (image-type (plist-get (cdr (assq xenops-math-process
                                            org-preview-latex-process-alist))
                                 :image-output-type)))
-    (xenops-math-compute-file-name latex image-type)))
+    (xenops-math-compute-file-name latex image-type colors)))
 
 (defun xenops-math-file-name-static-hash-data ()
   (list org-format-latex-header
