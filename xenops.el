@@ -114,7 +114,7 @@
     ;; Display math and tables as images
     (save-excursion
       (goto-char (point-min))
-      (xenops-render-if-cached)))
+      (xenops-render)))
 
    ;; Deactivate
    (t
@@ -266,12 +266,6 @@ type."
 (defun xenops-ops-get-for-ops (ops key)
   "Concatenated list of values associated with KEY for operations OPS."
   (xenops-get-for-types xenops-ops ops key))
-
-(defun xenops-render-if-cached ()
-  (let ((fn (symbol-function 'xenops-math-render)))
-    (cl-letf (((symbol-function 'xenops-math-render)
-               (lambda (element) (funcall fn element 'cached-only))))
-      (xenops-render))))
 
 (defun xenops-handle-paste ()
   (interactive)
