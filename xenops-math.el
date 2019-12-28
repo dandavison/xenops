@@ -56,7 +56,8 @@
              (margin (if (eq 'inline-math (plist-get element :type))
                          0
                        `(,xenops-math-image-margin . 0)))
-             (cache-file (xenops-math-compute-file-name latex -image-type))
+             (colors (xenops-math-get-latex-colors))
+             (cache-file (xenops-math-compute-file-name latex -image-type colors))
              (cache-file-exists? (file-exists-p cache-file))
              (insert-image (lambda (element)
                              (xenops-element-delete-overlays element)
@@ -65,9 +66,9 @@
          (cache-file-exists?
           (funcall insert-image element))
          (t
-          (xenops-math-create-latex-image element latex -image-type cache-file insert-image)))))))
+          (xenops-math-create-latex-image element latex -image-type colors cache-file insert-image)))))))
 
-(aio-defun xenops-math-create-latex-image (element latex image-type cache-file insert-image)
+(aio-defun xenops-math-create-latex-image (element latex image-type colors cache-file insert-image)
   "Process latex string to SVG via external processes, asynchronously."
   (xenops-element-create-marker element)
   (let* ((dir temporary-file-directory)
@@ -100,7 +101,7 @@
                              org-format-latex-header
                              'snippet)))
          (with-temp-file tex-file
-           (destructuring-bind (fg bg) (xenops-math-get-latex-colors)
+           (destructuring-bind (fg bg) colors
              (insert latex-header
                      "\n\\begin{document}\n"
                      "\\definecolor{fg}{rgb}{" fg "}\n"
@@ -362,12 +363,16 @@ If we are in a math element, then paste without the delimiters"
     ov))
 
 (defun xenops-math-get-cache-file (element)
+  ;; TODO: the file path should be stored somewhere, not recomputed.
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
          (latex (buffer-substring-no-properties beg end))
          (image-type (plist-get (cdr (assq xenops-math-process
                                            org-preview-latex-process-alist))
-                                :image-output-type)))
+                                :image-output-type))
+         (colors (save-excursion
+                   (goto-char beg)
+                   (xenops-math-get-latex-colors))))
     (xenops-math-compute-file-name latex image-type colors)))
 
 (defun xenops-math-file-name-static-hash-data ()
@@ -376,8 +381,8 @@ If we are in a math element, then paste without the delimiters"
         org-latex-packages-alist
         org-format-latex-options))
 
-(defun xenops-math-compute-file-name (latex image-type)
-  (let* ((data (append (xenops-math-file-name-static-hash-data) (list latex)))
+(defun xenops-math-compute-file-name (latex image-type colors)
+  (let* ((data (append (xenops-math-file-name-static-hash-data) (list latex colors)))
          (hash (sha1 (prin1-to-string data))))
     (format "%s.%s" (f-join (f-expand xenops-cache-directory) hash) image-type)))
 
