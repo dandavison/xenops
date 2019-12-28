@@ -356,6 +356,28 @@ If we are in a math element, then paste without the delimiters"
               'inline-math (list delimiter delimiter)
               (point-at-bol) (or (save-excursion (re-search-forward delimiter nil t)) (point-max))))))))
 
+(defun xenops-math-concatenate (beg end)
+  (interactive "r")
+  (let* ((delimiters )
+         (boundary-regexp
+          (format "\\(\n?%s\n?\\)"
+                  (s-join "\\|"
+                          (cl-loop
+                           for pair in (xenops-elements-get 'block-math :delimiters)
+                           collecting (s-join "[ \t\n]+" (--map (s-chop-prefix "^" it) (reverse pair)))))))
+         (concatenated?))
+    (save-excursion
+      (goto-char beg)
+      (while (re-search-forward boundary-regexp end t)
+        (setq concatenated? t)
+        (replace-match " \\\\\\\\\n")))
+    (when concatenated?
+      (push-mark)
+      (save-excursion
+        (goto-char beg)
+        (xenops-apply '(render)))
+      (pop-mark))))
+
 (defun xenops-math-make-overlay (element image-file image-type margin help-echo)
   (let ((ov (xenops-element-make-overlay element)))
     (overlay-put ov 'display
