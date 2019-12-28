@@ -65,43 +65,51 @@
          (cache-file-exists?
           (funcall insert-image element))
          ((not cached-only)
-          (xenops-math-render-async element latex -image-type cache-file insert-image)))))))
+          (xenops-math-create-latex-image element latex -image-type cache-file insert-image)))))))
 
-(defun xenops-math-render-async (element latex image-type cache-file insert-image)
+(aio-defun xenops-math-create-latex-image (element latex image-type cache-file insert-image)
+  "Process latex string to SVG via external processes, asynchronously."
   (xenops-element-create-marker element)
-  (let ((org-latex-packages-alist (xenops-math-get-latex-preamble-lines))
-        (org-latex-default-packages-alist))
-    (xenops-math-set-org-preview-latex-process-alist! image-type element)
-    (xenops-create-formula-image-async
-     latex cache-file (if (eq 'inline-math (plist-get element :type)) "1" "10")
-     (lambda ()
+  (let* ((dir temporary-file-directory)
+         (base-name (f-base cache-file))
+         (make-file-name (lambda (ext) (f-join dir (concat base-name ext))))
+         (tex-file (funcall make-file-name ".tex"))
+         (dvi-file (funcall make-file-name ".dvi"))
+         (svg-file (funcall make-file-name ".svg"))
+         (processing-type 'dvisvgm)
+         (processing-info
+          (cdr (assq processing-type org-preview-latex-process-alist)))
+         (dpi (* (org--get-display-dpi)
+                 (car (plist-get processing-info :image-size-adjust))
+                 xenops-math-image-scale-factor))
+         (scale (/ dpi 140))
+         (bounding-box (if (eq 'inline-math (plist-get element :type)) 1 10))
+         (commands
+          `(("latex" "-interaction" "nonstopmode" "-output-directory" ,dir ,tex-file)
+            ("dvisvgm" ,dvi-file
+             "-n"
+             "-b" ,(number-to-string bounding-box)
+             "-c" ,(number-to-string scale)
+             "-o" ,svg-file))))
+    (aio-await
+     (aio-with-async
+       (let* ((org-latex-packages-alist (xenops-math-get-latex-preamble-lines))
+              (org-latex-default-packages-alist)
+              (latex-header (org-latex-make-preamble
+                             (org-export-get-environment (org-export-get-backend 'latex))
+                             org-format-latex-header
+                             'snippet)))
+         (with-temp-file tex-file
+           (insert (format "%s\\begin{document}\n%s\n\\end{document}\n"
+                           latex-header
+                           latex))))))
+    (dolist (command commands)
+      (aio-await (funcall #'xenops-aio-subprocess command)))
+    (aio-await (aio-with-async (copy-file svg-file cache-file 'replace)))
+    (aio-await
+     (aio-with-async
        (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
          (funcall insert-image element))))))
-
-(aio-defun xenops-create-formula-image-async (latex image-cache-file bounding-box callback)
-  "Create IMAGE-CACHE-FILE from LATEX source string and call CALLBACK."
-  (let ((dir temporary-file-directory)
-        (base-name (f-base image-cache-file) ext))
-    (cl-flet ((make-file-name (lambda (ext) (f-join dir (concat base-name ext)))))
-      (let* ((tex-file (make-file-name ".tex"))
-             (dvi-file (make-file-name ".dvi"))
-             (svg-file (make-file-name ".svg"))
-             (latex-header (org-latex-make-preamble
-                            (org-export-get-environment (org-export-get-backend 'latex))
-                            org-format-latex-header
-                            'snippet))
-             (commands
-              `(("latex" "-interaction" "nonstopmode" "-output-directory" ,dir ,tex-file)
-                ("dvisvgm" ,dvi-file "-n" "-b" ,bounding-box "-c" "1.2531428571428573" "-o" ,svg-file))))
-        (aio-await (aio-with-async
-                     (with-temp-file tex-file
-                       (insert (format "%s\\begin{document}\n%s\n\\end{document}\n"
-                                       latex-header
-                                       latex)))))
-        (dolist (command commands)
-          (aio-await (funcall #'xenops-aio-subprocess command)))
-        (aio-await (aio-with-async (copy-file svg-file image-cache-file 'replace))))))
-  (aio-await (aio-with-async (funcall callback))))
 
 (defun xenops-aio-subprocess (command &optional output-buffer error-buffer)
   (let ((promise (aio-promise))
@@ -313,22 +321,6 @@ If we are in a math element, then paste without the delimiters"
              (xenops-parse-element-at-point-matching-delimiters
               'inline-math (list delimiter delimiter)
               (point-at-bol) (or (save-excursion (re-search-forward delimiter nil t)) (point-max))))))))
-
-(defun xenops-math-set-org-preview-latex-process-alist! (image-type element)
-  ;; TODO: this mutates the global variable!
-  (plist-put org-format-latex-options :scale xenops-math-image-scale-factor)
-  (if (string-equal image-type "svg")
-      (let* ((bounding-box (if (eq 'inline-math (plist-get element :type)) "1" "10"))
-             (dvisvgm-process-plist (cdr (assoc 'dvisvgm org-preview-latex-process-alist)))
-             (dvisvgm-image-converter (car (plist-get dvisvgm-process-plist
-                                                      :image-converter))))
-        (unless (string-match " -b \\([^ ]+\\) " dvisvgm-image-converter)
-          (error "Unable to set bounding box: unexpected value of `dvisvgm-image-converter'"))
-        (plist-put dvisvgm-process-plist
-                   :image-converter `(,(replace-match bounding-box t t
-                                                      dvisvgm-image-converter 1)))
-        (plist-put dvisvgm-process-plist
-                   :post-clean '("__dummy__")))))
 
 (defun xenops-math-make-overlay (element image-file image-type margin help-echo)
   (let ((ov (xenops-element-make-overlay element)))
