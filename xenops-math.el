@@ -43,7 +43,7 @@
   (cursor-sensor-mode -1)
   (font-lock-remove-keywords nil (xenops-math-font-lock-keywords)))
 
-(defun xenops-math-render (element)
+(defun xenops-math-render (element &optional cached-only)
   (unless (or (xenops-element-get-image element)
               (string-equal "" (s-trim (buffer-substring (plist-get element :begin-content)
                                                          (plist-get element :end-content)))))
@@ -65,7 +65,7 @@
         (cond
          (cache-file-exists?
           (funcall insert-image element))
-         (t
+         ((not cached-only)
           (xenops-math-create-latex-image element latex -image-type colors cache-file insert-image)))))))
 
 (aio-defun xenops-math-create-latex-image (element latex image-type colors cache-file insert-image)
@@ -284,7 +284,7 @@ If we are in a math element, then paste without the delimiters"
       (push-mark (point) t t)
       (funcall backward-paragraph-fn)
       (if (region-active-p)
-          (xenops-render)))))
+          (xenops-render-if-cached)))))
 
 (defun xenops-math-parse-element-from-string (element-string)
   (with-temp-buffer
