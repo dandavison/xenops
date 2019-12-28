@@ -288,26 +288,6 @@ type."
   (if (xenops-apply-parse-at-point)
       (insert "\"")))
 
-(defun xenops-render-async ()
-  "Run `xenops-render' on the current buffer's file, asynchronously."
-  (interactive)
-  (message "Xenops: processing images asynchronously")
-  (async-start `(lambda ()
-                  (package-initialize)
-                  (add-to-list 'load-path
-                               ,(file-name-directory (find-library-name "xenops")))
-                  (require 'xenops)
-                  (find-file ,(buffer-file-name))
-                  (xenops-mode)
-                  (cl-letf (((symbol-function 'xenops-math-file-name-static-hash-data)
-                             (lambda () ',(xenops-math-file-name-static-hash-data))))
-                    (xenops-generate-images-in-headless-process)))
-               (lambda (result)
-                 (run-with-idle-timer 0 nil
-                                      (lambda () (save-excursion (goto-char (point-min))
-                                                            (xenops-render-if-cached)
-                                                            (message "Xenops: done")))))))
-
 (defun xenops-generate-images-in-headless-process ()
   "Generate cached images on disk for all math elements in
 buffer, when running in a headless emacs process."
