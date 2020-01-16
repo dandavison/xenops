@@ -111,6 +111,7 @@
                      latex
                      "\n}\n"
                      "\n\\end{document}\n"))))))
+    (copy-file tex-file "/tmp/xenops.tex" 'replace)
     (dolist (command commands)
       (aio-await (funcall #'xenops-aio-subprocess command)))
     (aio-await (aio-with-async (copy-file svg-file cache-file 'replace)))
