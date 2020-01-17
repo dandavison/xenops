@@ -1,7 +1,8 @@
 ;; -*- lexical-binding: t -*-
 
 (defun xenops-text-footnote-render (element)
-  (let ((ov (xenops-element-make-overlay element)))
+  (let ((ov (xenops-overlay-create (plist-get element :begin)
+                                   (plist-get element :end))))
     (overlay-put ov 'display "[footnote]")
     (overlay-put ov 'help-echo
                  (s-replace-regexp "[ \n]+" " "

@@ -59,9 +59,10 @@
              (colors (xenops-math-get-latex-colors))
              (cache-file (xenops-math-compute-file-name latex -image-type colors))
              (cache-file-exists? (file-exists-p cache-file))
-             (insert-image (lambda (element)
-                             (xenops-element-delete-overlays element)
-                             (xenops-math-make-overlay element cache-file -image-type margin latex))))
+             (insert-image
+              (lambda (element)
+                (xenops-element-delete-overlays element)
+                (xenops-math-make-image-overlay element cache-file -image-type margin latex))))
         (cond
          (cache-file-exists?
           (funcall insert-image element))
@@ -391,11 +392,14 @@ If we are in a math element, then paste without the delimiters"
         (xenops-apply '(render)))
       (pop-mark))))
 
-(defun xenops-math-make-overlay (element image-file image-type margin help-echo)
-  (let ((ov (xenops-element-make-overlay element)))
+(defun xenops-math-make-image-overlay (element image-file image-type margin latex)
+  (let* ((beg (plist-get element :begin))
+         (end (plist-get element :end))
+         (ov (xenops-overlay-create beg end)))
     (overlay-put ov 'display
                  `(image :type ,(intern image-type)
                          :file ,image-file :ascent center :margin ,margin))
+    (overlay-put ov 'help-echo latex)
     ov))
 
 (defun xenops-math-get-cache-file (element)
