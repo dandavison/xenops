@@ -43,6 +43,11 @@
   "Create a marker pointing at the current :begin position of ELEMENT."
   (plist-put el :begin-marker (set-marker (make-marker) (plist-get el :begin))))
 
+(defun xenops-element-deactivate-marker (el)
+  "Delete the marker created by `xenops-element-create-marker'."
+  (if-let* ((marker (plist-get el :begin-marker)))
+      (set-marker marker nil)))
+
 (defun xenops-element-make-overlay (element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))

@@ -118,7 +118,8 @@
     (aio-await
      (aio-with-async
        (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-         (funcall insert-image element))))))
+         (funcall insert-image element)
+         (xenops-element-deactivate-marker element))))))
 
 (defun xenops-aio-subprocess (command &optional output-buffer error-buffer)
   (let ((promise (aio-promise))
