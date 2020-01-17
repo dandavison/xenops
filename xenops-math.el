@@ -95,7 +95,7 @@
              "-o" ,svg-file))))
     (aio-await
      (aio-with-async
-       (let* ((org-latex-packages-alist (xenops-math-get-latex-preamble-lines))
+       (let* ((org-latex-packages-alist (xenops-math-get-latex-preamble))
               (org-latex-default-packages-alist)
               (latex-header (org-latex-make-preamble
                              (org-export-get-environment (org-export-get-backend 'latex))
@@ -161,7 +161,17 @@
                 (if (string= bg "Transparent") "white" bg)))))
     (list fg bg)))
 
-(defun xenops-math-get-latex-preamble-lines ()
+(defvar xenops-math-latex-preamble-cache nil
+  "Internal cache for per-file LaTeX preamble.")
+
+(defun xenops-math-get-latex-preamble ()
+  (let ((key (sha1 (prin1-to-string (list (buffer-file-name) TeX-master)))))
+    (unless (assoc key xenops-math-latex-preamble-cache)
+      (push (cons key (xenops-math-compute-latex-preamble))
+            xenops-math-latex-preamble-cache))
+    (cdr (assoc key xenops-math-latex-preamble-cache))))
+
+(defun xenops-math-compute-latex-preamble ()
   (let ((file (make-temp-file "xenops-math-TeX-region-create" nil ".tex")))
     (TeX-region-create file "" (buffer-file-name) 0)
     (with-temp-buffer
