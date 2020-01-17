@@ -62,14 +62,20 @@
              (insert-image
               (lambda (element)
                 (xenops-element-delete-overlays element)
-                (xenops-math-make-image-overlay element cache-file -image-type margin latex))))
+                (xenops-math-make-image-overlay element cache-file -image-type margin latex)))
+             (insert-error
+              (lambda (element error)
+                (xenops-element-delete-overlays element)
+                (xenops-math-make-error-overlay element error))))
         (cond
          (cache-file-exists?
           (funcall insert-image element))
          ((not cached-only)
-          (xenops-math-create-latex-image element latex -image-type colors cache-file insert-image)))))))
+          (xenops-math-create-latex-image element latex -image-type colors cache-file
+                                          insert-image insert-error)))))))
 
-(aio-defun xenops-math-create-latex-image (element latex image-type colors cache-file insert-image)
+(aio-defun xenops-math-create-latex-image
+  (element latex image-type colors cache-file insert-image insert-error)
   "Process latex string to SVG via external processes, asynchronously."
   (cl-incf xenops-apply-in-flight-counter)
   (xenops-element-create-marker element)
@@ -114,21 +120,37 @@
                      "\n}\n"
                      "\n\\end{document}\n"))))))
     (copy-file tex-file "/tmp/xenops.tex" 'replace)
-    (dolist (command commands)
-      (aio-await (funcall #'xenops-aio-subprocess command)))
-    (aio-await (aio-with-async (copy-file svg-file cache-file 'replace)))
-    (aio-await
-     (aio-with-async
-       (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-         (funcall insert-image element)
-         (xenops-element-deactivate-marker element)
-         (cl-decf xenops-apply-in-flight-counter))))))
+    (condition-case error
+        (progn
+          (dolist (command commands)
+            (aio-await (xenops-aio-subprocess command)))
+          (aio-await (aio-with-async (copy-file svg-file cache-file 'replace)))
+          (aio-await
+           (aio-with-async
+             (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
+               (funcall insert-image element)
+               (xenops-element-deactivate-marker element)
+               (cl-decf xenops-apply-in-flight-counter)))))
+      (error (aio-await
+              (aio-with-async
+                (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
+                  (funcall insert-error element (cadr error)) ;; TODO why not cdr?
+                  (xenops-element-deactivate-marker element)
+                  (cl-decf xenops-apply-in-flight-counter))))))))
 
 (defun xenops-aio-subprocess (command &optional output-buffer error-buffer)
-  (let ((promise (aio-promise))
-        (value-function (lambda () (message "xenops-apply-in-flight-counter: %d" xenops-apply-in-flight-counter))))
-    (let ((sentinel (lambda (process event)
-                      (aio-resolve promise value-function)))
+  "Start asynchronous subprocess; return a promise.
+
+Resolve the promise when the process exits. The value function
+does nothing if the exit is successful, but if the process exits
+with an error status, then the value function signals the error."
+  (let ((promise (aio-promise)))
+    (let ((sentinel
+           (lambda (process event)
+             (unless (process-live-p process)
+               (aio-resolve promise
+                            (lambda () (unless (eq 0 (process-exit-status process))
+                                    (error "%s\n%s" event (s-join " " command))))))))
           (name (format "xenops-aio-subprocess-%s"
                         (sha1 (prin1-to-string command)))))
       (prog1 promise
@@ -400,6 +422,13 @@ If we are in a math element, then paste without the delimiters"
                  `(image :type ,(intern image-type)
                          :file ,image-file :ascent center :margin ,margin))
     (overlay-put ov 'help-echo latex)
+    ov))
+
+(defun xenops-math-make-error-overlay (element error)
+  (let ((ov (xenops-overlay-create (+ 1 (plist-get element :begin-content))
+                                   (plist-get element :end-content))))
+    (overlay-put ov 'before-string "⚠️")
+    (overlay-put ov 'help-echo error)
     ov))
 
 (defun xenops-math-get-cache-file (element)
