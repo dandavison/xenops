@@ -8,6 +8,7 @@
 2. Elements in the active region, if there is an active region.
 3. All elements in the buffer.")
      (interactive)
+     (setq xenops-apply-in-flight-counter 0)
      (xenops-apply '(,op-type))))
 
 (defmacro xenops-define-apply-at-point-command (op docstring)
@@ -17,6 +18,9 @@
      (-if-let* ((el (xenops-apply-parse-at-point))
                 (handlers (xenops-ops-get ',op :handlers)))
          (xenops-element-dispatch el handlers))))
+
+(defvar xenops-apply-in-flight-counter 0
+  "The number of asynchronous tasks currently in-flight.")
 
 (defun xenops-apply (ops &optional pred)
   "Apply operation types OPS to any elements encountered. The

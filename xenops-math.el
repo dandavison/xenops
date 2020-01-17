@@ -70,6 +70,7 @@
 
 (aio-defun xenops-math-create-latex-image (element latex image-type colors cache-file insert-image)
   "Process latex string to SVG via external processes, asynchronously."
+  (cl-incf xenops-apply-in-flight-counter)
   (xenops-element-create-marker element)
   (let* ((dir temporary-file-directory)
          (base-name (f-base cache-file))
@@ -119,11 +120,12 @@
      (aio-with-async
        (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
          (funcall insert-image element)
-         (xenops-element-deactivate-marker element))))))
+         (xenops-element-deactivate-marker element)
+         (cl-decf xenops-apply-in-flight-counter))))))
 
 (defun xenops-aio-subprocess (command &optional output-buffer error-buffer)
   (let ((promise (aio-promise))
-        (value-function (lambda () (message "xenops-aio: promise resolved: %s" (s-join " " command)))))
+        (value-function (lambda () (message "xenops-apply-in-flight-counter: %d" xenops-apply-in-flight-counter))))
     (let ((sentinel (lambda (process event)
                       (aio-resolve promise value-function)))
           (name (format "xenops-aio-subprocess-%s"
