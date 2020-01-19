@@ -88,7 +88,7 @@
          (scale (/ dpi 140))
          (bounding-box (if (eq 'inline-math (plist-get element :type)) 1 10))
          (commands
-          `(("latex" "-interaction" "nonstopmode" "-output-directory" ,dir ,tex-file)
+          `(("latex" "-shell-escape" "-interaction" "nonstopmode" "-output-directory" ,dir ,tex-file)
             ("dvisvgm" ,dvi-file
              "-n"
              "-b" ,(number-to-string bounding-box)
