@@ -417,12 +417,21 @@ If we are in a math element, then paste without the delimiters"
 (defun xenops-math-make-image-overlay (element image-file image-type margin latex)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
-         (ov (xenops-overlay-create beg end)))
+         (ov (xenops-overlay-create beg end))
+         (keymap (overlay-get ov 'keymap)))
     (overlay-put ov 'display
                  `(image :type ,(intern image-type)
                          :file ,image-file :ascent center :margin ,margin))
     (overlay-put ov 'help-echo latex)
+    (define-key keymap [mouse-3] #'xenops-math-image-overlay-menu)
     ov))
+
+(defun xenops-math-image-overlay-menu (event)
+  (interactive "e")
+  (popup-menu
+   `("Xenops"
+     ["Edit" (xenops-reveal)])
+   event))
 
 (defun xenops-math-make-error-overlay (element error)
   (let ((ov (xenops-overlay-create (+ 1 (plist-get element :begin-content))
