@@ -60,22 +60,21 @@
              (cache-file (xenops-math-compute-file-name latex -image-type colors))
              (cache-file-exists? (file-exists-p cache-file))
              (insert-image
-              (lambda (element)
+              (lambda (element &optional commands)
                 (xenops-element-delete-overlays element)
-                (xenops-math-make-image-overlay element cache-file -image-type margin latex)))
+                (xenops-math-make-image-overlay element commands cache-file -image-type margin latex)))
              (insert-error
-              (lambda (element error)
+              (lambda (element error &optional commands)
                 (xenops-element-delete-overlays element)
-                (xenops-math-make-error-overlay element error))))
+                (xenops-math-make-error-overlay element error commands))))
         (cond
          (cache-file-exists?
           (funcall insert-image element))
          ((not cached-only)
-          (xenops-math-create-latex-image element latex -image-type colors cache-file
+          (xenops-math-create-latex-image element latex -image-type margin colors cache-file
                                           insert-image insert-error)))))))
 
-(aio-defun xenops-math-create-latex-image
-  (element latex image-type colors cache-file insert-image insert-error)
+(aio-defun xenops-math-create-latex-image (element latex image-type margin colors cache-file insert-image insert-error)
   "Process latex string to SVG via external processes, asynchronously."
   (cl-incf xenops-apply-in-flight-counter)
   (xenops-element-create-marker element)
@@ -128,13 +127,13 @@
           (aio-await
            (aio-with-async
              (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-               (funcall insert-image element)
+               (funcall insert-image element commands)
                (xenops-element-deactivate-marker element)
                (cl-decf xenops-apply-in-flight-counter)))))
       (error (aio-await
               (aio-with-async
                 (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-                  (funcall insert-error element (cadr error)) ;; TODO why not cdr?
+                  (funcall insert-error element (cadr error) commands) ;; TODO why not cdr?
                   (xenops-element-deactivate-marker element)
                   (cl-decf xenops-apply-in-flight-counter))))))))
 
@@ -414,30 +413,46 @@ If we are in a math element, then paste without the delimiters"
         (xenops-apply '(render)))
       (pop-mark))))
 
-(defun xenops-math-make-image-overlay (element image-file image-type margin latex)
+(defun xenops-math-make-image-overlay (element commands image-file image-type margin latex)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
          (ov (xenops-overlay-create beg end))
-         (keymap (overlay-get ov 'keymap)))
+         (keymap (overlay-get ov 'keymap))
+         (xenops-math-image-overlay-menu
+          (lambda (event)
+            (interactive "e")
+            (popup-menu
+             `("Xenops"
+               ["Edit" (xenops-reveal)]
+               ["Copy LaTeX command" (xenops-math-image-overlay-copy-latex-command ,ov)]))
+            event)))
     (overlay-put ov 'display
                  `(image :type ,(intern image-type)
                          :file ,image-file :ascent center :margin ,margin))
     (overlay-put ov 'help-echo latex)
-    (define-key keymap [mouse-3] #'xenops-math-image-overlay-menu)
+    (overlay-put ov 'commands commands)
+    (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
     ov))
 
-(defun xenops-math-image-overlay-menu (event)
-  (interactive "e")
-  (popup-menu
-   `("Xenops"
-     ["Edit" (xenops-reveal)])
-   event))
+(defun xenops-math-image-overlay-copy-latex-command (overlay)
+  (kill-new (s-join " " (car (overlay-get overlay 'commands)))))
 
-(defun xenops-math-make-error-overlay (element error)
-  (let ((ov (xenops-overlay-create (+ 1 (plist-get element :begin-content))
-                                   (plist-get element :end-content))))
+(defun xenops-math-make-error-overlay (element error commands)
+  (let* ((ov (xenops-overlay-create (+ 1 (plist-get element :begin-content))
+                                    (plist-get element :end-content)))
+         (keymap (overlay-get ov 'keymap))
+         (xenops-math-image-overlay-menu
+          (lambda (event)
+            (interactive "e")
+            (popup-menu
+             `("Xenops"
+               ["Edit" (xenops-reveal)]
+               ["Copy LaTeX command" (xenops-math-image-overlay-copy-latex-command ,ov)]))
+            event)))
     (overlay-put ov 'before-string "⚠️")
     (overlay-put ov 'help-echo error)
+    (overlay-put ov 'commands commands)
+    (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
     ov))
 
 (defun xenops-math-get-cache-file (element)
