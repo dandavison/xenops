@@ -427,7 +427,7 @@ If we are in a math element, then paste without the delimiters"
             (interactive "e")
             (popup-menu
              `("Xenops"
-               ["Edit" (xenops-reveal)]
+               ["Edit" (progn (goto-char ,beg) (xenops-reveal-at-point))]
                ["Copy LaTeX command" (xenops-math-image-overlay-copy-latex-command ,ov)]))
             event)))
     (overlay-put ov 'help-echo help-echo)
