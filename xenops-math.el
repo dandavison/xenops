@@ -62,11 +62,15 @@
              (insert-image
               (lambda (element &optional commands)
                 (xenops-element-delete-overlays element)
-                (xenops-math-make-image-overlay element commands cache-file -image-type margin latex)))
+                (let ((ov (xenops-math-make-overlay element commands latex)))
+                  (overlay-put ov 'display
+                               `(image :type ,(intern -image-type)
+                                       :file ,cache-file :ascent center :margin ,margin)))))
              (insert-error
               (lambda (element error &optional commands)
                 (xenops-element-delete-overlays element)
-                (xenops-math-make-error-overlay element error commands))))
+                (let ((ov (xenops-math-make-overlay element commands error)))
+                  (overlay-put ov 'before-string "⚠️")))))
         (cond
          (cache-file-exists?
           (funcall insert-image element))
@@ -413,7 +417,7 @@ If we are in a math element, then paste without the delimiters"
         (xenops-apply '(render)))
       (pop-mark))))
 
-(defun xenops-math-make-image-overlay (element commands image-file image-type margin latex)
+(defun xenops-math-make-overlay (element commands help-echo)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
          (ov (xenops-overlay-create beg end))
@@ -426,34 +430,13 @@ If we are in a math element, then paste without the delimiters"
                ["Edit" (xenops-reveal)]
                ["Copy LaTeX command" (xenops-math-image-overlay-copy-latex-command ,ov)]))
             event)))
-    (overlay-put ov 'display
-                 `(image :type ,(intern image-type)
-                         :file ,image-file :ascent center :margin ,margin))
-    (overlay-put ov 'help-echo latex)
+    (overlay-put ov 'help-echo help-echo)
     (overlay-put ov 'commands commands)
     (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
     ov))
 
 (defun xenops-math-image-overlay-copy-latex-command (overlay)
   (kill-new (s-join " " (car (overlay-get overlay 'commands)))))
-
-(defun xenops-math-make-error-overlay (element error commands)
-  (let* ((ov (xenops-overlay-create (+ 1 (plist-get element :begin-content))
-                                    (plist-get element :end-content)))
-         (keymap (overlay-get ov 'keymap))
-         (xenops-math-image-overlay-menu
-          (lambda (event)
-            (interactive "e")
-            (popup-menu
-             `("Xenops"
-               ["Edit" (xenops-reveal)]
-               ["Copy LaTeX command" (xenops-math-image-overlay-copy-latex-command ,ov)]))
-            event)))
-    (overlay-put ov 'before-string "⚠️")
-    (overlay-put ov 'help-echo error)
-    (overlay-put ov 'commands commands)
-    (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
-    ov))
 
 (defun xenops-math-get-cache-file (element)
   ;; TODO: the file path should be stored somewhere, not recomputed.
