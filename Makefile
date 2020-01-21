@@ -16,6 +16,7 @@ test:
 		--eval "(add-to-list 'load-path \"/tmp/xenops-packages/auctex\")" \
 		--eval '(setq ert-batch-backtrace-right-margin 9999)' \
 		-l xenops.el \
+		-l tests/init.el \
 		-l tests/xenops.el \
 		-l tests/xenops-apply.el \
 		-l tests/xenops-util.el \

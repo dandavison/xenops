@@ -15,6 +15,7 @@
 (require 'xenops-apply)
 (require 'xenops-auctex)
 (require 'xenops-compat)
+(require 'xenops-doctor)
 (require 'xenops-element)
 (require 'xenops-elements)
 (require 'xenops-font)
@@ -79,6 +80,9 @@
   :lighter " Xenops"
   (cond
    (xenops-mode
+
+    (-if-let* ((problems (xenops-doctor 'quiet)))
+        (error problems))
 
     (define-key xenops-mode-map "\C-c\C-c" #'xenops-dwim)
     (define-key xenops-mode-map (kbd "s-0") #'xenops-reset-size)
