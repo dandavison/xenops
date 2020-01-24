@@ -53,32 +53,23 @@
       (let* ((-image-type (plist-get (cdr (assq xenops-math-process
                                                 org-preview-latex-process-alist))
                                      :image-output-type))
-             (margin (if (eq 'inline-math (plist-get element :type))
-                         0
-                       `(,xenops-math-image-margin . 0)))
              (colors (xenops-math-get-latex-colors))
              (cache-file (xenops-math-compute-file-name latex -image-type colors))
              (cache-file-exists? (file-exists-p cache-file))
-             (insert-image
+             (display-image
               (lambda (element &optional commands)
-                (xenops-element-delete-overlays element)
-                (let ((ov (xenops-math-make-overlay element commands latex)))
-                  (overlay-put ov 'display
-                               `(image :type ,(intern -image-type)
-                                       :file ,cache-file :ascent center :margin ,margin)))))
-             (insert-error
-              (lambda (element error &optional commands)
-                (xenops-element-delete-overlays element)
-                (let ((ov (xenops-math-make-overlay element commands error)))
-                  (overlay-put ov 'before-string "⚠️")))))
+                (xenops-math-display-latex-image element commands latex cache-file -image-type)))
+             (display-error
+              (lambda (element commands error)
+                (xenops-math-display-latex-error element commands error))))
         (cond
          (cache-file-exists?
-          (funcall insert-image element))
+          (funcall display-image element))
          ((not cached-only)
-          (xenops-math-create-latex-image element latex -image-type margin colors cache-file
-                                          insert-image insert-error)))))))
+          (xenops-math-create-latex-image element latex -image-type colors cache-file
+                                          display-image display-error)))))))
 
-(aio-defun xenops-math-create-latex-image (element latex image-type margin colors cache-file insert-image insert-error)
+(aio-defun xenops-math-create-latex-image (element latex image-type colors cache-file display-image display-error)
   "Process latex string to SVG via external processes, asynchronously."
   (cl-incf xenops-apply-in-flight-counter)
   (xenops-element-create-marker element)
@@ -131,13 +122,13 @@
           (aio-await
            (aio-with-async
              (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-               (funcall insert-image element commands)
+               (funcall display-image element commands)
                (xenops-element-deactivate-marker element)
                (cl-decf xenops-apply-in-flight-counter)))))
       (error (aio-await
               (aio-with-async
                 (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-                  (funcall insert-error element (cadr error) commands) ;; TODO why not cdr?
+                  (funcall display-error element commands (cadr error))
                   (xenops-element-deactivate-marker element)
                   (cl-decf xenops-apply-in-flight-counter))))))))
 
@@ -153,7 +144,7 @@ with an error status, then the value function signals the error."
              (unless (process-live-p process)
                (aio-resolve promise
                             (lambda () (unless (eq 0 (process-exit-status process))
-                                    (error "%s\n%s" event (s-join " " command))))))))
+                                         (error "%s\n%s" event (s-join " " command))))))))
           (name (format "xenops-aio-subprocess-%s"
                         (sha1 (prin1-to-string command)))))
       (prog1 promise
@@ -417,7 +408,17 @@ If we are in a math element, then paste without the delimiters"
         (xenops-apply '(render)))
       (pop-mark))))
 
+(defun xenops-math-display-latex-image (element commands help-echo cache-file -image-type)
+  "Display SVG image resulting from successful LaTeX compilation."
+  (let ((margin (if (eq 'inline-math (plist-get element :type))
+                    0 `(,xenops-math-image-margin . 0)))
+        (ov (xenops-math-make-overlay element commands help-echo)))
+    (overlay-put ov 'display
+                 `(image :type ,(intern -image-type)
+                         :file ,cache-file :ascent center :margin ,margin))))
+
 (defun xenops-math-make-overlay (element commands help-echo)
+  (xenops-element-delete-overlays element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
          (ov (xenops-overlay-create beg end))
@@ -435,8 +436,29 @@ If we are in a math element, then paste without the delimiters"
     (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
     ov))
 
+(defun xenops-math-display-latex-error (element commands help-echo)
+  (xenops-element-delete-overlays element)
+  (let* ((beg (plist-get element :begin))
+         (end (plist-get element :end))
+         (ov (xenops-overlay-create beg end))
+         (keymap (overlay-get ov 'keymap))
+         (xenops-math-image-overlay-menu
+          (lambda (event)
+            (interactive "e")
+            (popup-menu
+             `("Xenops"
+               ["Edit" (progn (goto-char ,beg) (xenops-reveal-at-point))]
+               ["Copy LaTeX command" (xenops-math-image-overlay-copy-latex-command ,ov)]))
+            event)))
+    (overlay-put ov 'help-echo help-echo)
+    (overlay-put ov 'commands commands)
+    (overlay-put ov 'before-string "⚠️")
+    (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
+    ov))
+
 (defun xenops-math-image-overlay-copy-latex-command (overlay)
-  (kill-new (s-join " " (car (overlay-get overlay 'commands)))))
+  (let ((latex-command (car (overlay-get overlay 'commands))))
+    (kill-new (s-join " " latex-command))))
 
 (defun xenops-math-get-cache-file (element)
   ;; TODO: the file path should be stored somewhere, not recomputed.
