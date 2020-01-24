@@ -14,6 +14,12 @@
   `xenops-math-image-increase-size' and
   `xenops-math-image-decrease-size'.")
 
+(defvar xenops-math-image-current-scale-factor 1.0
+  "The current relative scaling factor of images, i.e. the net
+  scale factor resulting from multiple applications of
+  `xenops-math-image-increase-size' and
+  `xenops-math-image-decrease-size'.")
+
 (defvar xenops-math-image-scale-factor 0.8
   "Scaling factor for SVG math images. This determines the size
   of the image in the image file that is cached on disk.")
@@ -228,7 +234,6 @@ with an error status, then the value function signals the error."
 (defun xenops-math-image-change-size (element factor)
   (-if-let* ((image (xenops-element-get-image element)))
       (when (eq (image-property image :type) 'svg)
-        ;; TODO: other image types
         (image-flush image)
         (let* ((data (or (eval (image-property image :data))
                          (and (f-exists? (image-property image :file))
@@ -422,7 +427,9 @@ If we are in a math element, then paste without the delimiters"
         (ov (xenops-math-make-overlay element commands help-echo)))
     (overlay-put ov 'display
                  `(image :type ,(intern -image-type)
-                         :file ,cache-file :ascent center :margin ,margin))))
+                         :file ,cache-file :ascent center :margin ,margin)))
+  (unless (equal xenops-math-image-current-scale-factor 1.0)
+    (xenops-math-image-change-size element xenops-math-image-current-scale-factor)))
 
 (defun xenops-math-make-overlay (element commands help-echo)
   (xenops-element-delete-overlays element)

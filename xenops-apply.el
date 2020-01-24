@@ -55,7 +55,18 @@ operated on is either the active region, or the entire buffer."
       ;; Hack: This should be abstracted.
       (and region-active (not (-intersection handlers '(xenops-math-image-increase-size
                                                         xenops-math-image-decrease-size)))
-           (deactivate-mark)))))
+           (deactivate-mark))
+      ;; Hack: In some sense we want a new image to have the expected size, given any changes to
+      ;; image size that have been applied to existing images. Here we track the overall image
+      ;; scale, paying attention only when a user has resized all the images in the buffer.
+      (unless region-active
+        (cond
+         ((-intersection handlers '(xenops-math-image-increase-size))
+          (setq xenops-math-image-current-scale-factor (* xenops-math-image-current-scale-factor
+                                                          xenops-math-image-change-size-factor)))
+         ((-intersection handlers '(xenops-math-image-decrease-size))
+          (setq xenops-math-image-current-scale-factor (/ xenops-math-image-current-scale-factor
+                                                          xenops-math-image-change-size-factor))))))))
 
 (defun xenops-apply-handlers-at-point (handlers &optional pred)
   "Apply HANDLERS to element point if there is one."
