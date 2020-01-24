@@ -58,18 +58,14 @@
              (cache-file-exists? (file-exists-p cache-file))
              (display-image
               (lambda (element &optional commands)
-                (xenops-math-display-latex-image element commands latex cache-file -image-type)))
-             (display-error
-              (lambda (element commands error)
-                (xenops-math-display-latex-error element commands error))))
+                (xenops-math-display-latex-image element commands latex cache-file -image-type))))
         (cond
          (cache-file-exists?
           (funcall display-image element))
          ((not cached-only)
-          (xenops-math-create-latex-image element latex -image-type colors cache-file
-                                          display-image display-error)))))))
+          (xenops-math-create-latex-image element latex -image-type colors cache-file display-image)))))))
 
-(aio-defun xenops-math-create-latex-image (element latex image-type colors cache-file display-image display-error)
+(aio-defun xenops-math-create-latex-image (element latex image-type colors cache-file display-image)
   "Process latex string to SVG via external processes, asynchronously."
   (cl-incf xenops-apply-in-flight-counter)
   (xenops-element-create-marker element)
@@ -128,7 +124,7 @@
       (error (aio-await
               (aio-with-async
                 (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-                  (funcall display-error element commands (cadr error))
+                  (xenops-math-display-latex-error element error)
                   (xenops-element-deactivate-marker element)
                   (cl-decf xenops-apply-in-flight-counter))))))))
 
@@ -138,20 +134,31 @@
 Resolve the promise when the process exits. The value function
 does nothing if the exit is successful, but if the process exits
 with an error status, then the value function signals the error."
-  (let ((promise (aio-promise)))
-    (let ((sentinel
-           (lambda (process event)
-             (unless (process-live-p process)
-               (aio-resolve promise
-                            (lambda () (unless (eq 0 (process-exit-status process))
-                                         (error "%s\n%s" event (s-join " " command))))))))
-          (name (format "xenops-aio-subprocess-%s"
-                        (sha1 (prin1-to-string command)))))
-      (prog1 promise
-        (make-process
-         :name name
-         :command command
-         :sentinel sentinel)))))
+  (let* ((promise (aio-promise))
+         (name (format "xenops-aio-subprocess-%s"
+                       (sha1 (prin1-to-string command))))
+         (output-buffer (generate-new-buffer name))
+         (sentinel
+          (lambda (process event)
+            (unless (process-live-p process)
+              (aio-resolve
+               promise
+               (lambda ()
+                 (if (eq 0 (process-exit-status process))
+                     (kill-buffer output-buffer)
+                   (signal 'error
+                           (prog1 (list :xenops-error-data
+                                    (list (s-join " " command)
+                                          event
+                                          (with-current-buffer output-buffer
+                                            (buffer-string))))
+                             (kill-buffer output-buffer))))))))))
+    (prog1 promise
+      (make-process
+       :name name
+       :buffer output-buffer
+       :command command
+       :sentinel sentinel))))
 
 (defun xenops-math-get-latex-colors ()
   (let* ((face (face-at-point))
@@ -436,25 +443,47 @@ If we are in a math element, then paste without the delimiters"
     (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
     ov))
 
-(defun xenops-math-display-latex-error (element commands help-echo)
+(defun xenops-math-display-latex-error (element error)
   (xenops-element-delete-overlays element)
   (let* ((beg (plist-get element :begin))
-         (end (plist-get element :end))
+         (end (plist-get element :begin-content))
          (ov (xenops-overlay-create beg end))
          (keymap (overlay-get ov 'keymap))
-         (xenops-math-image-overlay-menu
-          (lambda (event)
-            (interactive "e")
-            (popup-menu
-             `("Xenops"
-               ["Edit" (progn (goto-char ,beg) (xenops-reveal-at-point))]
-               ["Copy LaTeX command" (xenops-math-image-overlay-copy-latex-command ,ov)]))
-            event)))
+         (error-badge "⚠️")
+         help-echo)
+    (-if-let* ((error-data (plist-get (cdr error) :xenops-error-data)))
+        (cl-destructuring-bind (failing-command failure-description output) error-data
+          (let* ((xenops-math-image-overlay-menu
+                  (lambda (event)
+                    (interactive "e")
+                    (popup-menu
+                     `("Xenops"
+                       ["View failing command output" (xenops-math-display-process-output ,output)]
+                       ["Copy failing command" (kill-new ,failing-command)]))
+                    event)))
+            (setq help-echo (format "External process failure: %s
+Right-click on the warning badge to copy the failing command or view its output.
+
+%s"
+                                    failure-description
+                                    failing-command))
+            (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
+            ov))
+      (setq help-echo (format "External process failure:\n\n%s"
+                              (s-join "\n\n" (--map (format "%S" it) (cdr error))))))
+    (add-text-properties 0 (length error-badge)
+                         `(help-echo ,help-echo keymap ,keymap)
+                         error-badge)
+    (overlay-put ov 'after-string error-badge)
     (overlay-put ov 'help-echo help-echo)
-    (overlay-put ov 'commands commands)
-    (overlay-put ov 'before-string "⚠️")
-    (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
     ov))
+
+(defun xenops-math-display-process-output (output)
+  (let ((buf (get-buffer-create "*Xenops external command output*")))
+    (with-current-buffer buf
+      (erase-buffer)
+      (insert output))
+    (display-buffer buf)))
 
 (defun xenops-math-image-overlay-copy-latex-command (overlay)
   (let ((latex-command (car (overlay-get overlay 'commands))))
