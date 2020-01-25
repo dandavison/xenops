@@ -69,7 +69,7 @@ operated on is either the active region, or the entire buffer."
                                                           xenops-math-image-change-size-factor))))))))
 
 (defun xenops-apply-handlers-at-point (handlers &optional pred)
-  "Apply HANDLERS to element point if there is one."
+  "Apply HANDLERS to element at point if there is one."
   (cl-flet ((handle (lambda (el) (save-excursion
                               (xenops-element-dispatch el handlers)))))
     (-when-let* ((el (xenops-apply-parse-at-point)))
@@ -79,7 +79,7 @@ operated on is either the active region, or the entire buffer."
 (defun xenops-apply-get-next-element (&optional start-regexp end parse-at-point-fns)
   "If there is another element, return it and leave point after it.
 An element is a plist containing data about a regexp match for a
-section of the buffer that xenops can do something to."
+section of the buffer that Xenops can do something to."
   (let ((start-regexp (or start-regexp (xenops-elements-delimiter-start-regexp)))
         (end (or end (point-max)))
         (parse-at-point-fns (or parse-at-point-fns (xenops-elements-get-all :parser))))
