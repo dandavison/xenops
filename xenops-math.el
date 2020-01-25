@@ -73,7 +73,6 @@
 
 (aio-defun xenops-math-create-latex-image (element latex image-type colors cache-file display-image)
   "Process latex string to SVG via external processes, asynchronously."
-  (cl-incf xenops-apply-in-flight-counter)
   (xenops-element-create-marker element)
   (let* ((dir temporary-file-directory)
          (base-name (f-base cache-file))
@@ -124,14 +123,12 @@
            (aio-with-async
              (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
                (funcall display-image element commands)
-               (xenops-element-deactivate-marker element)
-               (cl-decf xenops-apply-in-flight-counter)))))
+               (xenops-element-deactivate-marker element)))))
       (error (aio-await
               (aio-with-async
                 (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
                   (xenops-math-display-latex-error element error)
-                  (xenops-element-deactivate-marker element)
-                  (cl-decf xenops-apply-in-flight-counter))))))))
+                  (xenops-element-deactivate-marker element))))))))
 
 (defun xenops-aio-subprocess (command &optional output-buffer error-buffer)
   "Start asynchronous subprocess; return a promise.
