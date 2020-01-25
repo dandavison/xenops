@@ -115,7 +115,6 @@
                      latex
                      "\n}\n"
                      "\n\\end{document}\n"))))))
-    (copy-file tex-file "/tmp/xenops.tex" 'replace)
     (condition-case error
         (progn
           (dolist (command commands)
