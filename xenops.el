@@ -175,8 +175,8 @@
 
 (defvar xenops-elements
   `((block-math
-     .  ((:delimiters . (("^[ \t]*\\\\begin{align\\*?}"
-                          "^[ \t]*\\\\end{align\\*?}")))
+     .  ((:delimiters . (("^[ \t]*\\\\begin{\\(align\\|equation\\|tikzpicture\\)\\*?}"
+                          "^[ \t]*\\\\end{\\(align\\|equation\\|tikzpicture\\)\\*?}")))
          (:parser . xenops-math-parse-block-element-at-point)
          (:handlers . (xenops-math-render
                        xenops-math-regenerate
