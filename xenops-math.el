@@ -217,11 +217,11 @@ with an error status, then the value function signals the error."
       (delete-file cache-file)
       (clear-image-cache cache-file)
       (message "Xenops: deleted file: %s" cache-file))
-    (xenops-element-delete-overlays element)
+    (xenops-element-overlays-delete element)
     (xenops-math-render element)))
 
 (defun xenops-math-reveal (element)
-  (xenops-element-delete-overlays element)
+  (xenops-element-overlays-delete element)
   (goto-char (plist-get element :begin-content)))
 
 (defun xenops-math-image-increase-size (element)
@@ -431,7 +431,7 @@ If we are in a math element, then paste without the delimiters"
     (xenops-math-image-change-size element xenops-math-image-current-scale-factor)))
 
 (defun xenops-math-make-overlay (element commands help-echo)
-  (xenops-element-delete-overlays element)
+  (xenops-element-overlays-delete element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
          (ov (xenops-overlay-create beg end))
@@ -450,7 +450,7 @@ If we are in a math element, then paste without the delimiters"
     ov))
 
 (defun xenops-math-display-latex-error (element error)
-  (xenops-element-delete-overlays element)
+  (xenops-element-overlays-delete element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :begin-content))
          (ov (xenops-overlay-create beg end))
