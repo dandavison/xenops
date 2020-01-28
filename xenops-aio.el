@@ -1,5 +1,16 @@
 ;; -*- lexical-binding: t -*-
 
+(defmacro xenops-aio-with-async-with-buffer (buffer &rest body)
+  "Evaluate BODY under `aio-with-async' with current buffer set to BUFFER."
+  `(aio-with-async
+     (with-current-buffer ,buffer
+       ,@body)))
+
+(defun xenops-aio-sem-cancel-waiting-tasks (sem init)
+  "Cancel all tasks waiting in the queue and reinitialize the semaphore."
+  (setf (aref sem 2) '(nil . nil)
+        (aref sem 1) init))
+
 (defun xenops-aio-subprocess (command &optional output-buffer error-buffer)
   "Start asynchronous subprocess; return a promise.
 

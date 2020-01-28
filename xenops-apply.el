@@ -43,11 +43,16 @@ operated on is either the active region, or the entire buffer."
           `(,(point-min) ,(point-max) nil))
       (save-excursion
         (goto-char beg)
-        (let ((parse-at-point-fns (xenops-elements-get-all :parser)))
+        (let ((parse-at-point-fns (xenops-elements-get-all :parser))
+              (sem-start-value (aref xenops-math-latex-tasks-semaphore 1)))
           (while (setq el (xenops-apply-get-next-element nil end parse-at-point-fns))
             (and el
                  (or (null pred) (funcall pred el))
-                 (ignore-errors (handle el))))))
+                 (ignore-errors (handle el))))
+          (if (-intersection handlers '(xenops-math-render))
+              (message "Started %d latex processing tasks"
+                       (- sem-start-value
+                          (aref xenops-math-latex-tasks-semaphore 1))))))
       ;; Hack: This should be abstracted.
       (and region-active (not (-intersection handlers '(xenops-math-image-increase-size
                                                         xenops-math-image-decrease-size)))

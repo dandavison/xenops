@@ -9,6 +9,10 @@
 
 (defvar xenops-math-process 'dvisvgm)
 
+(setq xenops-math-latex-max-tasks-in-flight 56)
+
+(defvar-local xenops-math-latex-tasks-semaphore nil)
+
 (defvar xenops-math-image-change-size-factor 1.1
   "The factor by which the image's size will be changed under
   `xenops-math-image-increase-size' and
@@ -35,6 +39,8 @@
       (xenops-math-block-math-font-lock-handler)))))
 
 (defun xenops-math-activate ()
+  (setq-local xenops-math-latex-tasks-semaphore
+              (aio-sem xenops-math-latex-max-tasks-in-flight))
   (make-directory xenops-cache-directory t)
   (setq mouse-drag-and-drop-region t)
   (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-around-advice)
@@ -75,62 +81,95 @@
 
 (aio-defun xenops-math-create-latex-image (element latex image-type colors cache-file display-image)
   "Process latex string to SVG via external processes, asynchronously."
-  (xenops-element-create-marker element)
-  (let* ((dir temporary-file-directory)
-         (base-name (f-base cache-file))
-         (make-file-name (lambda (ext) (f-join dir (concat base-name ext))))
-         (tex-file (funcall make-file-name ".tex"))
-         (dvi-file (funcall make-file-name ".dvi"))
-         (svg-file (funcall make-file-name ".svg"))
-         (processing-type 'dvisvgm)
-         (processing-info
-          (cdr (assq processing-type org-preview-latex-process-alist)))
-         (dpi (* (org--get-display-dpi)
-                 (car (plist-get processing-info :image-size-adjust))
-                 xenops-math-image-scale-factor))
-         (scale (/ dpi 140))
-         (bounding-box (if (eq 'inline-math (plist-get element :type)) 1 10))
-         (commands
-          `(("latex" "-shell-escape" "-interaction" "nonstopmode" "-output-directory" ,dir ,tex-file)
-            ("dvisvgm" ,dvi-file
-             "-n"
-             "-b" ,(number-to-string bounding-box)
-             "-c" ,(number-to-string scale)
-             "-o" ,svg-file))))
-    (aio-await
-     (aio-with-async
-       (let* ((org-latex-packages-alist (xenops-math-get-latex-preamble))
-              (org-latex-default-packages-alist)
-              (latex-header (org-latex-make-preamble
-                             (org-export-get-environment (org-export-get-backend 'latex))
-                             org-format-latex-header
-                             'snippet)))
-         (with-temp-file tex-file
-           (destructuring-bind (fg bg) colors
-             (insert latex-header
-                     "\n\\begin{document}\n"
-                     "\\definecolor{fg}{rgb}{" fg "}\n"
-                     "\\definecolor{bg}{rgb}{" bg "}\n"
-                     "\n\\pagecolor{bg}\n"
-                     "\n{\\color{fg}\n"
-                     latex
-                     "\n}\n"
-                     "\n\\end{document}\n"))))))
-    (condition-case error
-        (progn
-          (dolist (command commands)
-            (aio-await (xenops-aio-subprocess command)))
-          (aio-await (aio-with-async (copy-file svg-file cache-file 'replace)))
-          (aio-await
-           (aio-with-async
-             (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-               (funcall display-image element commands)
-               (xenops-element-deactivate-marker element)))))
-      (error (aio-await
-              (aio-with-async
-                (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-                  (xenops-math-display-latex-error element error)
-                  (xenops-element-deactivate-marker element))))))))
+  (let ((buffer (current-buffer)))
+    (aio-await (aio-sem-wait xenops-math-latex-tasks-semaphore))
+    (with-current-buffer buffer
+      (xenops-element-create-marker element))
+    (let* ((dir temporary-file-directory)
+           (base-name (f-base cache-file))
+           (make-file-name (lambda (ext) (f-join dir (concat base-name ext))))
+           (tex-file (funcall make-file-name ".tex"))
+           (dvi-file (funcall make-file-name ".dvi"))
+           (svg-file (funcall make-file-name ".svg"))
+           (processing-type 'dvisvgm)
+           (processing-info
+            (cdr (assq processing-type org-preview-latex-process-alist)))
+           (dpi (* (org--get-display-dpi)
+                   (car (plist-get processing-info :image-size-adjust))
+                   xenops-math-image-scale-factor))
+           (scale (/ dpi 140))
+           (bounding-box (if (eq 'inline-math (plist-get element :type)) 1 10))
+           (commands
+            `(("latex" "-shell-escape" "-interaction" "nonstopmode" "-output-directory" ,dir ,tex-file)
+              ("dvisvgm" ,dvi-file
+               "-n"
+               "-b" ,(number-to-string bounding-box)
+               "-c" ,(number-to-string scale)
+               "-o" ,svg-file))))
+      (aio-await
+       (xenops-aio-with-async-with-buffer
+        buffer
+        (let* ((org-latex-packages-alist (xenops-math-get-latex-preamble))
+               (org-latex-default-packages-alist)
+               (latex-header (org-latex-make-preamble
+                              (org-export-get-environment (org-export-get-backend 'latex))
+                              org-format-latex-header
+                              'snippet)))
+          (with-temp-file tex-file
+            (destructuring-bind (fg bg) colors
+              (insert latex-header
+                      "\n\\begin{document}\n"
+                      "\\definecolor{fg}{rgb}{" fg "}\n"
+                      "\\definecolor{bg}{rgb}{" bg "}\n"
+                      "\n\\pagecolor{bg}\n"
+                      "\n{\\color{fg}\n"
+                      latex
+                      "\n}\n"
+                      "\n\\end{document}\n"))))))
+      (condition-case error
+          (progn
+            (dolist (command commands)
+              (aio-await (xenops-aio-subprocess command)))
+            (aio-await (aio-with-async (copy-file svg-file cache-file 'replace)))
+            (aio-await
+             (xenops-aio-with-async-with-buffer
+              buffer
+              (-if-let* ((marker (plist-get element :begin-marker))
+                         (element (xenops-math-parse-element-at marker)))
+                  (funcall display-image element commands)
+                (if marker (message "Failed to parse element at marker: %S" marker)
+                  (message "Expected element to have marker: %S" element)))))
+            (xenops-element-deactivate-marker element))
+        (error (aio-await
+                (xenops-aio-with-async-with-buffer
+                 buffer
+                 (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
+                   (xenops-math-display-latex-error element error)
+                   (xenops-element-deactivate-marker element))))))
+      (with-current-buffer buffer
+        (aio-sem-post xenops-math-latex-tasks-semaphore)
+        (xenops-math-latex-show-waiting-tasks)))))
+
+(defun xenops-math-latex-waiting-tasks-count ()
+  (when xenops-mode
+    (- xenops-math-latex-max-tasks-in-flight
+       (aref xenops-math-latex-tasks-semaphore 1))))
+
+(defun xenops-math-latex-show-waiting-tasks ()
+  "Display number of waiting latex processing tasks."
+  (interactive)
+  (when xenops-mode
+    (message "%S latex processing tasks waiting" (xenops-math-latex-waiting-tasks-count))))
+
+(defun xenops-math-latex-cancel-waiting-tasks ()
+  "Cancel waiting latex processing tasks."
+  (interactive)
+  (when xenops-mode
+    (xenops-aio-sem-cancel-waiting-tasks xenops-math-latex-tasks-semaphore
+                                         xenops-math-latex-max-tasks-in-flight)
+    (dolist (ov (overlays-in (point-min) (point-max)))
+      (if (eq (overlay-get ov 'xenops-overlay-type) 'xenops-math-latex-waiting)
+          (delete-overlay ov)))))
 
 (defun xenops-math-get-latex-colors ()
   (let* ((face (face-at-point))
