@@ -12,6 +12,7 @@
 (require 'preview)
 (require 's)
 
+(require 'xenops-aio)
 (require 'xenops-apply)
 (require 'xenops-auctex)
 (require 'xenops-compat)
