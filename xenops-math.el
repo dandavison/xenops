@@ -51,6 +51,7 @@
 
 (defun xenops-math-render (element &optional cached-only)
   (unless (or (xenops-element-get-image element)
+              (xenops-element-overlay-get element 'xenops-math-latex-waiting)
               (string-equal "" (s-trim (buffer-substring (plist-get element :begin-content)
                                                          (plist-get element :end-content)))))
     (let ((latex (buffer-substring-no-properties (plist-get element :begin)
@@ -69,6 +70,7 @@
          (cache-file-exists?
           (funcall display-image element))
          ((not cached-only)
+          (xenops-math-display-latex-waiting element)
           (xenops-math-create-latex-image element latex -image-type colors cache-file display-image)))))))
 
 (aio-defun xenops-math-create-latex-image (element latex image-type colors cache-file display-image)
@@ -447,6 +449,15 @@ Right-click on the warning badge to copy the failing command or view its output.
                          error-badge)
     (overlay-put ov 'after-string error-badge)
     (overlay-put ov 'help-echo help-echo)
+    ov))
+
+(defun xenops-math-display-latex-waiting (element)
+  (xenops-element-overlays-delete element)
+  (let* ((beg (plist-get element :begin))
+         (end (plist-get element :end))
+         (ov (xenops-overlay-create beg end)))
+    (overlay-put ov 'face '(:background "OldLace"))
+    (overlay-put ov 'xenops-overlay-type 'xenops-math-latex-waiting)
     ov))
 
 (defun xenops-math-display-process-output (output)
