@@ -3,7 +3,7 @@
 (ert-deftest xenops-math-parse-inline-math-from-string ()
   (should (equal (xenops-math-parse-element-from-string "$x$")
                  '(:begin 1 :begin-content 2 :end-content 3 :end 4 :type inline-math
-                          :delimiters ("\\$" "\\$")))))
+                   :delimiters ("\\$" "\\$")))))
 
 (ert-deftest xenops-math-parse-block-math-from-string ()
   (should (equal (xenops-math-parse-element-from-string
@@ -14,8 +14,8 @@
 \\end{align*}
 "))
                  '(:begin 1 :begin-content 15 :end-content 20 :end 32 :type block-math
-                          :delimiters ("^[ \t]*\\\\begin{align\\*?}"
-                                       "^[ \t]*\\\\end{align\\*?}")))))
+                   :delimiters ("^[ \t]*\\\\begin{align\\*?}"
+                                "^[ \t]*\\\\end{align\\*?}")))))
 
 
 (ert-deftest xenops-math-create-latex-document-for-fragment--single-file ()

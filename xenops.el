@@ -147,7 +147,7 @@
   '((render
      . ((:handlers . (xenops-math-render
                       xenops-image-render
-                      xenops-text-footnote-render))))
+                      xenops-footnote-render))))
     (reveal
      . ((:handlers . (xenops-math-reveal
                       xenops-image-reveal
@@ -213,8 +213,8 @@
     (footnote
      . ((:delimiters . ((,(concat "\\\\footnote"
                                   xenops-brace-delimited-multiline-expression-regexp))))
-        (:parser . xenops-text-footnote-parse-at-point)
-        (:handlers .(xenops-text-footnote-render
+        (:parser . xenops-footnote-parse-at-point)
+        (:handlers .(xenops-footnote-render
                      xenops-element-reveal
                      xenops-element-copy
                      xenops-element-delete))))
