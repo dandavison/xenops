@@ -39,9 +39,12 @@ is encountered. Return this value without further evaluations."
                     (cl-destructuring-bind (size . units)
                         (xenops-util-svg-parse-length-or-percent (match-string 1 match))
                       (format "%f%s" (* scale size) units))))
-    ;; We could parse as XML, but this is tempting.
-    (setq svg (replace-regexp-in-string "width='\\([^']+\\)'.*" #'resize svg nil nil 1))
-    (setq svg (replace-regexp-in-string "height='\\([^']+\\)'.*" #'resize svg nil nil 1))
+    ;; This regexp captures a single-quoted string, and then consumes to the end of the input,
+    ;; across newlines. I.e. we replace the first match only in a multiline string. See
+    ;; `replace-regexp-in-string'.
+    (let ((quoted-string-regexp "'\\([^']+\\)'\\(.\\|\n\\)*"))
+      (setq svg (replace-regexp-in-string  (concat "width=" quoted-string-regexp) #'resize svg nil nil 1))
+      (setq svg (replace-regexp-in-string (concat "height=" quoted-string-regexp) #'resize svg nil nil 1)))
     svg))
 
 (defun xenops-util-svg-parse-length-or-percent (string)
@@ -54,6 +57,3 @@ is encountered. Return this value without further evaluations."
           unit-specifier)))
 
 (provide 'xenops-util)
-
-
-(replace-regexp-in-string "width='\\([^']+\\)'.*" "XXXXpt" "32.409891' width='2.5pt' width='2.5pt' xmlns='http" nil nil 1)
