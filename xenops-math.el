@@ -5,13 +5,9 @@
 ;; | math element   | either an inline element or a block element    |
 ;; | inline element | inline math delimited by $...$                 |
 ;; | block element  | e.g. a \begin{align}...\end{align} environment |
-
+(require 'xenops-math-latex)
 
 (defvar xenops-math-process 'dvisvgm)
-
-(setq xenops-math-latex-max-tasks-in-flight 56)
-
-(defvar-local xenops-math-latex-tasks-semaphore nil)
 
 (defvar xenops-math-image-change-size-factor 1.1
   "The factor by which the image's size will be changed under
@@ -66,156 +62,18 @@
       (let* ((-image-type (plist-get (cdr (assq xenops-math-process
                                                 org-preview-latex-process-alist))
                                      :image-output-type))
-             (colors (xenops-math-get-latex-colors))
+             (colors (xenops-math-latex-get-colors))
              (cache-file (xenops-math-compute-file-name latex -image-type colors))
              (cache-file-exists? (file-exists-p cache-file))
              (display-image
               (lambda (element &optional commands)
-                (xenops-math-display-latex-image element commands latex cache-file -image-type))))
+                (xenops-math-latex-display-image element commands latex cache-file -image-type))))
         (cond
          (cache-file-exists?
           (funcall display-image element))
          ((not cached-only)
-          (xenops-math-display-latex-waiting element)
-          (xenops-math-create-latex-image element latex -image-type colors cache-file display-image)))))))
-
-(aio-defun xenops-math-create-latex-image (element latex image-type colors cache-file display-image)
-  "Process latex string to SVG via external processes, asynchronously."
-  (let ((buffer (current-buffer)))
-    (aio-await (aio-sem-wait xenops-math-latex-tasks-semaphore))
-    (with-current-buffer buffer
-      (xenops-element-create-marker element))
-    (let* ((dir temporary-file-directory)
-           (base-name (f-base cache-file))
-           (make-file-name (lambda (ext) (f-join dir (concat base-name ext))))
-           (tex-file (funcall make-file-name ".tex"))
-           (dvi-file (funcall make-file-name ".dvi"))
-           (svg-file (funcall make-file-name ".svg"))
-           (processing-type 'dvisvgm)
-           (processing-info
-            (cdr (assq processing-type org-preview-latex-process-alist)))
-           (dpi (* (org--get-display-dpi)
-                   (car (plist-get processing-info :image-size-adjust))
-                   xenops-math-image-scale-factor))
-           (scale (/ dpi 140))
-           (bounding-box (if (eq 'inline-math (plist-get element :type)) 1 10))
-           (commands
-            `(("latex" "-shell-escape" "-interaction" "nonstopmode" "-output-directory" ,dir ,tex-file)
-              ("dvisvgm" ,dvi-file
-               "-n"
-               "-b" ,(number-to-string bounding-box)
-               "-c" ,(number-to-string scale)
-               "-o" ,svg-file))))
-      (aio-await
-       (xenops-aio-with-async-with-buffer
-        buffer
-        (let* ((org-latex-packages-alist (xenops-math-get-latex-preamble))
-               (org-latex-default-packages-alist)
-               (latex-header (org-latex-make-preamble
-                              (org-export-get-environment (org-export-get-backend 'latex))
-                              org-format-latex-header
-                              'snippet)))
-          (with-temp-file tex-file
-            (destructuring-bind (fg bg) colors
-              (insert latex-header
-                      "\n\\begin{document}\n"
-                      "\\definecolor{fg}{rgb}{" fg "}\n"
-                      "\\definecolor{bg}{rgb}{" bg "}\n"
-                      "\n\\pagecolor{bg}\n"
-                      "\n{\\color{fg}\n"
-                      latex
-                      "\n}\n"
-                      "\n\\end{document}\n"))))))
-      (condition-case error
-          (progn
-            (dolist (command commands)
-              (aio-await (xenops-aio-subprocess command)))
-            (aio-await (aio-with-async (copy-file svg-file cache-file 'replace)))
-            (aio-await
-             (xenops-aio-with-async-with-buffer
-              buffer
-              (-if-let* ((marker (plist-get element :begin-marker))
-                         (element (xenops-math-parse-element-at marker)))
-                  (funcall display-image element commands)
-                (if marker (message "Failed to parse element at marker: %S" marker)
-                  (message "Expected element to have marker: %S" element)))))
-            (xenops-element-deactivate-marker element))
-        (error (aio-await
-                (xenops-aio-with-async-with-buffer
-                 buffer
-                 (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-                   (xenops-math-display-latex-error element error)
-                   (xenops-element-deactivate-marker element))))))
-      (with-current-buffer buffer
-        (aio-sem-post xenops-math-latex-tasks-semaphore)
-        (xenops-math-latex-show-waiting-tasks)))))
-
-(defun xenops-math-latex-waiting-tasks-count ()
-  (when xenops-mode
-    (- xenops-math-latex-max-tasks-in-flight
-       (aref xenops-math-latex-tasks-semaphore 1))))
-
-(defun xenops-math-latex-show-waiting-tasks ()
-  "Display number of waiting latex processing tasks."
-  (interactive)
-  (when xenops-mode
-    (message "%S latex processing tasks waiting" (xenops-math-latex-waiting-tasks-count))))
-
-(defun xenops-math-latex-cancel-waiting-tasks ()
-  "Cancel waiting latex processing tasks."
-  (interactive)
-  (when xenops-mode
-    (xenops-aio-sem-cancel-waiting-tasks xenops-math-latex-tasks-semaphore
-                                         xenops-math-latex-max-tasks-in-flight)
-    (dolist (ov (overlays-in (point-min) (point-max)))
-      (if (eq (overlay-get ov 'xenops-overlay-type) 'xenops-math-latex-waiting)
-          (delete-overlay ov)))))
-
-(defun xenops-math-get-latex-colors ()
-  (let* ((face (face-at-point))
-         (fg
-          (let ((color (plist-get org-format-latex-options :foreground)))
-            (if (eq color 'auto)
-                (and face (face-attribute face :foreground nil 'default))
-              color)))
-         (bg
-          (let ((color (plist-get org-format-latex-options :background)))
-            (if (eq color 'auto)
-                (and face (face-attribute face :background nil 'default))
-              color)))
-
-         (fg (or fg "Black"))
-         (bg (or bg "Transparent"))
-
-         (fg (if (eq fg 'default)
-                 (org-latex-color :foreground)
-               (org-latex-color-format fg)))
-         (bg (if (eq bg 'default)
-                 (org-latex-color :background)
-               (org-latex-color-format
-                (if (string= bg "Transparent") "white" bg)))))
-    (list fg bg)))
-
-(defvar xenops-math-latex-preamble-cache nil
-  "Internal cache for per-file LaTeX preamble.")
-
-(defun xenops-math-get-latex-preamble ()
-  (let ((key (sha1 (prin1-to-string (list (buffer-file-name) TeX-master)))))
-    (unless (assoc key xenops-math-latex-preamble-cache)
-      (push (cons key (xenops-math-compute-latex-preamble))
-            xenops-math-latex-preamble-cache))
-    (cdr (assoc key xenops-math-latex-preamble-cache))))
-
-(defun xenops-math-compute-latex-preamble ()
-  (let ((file (make-temp-file "xenops-math-TeX-region-create" nil ".tex")))
-    (TeX-region-create file "" (buffer-file-name) 0)
-    (with-temp-buffer
-      (insert-file-contents file)
-      (split-string
-       (buffer-substring (re-search-forward "\\documentclass.+$")
-                         (progn (search-forward "\\begin{document}")
-                                (match-beginning 0)))
-       "\n" t "[ \t\n]+"))))
+          (xenops-math-latex-display-waiting element)
+          (xenops-math-latex-create-image element latex -image-type colors cache-file display-image)))))))
 
 (defun xenops-math-regenerate (element)
   (let ((cache-file (xenops-math-get-cache-file element)))
@@ -425,91 +283,6 @@ If we are in a math element, then paste without the delimiters"
         (xenops-apply '(render)))
       (pop-mark))))
 
-(defun xenops-math-display-latex-image (element commands help-echo cache-file -image-type)
-  "Display SVG image resulting from successful LaTeX compilation."
-  (let ((margin (if (eq 'inline-math (plist-get element :type))
-                    0 `(,xenops-math-image-margin . 0)))
-        (ov (xenops-math-make-overlay element commands help-echo)))
-    (overlay-put ov 'display
-                 `(image :type ,(intern -image-type)
-                         :file ,cache-file :ascent center :margin ,margin)))
-  (unless (equal xenops-math-image-current-scale-factor 1.0)
-    (xenops-math-image-change-size element xenops-math-image-current-scale-factor)))
-
-(defun xenops-math-make-overlay (element commands help-echo)
-  (xenops-element-overlays-delete element)
-  (let* ((beg (plist-get element :begin))
-         (end (plist-get element :end))
-         (ov (xenops-overlay-create beg end))
-         (keymap (overlay-get ov 'keymap))
-         (xenops-math-image-overlay-menu
-          (lambda (event)
-            (interactive "e")
-            (popup-menu
-             `("Xenops"
-               ["Edit" (progn (goto-char ,beg) (xenops-reveal-at-point))]
-               ["Copy LaTeX command" (xenops-math-image-overlay-copy-latex-command ,ov)]))
-            event)))
-    (overlay-put ov 'help-echo help-echo)
-    (overlay-put ov 'commands commands)
-    (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
-    ov))
-
-(defun xenops-math-display-latex-error (element error)
-  (xenops-element-overlays-delete element)
-  (let* ((beg (plist-get element :begin))
-         (end (plist-get element :begin-content))
-         (ov (xenops-overlay-create beg end))
-         (keymap (overlay-get ov 'keymap))
-         (error-badge "⚠️")
-         help-echo)
-    (-if-let* ((error-data (plist-get (cdr error) :xenops-error-data)))
-        (cl-destructuring-bind (failing-command failure-description output) error-data
-          (let* ((xenops-math-image-overlay-menu
-                  (lambda (event)
-                    (interactive "e")
-                    (popup-menu
-                     `("Xenops"
-                       ["View failing command output" (xenops-math-display-process-output ,output)]
-                       ["Copy failing command" (kill-new ,failing-command)]))
-                    event)))
-            (setq help-echo (format "External process failure: %s
-Right-click on the warning badge to copy the failing command or view its output.
-
-%s"
-                                    failure-description
-                                    failing-command))
-            (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
-            ov))
-      (setq help-echo (format "External process failure:\n\n%s"
-                              (s-join "\n\n" (--map (format "%S" it) (cdr error))))))
-    (add-text-properties 0 (length error-badge)
-                         `(help-echo ,help-echo keymap ,keymap)
-                         error-badge)
-    (overlay-put ov 'after-string error-badge)
-    (overlay-put ov 'help-echo help-echo)
-    ov))
-
-(defun xenops-math-display-latex-waiting (element)
-  (xenops-element-overlays-delete element)
-  (let* ((beg (plist-get element :begin))
-         (end (plist-get element :end))
-         (ov (xenops-overlay-create beg end)))
-    (overlay-put ov 'face '(:background "OldLace"))
-    (overlay-put ov 'xenops-overlay-type 'xenops-math-latex-waiting)
-    ov))
-
-(defun xenops-math-display-process-output (output)
-  (let ((buf (get-buffer-create "*Xenops external command output*")))
-    (with-current-buffer buf
-      (erase-buffer)
-      (insert output))
-    (display-buffer buf)))
-
-(defun xenops-math-image-overlay-copy-latex-command (overlay)
-  (let ((latex-command (car (overlay-get overlay 'commands))))
-    (kill-new (s-join " " latex-command))))
-
 (defun xenops-math-get-cache-file (element)
   ;; TODO: the file path should be stored somewhere, not recomputed.
   (let* ((beg (plist-get element :begin))
@@ -520,7 +293,7 @@ Right-click on the warning badge to copy the failing command or view its output.
                                 :image-output-type))
          (colors (save-excursion
                    (goto-char beg)
-                   (xenops-math-get-latex-colors))))
+                   (xenops-math-latex-get-colors))))
     (xenops-math-compute-file-name latex image-type colors)))
 
 (defun xenops-math-file-name-static-hash-data ()

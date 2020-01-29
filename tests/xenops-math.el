@@ -23,7 +23,7 @@
     (f-write-text xenops-test-math-single-file-contents 'utf-8 file)
     (find-file file)
     (xenops-mode)
-    (let ((preamble (xenops-math-get-latex-preamble-lines)))
+    (let ((preamble (xenops-math-latex-get-preamble-lines)))
       (should
        (member "\\newcommand{\\CommandInFile}{\\text{CommandInFileOutput}}" preamble))
       (should
@@ -37,7 +37,7 @@
     (find-file child-file)
     (xenops-mode)
     (let* ((TeX-master master-file)
-           (preamble (xenops-math-get-latex-preamble-lines)))
+           (preamble (xenops-math-latex-get-preamble-lines)))
       (should
        (member "\\newcommand{\\CommandInMasterFile}{\\text{CommandInMasterFileOutput}}" preamble))
       (should

@@ -9,15 +9,15 @@
 </g>
 </svg>")
 
-(defun xenops-test-mock-xenops-math-create-latex-image (element _ _ _ file callback)
+(defun xenops-test-mock-xenops-math-latex-create-image (element _ _ _ file callback)
   (with-temp-buffer
     (insert xenops-test-svg)
     (write-file file))
   (funcall callback element))
 
 (defmacro xenops-render--do-test (buffer-contents &rest body)
-  `(cl-letf (((symbol-function 'xenops-math-create-latex-image)
-              #'xenops-test-mock-xenops-math-create-latex-image))
+  `(cl-letf (((symbol-function 'xenops-math-latex-create-image)
+              #'xenops-test-mock-xenops-math-latex-create-image))
      (let ((xenops-cache-directory (make-temp-file "xenops-test-" 'dir))
            ;; We are relying on this file being treated as its own master file by
            ;; `TeX-region-create'. If the file name does not end in .tex, then a master file will be
