@@ -8,7 +8,7 @@
 
 An item in the list must have one of the following forms:
 
-\(STRING . CHARACTER\)   An entry of this form has the same meaning
+\(STRING . CHARACTER\) An entry of this form has the same meaning
                        as an entry in `prettify-symbols-alist':
                        occurrences of STRING (which is not a
                        regular expression) are displayed as
@@ -16,7 +16,7 @@ An item in the list must have one of the following forms:
                        then this is treated as a sequence of
                        characters to be composed. See `prettify-symbols-alist'.
 
-\(STRING . STRING\)      In this case, occurrences of the first string
+\(STRING . STRING\)    In this case, occurrences of the first string
                        (not a regular expression) are displayed as
                        the second string.
 
@@ -33,7 +33,7 @@ REGEXP                 In this case, REGEXP must be a regular expression with
                        for how an italic font is then applied to
                        \"some text\".
 
-\(REGEXP . FUNCTION\)   In this case, REGEXP must be a regular
+\(REGEXP . FUNCTION\) In this case, REGEXP must be a regular
                       expression with exactly one capture group and
                       FUNCTION must be a function that takes one
                       string argument and returns a string.  The
