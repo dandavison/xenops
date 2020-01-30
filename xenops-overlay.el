@@ -9,10 +9,7 @@
                  'modification-hooks
                  (list (lambda (o _flag _beg _end &optional _l)
                          (delete-overlay o))))
-
-    (set-keymap-parent keymap xenops-rendered-element-keymap)
     (overlay-put ov 'keymap keymap)
-
     ov))
 
 (defun xenops-overlay-at-point ()

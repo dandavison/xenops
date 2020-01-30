@@ -90,9 +90,11 @@ waiting in the queue to be executed."
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
          (ov (xenops-overlay-create beg end)))
-    (overlay-put ov 'face '(:background "OldLace"))
+    (overlay-put ov 'face `(:background ,(if (eq (frame-parameter nil 'background-mode) 'light)
+                                             "OldLace" "#362b2b")))
     (overlay-put ov 'xenops-overlay-type 'xenops-math-latex-waiting)
-    ov))
+    (overlay-put ov 'help-echo "Image-generation task in-progress. \
+Use `M-x xenops-cancel-waiting-tasks` to make this element editable.") ov))
 
 (defun xenops-math-latex-display-image (element commands help-echo cache-file -image-type)
   "Display SVG image resulting from successful LaTeX compilation."
@@ -161,6 +163,7 @@ images and error information."
             event)))
     (overlay-put ov 'help-echo help-echo)
     (overlay-put ov 'commands commands)
+    (set-keymap-parent keymap xenops-rendered-element-keymap)
     (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
     ov))
 
