@@ -298,18 +298,6 @@ type."
   (if (xenops-apply-parse-at-point)
       (insert "\"")))
 
-(defun xenops-generate-images-in-headless-process ()
-  "Generate cached images on disk for all math elements in
-buffer, when running in a headless emacs process."
-  (cl-letf (((symbol-function 'org--get-display-dpi) (lambda () 129))
-            ((symbol-function 'org-latex-color)
-             (lambda (attr)
-               (case attr
-                 (:foreground "0,0,0")
-                 (:background "1,1,1")
-                 (t (error "Unexpected input: %s" attr))))))
-    (xenops-render)))
-
 (defun xenops-avy-goto-math ()
   (interactive)
   (let (avy-action) (xenops-avy-do-at-math)))
