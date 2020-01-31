@@ -7,7 +7,7 @@
 
 (defun xenops-math-latex-make-latex-document (latex colors)
   "Make the LaTeX document for a single math image."
-  (let* ((org-latex-packages-alist (xenops-math-latex-get-preamble))
+  (let* ((org-latex-packages-alist (xenops-math-latex-get-preamble-lines))
          (org-latex-default-packages-alist)
          (latex-header (org-latex-make-preamble
                         (org-export-get-environment (org-export-get-backend 'latex))
@@ -231,16 +231,16 @@ images of LaTeX content."
 (defvar xenops-math-latex-preamble-cache nil
   "Internal cache for per-file LaTeX preamble.")
 
-(defun xenops-math-latex-get-preamble ()
+(defun xenops-math-latex-get-preamble-lines ()
   "Get the preamble for a LaTeX document for a single math
 element."
   (let ((key (sha1 (prin1-to-string (list (buffer-file-name) TeX-master)))))
     (unless (assoc key xenops-math-latex-preamble-cache)
-      (push (cons key (xenops-math-latex-make-preamble))
+      (push (cons key (xenops-math-latex-make-preamble-lines))
             xenops-math-latex-preamble-cache))
     (cdr (assoc key xenops-math-latex-preamble-cache))))
 
-(defun xenops-math-latex-make-preamble ()
+(defun xenops-math-latex-make-preamble-lines ()
   "Make the preamble for a LaTeX document for a single math
 element."
   (let ((file (make-temp-file "xenops-math-TeX-region-create" nil ".tex")))
