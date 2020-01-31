@@ -7,22 +7,24 @@
 
 (defun xenops-math-latex-make-latex-document (latex colors)
   "Make the LaTeX document for a single math image."
-  (let* ((org-latex-packages-alist (xenops-math-latex-get-preamble-lines))
-         (org-latex-default-packages-alist)
-         (latex-header (org-latex-make-preamble
-                        (org-export-get-environment (org-export-get-backend 'latex))
-                        org-format-latex-header
-                        'snippet)))
-    (destructuring-bind (fg bg) colors
-      (concat latex-header
-              "\n\\begin{document}\n"
-              "\\definecolor{fg}{rgb}{" fg "}\n"
-              "\\definecolor{bg}{rgb}{" bg "}\n"
-              "\n\\pagecolor{bg}\n"
-              "\n{\\color{fg}\n"
-              latex
-              "\n}\n"
-              "\n\\end{document}\n"))))
+  (cl-destructuring-bind (org-latex-packages-alist org-latex-default-packages-alist)
+      (if (eq major-mode 'org-mode)
+          (list org-latex-packages-alist org-latex-default-packages-alist)
+        (list (xenops-math-latex-get-preamble-lines) nil))
+    (let* ((latex-header (org-latex-make-preamble
+                          (org-export-get-environment (org-export-get-backend 'latex))
+                          org-format-latex-header
+                          'snippet)))
+      (destructuring-bind (fg bg) colors
+        (concat latex-header
+                "\n\\begin{document}\n"
+                "\\definecolor{fg}{rgb}{" fg "}\n"
+                "\\definecolor{bg}{rgb}{" bg "}\n"
+                "\n\\pagecolor{bg}\n"
+                "\n{\\color{fg}\n"
+                latex
+                "\n}\n"
+                "\n\\end{document}\n")))))
 
 (defun xenops-math-latex-make-commands (element dir tex-file dvi-file svg-file)
   "Construct the external process invocations used to convert a single LaTeX fragment to SVG."
