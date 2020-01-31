@@ -80,8 +80,7 @@
                    (xenops-math-latex-display-error element error)
                    (xenops-element-deactivate-marker element))))))
       (with-current-buffer buffer
-        (aio-sem-post xenops-math-latex-tasks-semaphore)
-        (xenops-show-waiting-tasks)))))
+        (aio-sem-post xenops-math-latex-tasks-semaphore)))))
 
 (defun xenops-math-latex-display-waiting (element)
   "Style a math element to indicate that its processing task is
