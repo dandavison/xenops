@@ -1,8 +1,22 @@
-<p align="center"><img width=512px src="xenops.jpg" alt="" /></p>
+<table style="width:100%">
+  <tr>
+    <td>
+      <img width=300px src="img/demo-1.gif" alt="demo" />
+    </td>
+    <td>
+      <img width=512px src="xenops.jpg" alt="Xenops rutilans" />
+    </td>
+  </tr>
+</table>
 
-[![Build Status](https://travis-ci.com/dandavison/xenops.svg?token=CX7zhABhKYrVPxKn4rWz&branch=master)](https://travis-ci.com/dandavison/xenops)
+<p align="right">
+  <a href="https://travis-ci.com/dandavison/xenops">
+    <img src="https://travis-ci.com/dandavison/xenops.svg?token=CX7zhABhKYrVPxKn4rWz&branch=master" alt="Build Status" />
+  </a>
+</p>
 
-Xenops is a LaTeX editing environment for Emacs. Xenops alters the visual appearance of a LaTeX document as displayed by Emacs, but it does not change the LaTeX code that is written to disk.
+
+Xenops alters the visual appearance of a LaTeX document as displayed by Emacs, but it does not change the LaTeX code that is written to disk.
 
 Xenops has the following aims:
 
