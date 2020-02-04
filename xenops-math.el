@@ -27,8 +27,6 @@
 (defvar xenops-math-image-margin 20
   "Number of pixels to be used as left margin for non-inline math images")
 
-(setq xenops-math-inline-math-delimiters '("\\$" "\\$"))
-
 (defun xenops-math-font-lock-keywords ()
   `((,(xenops-math-block-delimiter-lines-regexp)
      (0

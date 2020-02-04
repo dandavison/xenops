@@ -15,7 +15,7 @@
                           (org-export-get-environment (org-export-get-backend 'latex))
                           org-format-latex-header
                           'snippet)))
-      (destructuring-bind (fg bg) colors
+      (cl-destructuring-bind (fg bg) colors
         (concat latex-header
                 "\n\\begin{document}\n"
                 "\\definecolor{fg}{rgb}{" fg "}\n"
