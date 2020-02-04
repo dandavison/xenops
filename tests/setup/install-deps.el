@@ -14,11 +14,9 @@
 
 (defun xenops-dependencies-setup-package-repositories ()
   (setq package-archives
-        (list (if melpa-stable
-                  '("melpa-stable" . "https://stable.melpa.org/packages/")
-                '("melpa" . "https://melpa.org/packages/"))
-              '("org" . "https://orgmode.org/elpa/")))
-  (package-refresh-contents))
+        (if melpa-stable
+            '(("melpa-stable" . "https://stable.melpa.org/packages/"))
+          '(("melpa" . "https://melpa.org/packages/")))))
 
 (defun xenops-package-install (package)
   (interactive "Spackage: ")
@@ -29,4 +27,8 @@
       (message "%S: ...OK" package))))
 
 (xenops-dependencies-setup-package-repositories)
+(when xenops-install-auctex-from-elpa
+  (push '("gnu" . "https://elpa.gnu.org/packages/") package-archives)
+  (push 'auctex xenops-dependencies))
+(package-refresh-contents)
 (mapc #'xenops-package-install xenops-dependencies)

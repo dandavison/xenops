@@ -10,5 +10,7 @@
                                "elpa"))
 (message "installing in %s ...\n" package-user-dir)
 (package-initialize)
-(load-file (concat xenops-package-dir "/auctex/auctex.el"))
-(load-file (concat xenops-package-dir "/auctex/preview-latex.el"))
+(setq xenops-install-auctex-from-elpa (getenv "XENOPS_DOCKER"))
+(unless xenops-install-auctex-from-elpa
+  (load-file (concat xenops-package-dir "/auctex/auctex.el"))
+  (load-file (concat xenops-package-dir "/auctex/preview-latex.el")))
