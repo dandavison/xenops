@@ -9,7 +9,6 @@
     dash
     dash-functional
     f
-    org
     s
     use-package))
 
@@ -30,9 +29,6 @@
       (message "%S: ...OK" package))))
 
 (defun xenops-dependencies-check-packages ()
-  (unless (string-match "^9\." org-version)
-    (message "org-version is %S but >= 9 is required" org-version)
-    (kill-emacs 1))
   (save-window-excursion
     (package-list-packages t)
     (condition-case nil
@@ -44,5 +40,4 @@
 
 (xenops-dependencies-setup-package-repositories)
 (mapc #'xenops-package-install xenops-dependencies)
-(use-package org :ensure org-plus-contrib :pin org)
 (xenops-dependencies-check-packages)
