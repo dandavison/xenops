@@ -247,11 +247,16 @@ If we are in a math element, then paste without the delimiters"
   (xenops-parse-element-at-point 'table))
 
 (defun xenops-math-parse-inline-element-at-point ()
-  "If point is in inline math element, return plist describing match"
-  (let ((delimiter (caar (xenops-elements-get 'inline-math :delimiters))))
+  (xenops-math-parse-dollar-delimited-inline-element-at-point))
+
+(defun xenops-math-parse-dollar-delimited-inline-element-at-point ()
+  "If point is in dollar-delimited inline math element, return plist describing match."
+  ;; This is a bit awkward since the start and end delimiters are the same. It
+  ;; will fail if dollar-delimited inline math extends over multiple lines.
+  (let ((delimiter "\\$"))
     (save-excursion
       (let ((odd-count (cl-oddp (count-matches delimiter (point-at-bol) (point)))))
-        (when (and (not odd-count) (looking-at (caar (xenops-elements-get 'inline-math :delimiters))))
+        (when (and (not odd-count) (looking-at delimiter))
           (forward-char)
           (setq odd-count t))
         (and odd-count
