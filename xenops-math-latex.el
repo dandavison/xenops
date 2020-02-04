@@ -55,14 +55,14 @@
            (dvi-file (funcall make-file-name ".dvi"))
            (svg-file (funcall make-file-name ".svg"))
            (commands (xenops-math-latex-make-commands element dir tex-file dvi-file svg-file)))
-      (aio-await
-       (xenops-aio-with-async-with-buffer
-        buffer
-        (let ((latex-document (xenops-math-latex-make-latex-document latex colors)))
-          (with-temp-file tex-file
-            (insert latex-document)))))
       (condition-case error
           (progn
+            (aio-await
+             (xenops-aio-with-async-with-buffer
+              buffer
+              (let ((latex-document (xenops-math-latex-make-latex-document latex colors)))
+                (with-temp-file tex-file
+                  (insert latex-document)))))
             (dolist (command commands)
               (aio-await (xenops-aio-subprocess command)))
             (aio-await (aio-with-async (copy-file svg-file cache-file 'replace)))
@@ -119,7 +119,7 @@ via hover-over text and contextual menu."
          (keymap (overlay-get ov 'keymap))
          (error-badge "⚠️")
          help-echo)
-    (-if-let* ((error-data (plist-get (cdr error) :xenops-error-data)))
+    (-if-let* ((error-data (plist-get (cdr error) :xenops-aio-subprocess-error-data)))
         (cl-destructuring-bind (failing-command failure-description output) error-data
           (let* ((xenops-math-image-overlay-menu
                   (lambda (event)
@@ -129,7 +129,7 @@ via hover-over text and contextual menu."
                        ["View failing command output" (xenops-math-latex-display-process-output ,output)]
                        ["Copy failing command" (kill-new ,failing-command)]))
                     event)))
-            (setq help-echo (format "External process failure: %s
+            (setq help-echo (format "External running external process: %s
 Right-click on the warning badge to copy the failing command or view its output.
 
 %s"
@@ -137,8 +137,8 @@ Right-click on the warning badge to copy the failing command or view its output.
                                     failing-command))
             (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
             ov))
-      (setq help-echo (format "External process failure:\n\n%s"
-                              (s-join "\n\n" (--map (format "%S" it) (cdr error))))))
+      (setq help-echo (format "Error processing LaTeX fragment:\n\n%s"
+                              (s-join "\n\n" (--map (format "%S" it) error)))))
     (add-text-properties 0 (length error-badge)
                          `(help-echo ,help-echo keymap ,keymap)
                          error-badge)

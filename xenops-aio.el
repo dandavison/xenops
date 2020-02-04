@@ -30,7 +30,7 @@ with an error status, then the value function signals the error."
                  (if (eq 0 (process-exit-status process))
                      (kill-buffer output-buffer)
                    (signal 'error
-                           (prog1 (list :xenops-error-data
+                           (prog1 (list :xenops-aio-subprocess-error-data
                                     (list (s-join " " command)
                                           event
                                           (with-current-buffer output-buffer
