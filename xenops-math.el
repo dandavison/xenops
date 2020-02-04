@@ -247,7 +247,16 @@ If we are in a math element, then paste without the delimiters"
   (xenops-parse-element-at-point 'table))
 
 (defun xenops-math-parse-inline-element-at-point ()
-  (xenops-math-parse-dollar-delimited-inline-element-at-point))
+  (or (xenops-math-parse-dollar-delimited-inline-element-at-point)
+      (xenops-math-parse-paren-delimited-inline-element-at-point)))
+
+(defun xenops-math-parse-paren-delimited-inline-element-at-point ()
+  "If point is in backslash-paren-delimited inline math element, return plist describing match."
+  (cl-letf (((symbol-function 'xenops-elements-get)
+             (lambda (type key)
+               (if (and (eq type 'inline-math) (eq key :delimiters))
+                   '(("\\\\(" "\\\\)"))))))
+    (xenops-parse-element-at-point 'inline-math)))
 
 (defun xenops-math-parse-dollar-delimited-inline-element-at-point ()
   "If point is in dollar-delimited inline math element, return plist describing match."
