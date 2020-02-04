@@ -28,16 +28,5 @@
       (package-install package)
       (message "%S: ...OK" package))))
 
-(defun xenops-dependencies-check-packages ()
-  (save-window-excursion
-    (package-list-packages t)
-    (condition-case nil
-        (progn
-          (package-menu-mark-upgrades)
-          (package-menu-execute t))
-      (error
-       (message "All packages up to date")))))
-
 (xenops-dependencies-setup-package-repositories)
 (mapc #'xenops-package-install xenops-dependencies)
-(xenops-dependencies-check-packages)
