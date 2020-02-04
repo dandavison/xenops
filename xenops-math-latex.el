@@ -233,10 +233,13 @@ images of LaTeX content."
 (defvar xenops-math-latex-preamble-cache nil
   "Internal cache for per-file LaTeX preamble.")
 
+(defun xenops-math-latex-make-preamble-cache-key ()
+  (sha1 (prin1-to-string (list (buffer-file-name) TeX-master))))
+
 (defun xenops-math-latex-get-preamble-lines ()
   "Get the preamble for a LaTeX document for a single math
 element."
-  (let ((key (sha1 (prin1-to-string (list (buffer-file-name) TeX-master)))))
+  (let ((key (xenops-math-latex-make-preamble-cache-key)))
     (unless (assoc key xenops-math-latex-preamble-cache)
       (push (cons key (xenops-math-latex-make-preamble-lines))
             xenops-math-latex-preamble-cache))
@@ -254,5 +257,11 @@ element."
                          (progn (search-forward "\\begin{document}")
                                 (match-beginning 0)))
        "\n" t "[ \t\n]+"))))
+
+(defun xenops-clear-latex-preamble-cache ()
+  (interactive)
+  (setq xenops-math-latex-preamble-cache
+        (assoc-delete-all (xenops-math-latex-make-preamble-cache-key)
+                          xenops-math-latex-preamble-cache)))
 
 (provide 'xenops-math-latex)
