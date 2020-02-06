@@ -39,6 +39,7 @@
   (setq mouse-drag-and-drop-region t)
   (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-around-advice)
   (advice-add fill-paragraph-function :after #'xenops-math-fill-paragraph-after-advice)
+  (advice-add #'TeX-insert-dollar :after #'xenops-math-insert-inline-delimiter-after-advice)
   (font-lock-add-keywords nil (xenops-math-font-lock-keywords))
   (cursor-sensor-mode +1)
   (add-to-list 'fill-nobreak-predicate #'xenops-math-parse-inline-element-at-point))
@@ -46,6 +47,7 @@
 (defun xenops-math-deactivate ()
   (advice-remove #'mouse-drag-and-drop-region #'xenops-math-mouse-drag-region-around-advice)
   (advice-remove fill-paragraph-function #'xenops-math-fill-paragraph-after-advice)
+  (advice-remove #'TeX-insert-dollar #'xenops-math-insert-inline-delimiter-after-advice)
   (cursor-sensor-mode -1)
   (font-lock-remove-keywords nil (xenops-math-font-lock-keywords)))
 
@@ -173,6 +175,14 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-paste ()
   (or (xenops-math-handle-paste) (yank)))
+
+(defun xenops-math-insert-inline-delimiter-after-advice (&rest args)
+  ;; Hack: If `TeX-electric-math' is nil then, without the following, an inline math element will
+  ;; not be rendered when the closing delimiter is inserted.
+  (-if-let* ((element (save-excursion
+                        (backward-char)
+                        (xenops-math-parse-inline-element-at-point))))
+      (xenops-math-render element)))
 
 (defun xenops-math-fill-paragraph-after-advice (&rest args)
   (let ((forward-paragraph-fn (if (fboundp 'LaTeX-forward-paragraph)
