@@ -127,13 +127,13 @@ Suppose we have inline element 1$345$7 where the integers are the
 buffer positions of the corresponding characters. The following
 tables shows required behavior for cursor position transitions.
 
-| old pos | new pos | behavior      | notes                                   | implementation |
-|---------+---------+---------------+-----------------------------------------+----------------|
-|       4 |       3 | do not render | 3 is pos for inserting at element start |                |
-|       3 |       1 | render        |                                         |                |
-|       5 |       6 | do not render | 6 is pos for inserting at element end   |                |
-|       5 |       7 | render        |                                         |                |
-|       5 |       6 | do not render |                                         |                |
+| old pos | new pos | behavior      | notes                                   |
+|---------+---------+---------------+-----------------------------------------+
+|       4 |       3 | do not render | 3 is pos for inserting at element start |
+|       3 |       1 | render        |                                         |
+|       5 |       6 | do not render | 6 is pos for inserting at element end   |
+|       5 |       7 | render        |                                         |
+|       5 |       6 | do not render |                                         |
 
 The above is achieved by setting the `cursor-sensor-functions'
 property on positions 3-6 inclusive (which are the :begin-content
