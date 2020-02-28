@@ -6,8 +6,6 @@
   "The directory in which Xenops should offer to save images when
 pasted from the system clipboard.")
 
-(defvar xenops-image-pngpaste-executable "pngpaste")
-
 (defvar xenops-image-latex-template
   "\\includegraphics[width=400pt]{%s}"
   "LaTeX code for inclusion of a pasted image in the LaTeX
@@ -49,26 +47,32 @@ pasted from the system clipboard.")
 
 (defun xenops-image-handle-paste ()
   (interactive)
-  (let ((temp-file (make-temp-file "xenops-image-from-clipboard-"))
-        (output-file))
-    (let ((exit-status
-           (call-process xenops-image-pngpaste-executable nil `(:file ,temp-file) nil "-")))
-      (if (= exit-status 0)
-          (let ((file-name-suggestion
-                 (xenops-image-suggest-file-name
-                  (format "-%s.%s" (substring (sha1 (f-read-bytes temp-file)) 0 4) "png"))))
-            (setq output-file
-                  (read-file-name "Save image as: "
-                                  (or xenops-image-directory default-directory)
-                                  nil nil file-name-suggestion))
-            (when (file-exists-p output-file) (error "File exists: %s" output-file))
-            (copy-file temp-file output-file t))))
-    (when output-file
-      (save-excursion
-        (insert (format xenops-image-latex-template
-                        (file-relative-name output-file))))
-      (xenops-image-render (xenops-apply-get-next-element))
-      t)))
+  (xenops-image-handle-paste-macos))
+
+(defun xenops-image-handle-paste-macos ()
+  (interactive)
+  ;; https://github.com/jcsalterego/pngpaste
+  (when (executable-find "pngpaste")
+    (let ((temp-file (make-temp-file "xenops-image-from-clipboard-"))
+          (output-file))
+      (let ((exit-status
+             (call-process "pngpaste" nil `(:file ,temp-file) nil "-")))
+        (if (= exit-status 0)
+            (let ((file-name-suggestion
+                   (xenops-image-suggest-file-name
+                    (format "-%s.%s" (substring (sha1 (f-read-bytes temp-file)) 0 4) "png"))))
+              (setq output-file
+                    (read-file-name "Save image as: "
+                                    (or xenops-image-directory default-directory)
+                                    nil nil file-name-suggestion))
+              (when (file-exists-p output-file) (error "File exists: %s" output-file))
+              (copy-file temp-file output-file t))))
+      (when output-file
+        (save-excursion
+          (insert (format xenops-image-latex-template
+                          (file-relative-name output-file))))
+        (xenops-image-render (xenops-apply-get-next-element))
+        t))))
 
 (defun xenops-image-suggest-file-name (&optional suffix)
   (save-excursion
