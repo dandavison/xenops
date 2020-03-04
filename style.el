@@ -83,7 +83,7 @@ REGEXP                 In this case, REGEXP must be a regular expression with
      (if deactivate 'font-lock-remove-keywords 'font-lock-add-keywords)
      nil
      `((,regexp
-        0 `(face font-lock-keyword-face
+        0 `(face default
                  help-echo ,(match-string 0))))))
   (if deactivate
       (setq tooltip-delay style-tooltip-delay-orig)
