@@ -15,42 +15,74 @@
   </a>
 </p>
 
+Xenops is a LaTeX editing environment for Emacs. To use it, activate the minor mode: `M-x xenops-mode`. The key features are:
 
-Xenops alters the visual appearance of a LaTeX document as displayed by Emacs, but it does not change the LaTeX code that is written to disk.
+- **LaTeX math, tables, and TikZ content are automatically rendered in the Emacs buffer as SVG.**
 
-Xenops has the following aims:
+  The result is that you can work on the document in Emacs without needing to frequently check the appearance of the PDF. Rendering is asynchronous, so it doesn't interrupt your writing.
 
-1. While writing, you should not have to keep regenerating the PDF to check the final appearance of the document.
-   The Emacs LaTeX buffer itself should faithfully render math and tables, and it should be clean and pleasant to look at.
-2. Mathematical content, and tables, should always be displayed as images, unless they are currently being edited.
-3. Any LaTeX markup that is hidden by Xenops can be easily revealed.
+- **A file edited with Xenops is just a normal LaTeX file.**
 
-Xenops is an Emacs minor-mode: the major-mode of the document is still your normal Emacs LaTeX editing mode (`latex-mode`). It is an extension of LaTeX editing features already present in Emacs ([auctex](https://www.gnu.org/software/auctex/) and [org-mode](https://orgmode.org/manual/Previewing-LaTeX-fragments.html)). It does the following:
+  Other people collaborating on the same document do not have to use Xenops (or Emacs), and using Xenops does not involve adding non-LaTeX content to your files.
 
-- LaTeX math content is rendered by an external process and displayed inline as SVG.<sup>1</sup>
-- When the cursor enters a math image, the underlying LaTeX code is revealed for editing, and when the cursor exits that code, the image is regenerated if necessary, and display switches to show the image.
-- Similarly, double-click on a math image reveals the underlying code for editing, and a click away from the math re-generates it.
-- You can use the mouse to drag an existing math image to a new location, to use it as the starting point for a new one, or you can use `xenops-avy-copy-math` to do this.
-- `xenops-avy-goto-math` to jump to math blocks using [avy](https://github.com/abo-abo/avy).
-- While LaTeX math code is displayed, math markup is replaced by unicode equivalents<sup>2</sup>
-- LaTeX tables are displayed as SVGs, in the same way as LaTeX math content.
-- Images (`\includegraphics`) are displayed inline automatically.
-- Images pasted from system clipboard (e.g. screenshots) are written to disk, captured as LaTeX (`\includegraphics`), and displayed inline.
-- Opinionated alterations are made to clean up the visual appearance of common LaTeX markup: (`\begin{*}...\end{*}` environments, `\section`,  etc).
-- Source code in many languages can be executed from within the LaTeX buffer using [org-babel](https://orgmode.org/manual/Working-with-source-code.html).<sup>3</sup>
-- SVG bounding boxes and image positioning are set appropriately for inline vs. display math.
+- **Source code in `minted` blocks can be executed, and is syntax-highlighted.**
+
+  Mathematica and sympy are both capable of returning symbolic expressions as LaTeX code. This means that you can perform a symbolic calculation in a mathematica or sympy `minted` block, and Xenops will render the symbolic expression that results as an SVG image.
+
+- **Xenops provides an optional decluttered view of your document.**
+  
+  This view can be toggled on/off with `M-x xenops-xen-mode`. It works by hiding common LaTeX markup, and restyling certain document elements.
+
+- **Images on disk are displayed in the Emacs buffer, and screenshots can be captured from the system clipboard.**
+
+  So, for example, `\includegraphics{myfile.png}` will be displayed as an image, and if you capture a screenshot to the system clipboard, then paste (e.g. `C-y`) will prompt for a file name, save the image to disk, insert the `\includegraphics` element, and display the image.
+  
+
+
+When using Xenops, you can continue to use [auctex](https://www.gnu.org/software/auctex/): Xenops can be thought of as a replacement for the `preview-latex` functionality in auctex.
+
+Xenops can also be used with [org-mode](https://orgmode.org) documents that contain LaTeX fragments.
+
+
+# Getting started
+
+
+1. **Ensure that you have [LaTeX](https://www.latex-project.org/get) installed on your machine**
+
+    The commands `which latex` and `which dvisvgm` must both return paths to the executables. `dvisvgm` should be present as part of your LaTeX installation, but it's also available [here](https://dvisvgm.de/Downloads).
+    
+1. **Ensure that your Emacs version is at least Emacs 26.**
+
+    If you are using MacOS, install emacs from homebrew using either the `emacs-plus` or `emacs-mac` packages, since they provide the required SVG support.
+
+    Xenops can only display images if you run Emacs as a GUI application, not as a terminal application.
+
+1. **Clone this repository.**
+
+1.  **Load Xenops in your Emacs config file.**
+    ```
+    (add-to-list 'load-path "/path/to/xenops/repo")
+    (require 'xenops)
+    (add-hook 'latex-mode-hook #'xenops-mode)
+    (add-hook 'LaTeX-mode-hook #'xenops-mode)
+    ```
+
+1. **`M-x xenops-doctor`**
+
+    This will check all the requirements listed above and some others.
+    
+1. **Open a LaTeX document, and activate Xenops mode: `M-x xenops-mode`.**
+
+    Now try entering some math using the standard delimiters, for example `$\frac{\partial L}{\partial \dot{x}}$`. When the cursor moves outside the delimiters, the math should be rendered asynchronously. If it is not, check your `*Messages*` buffer, and open a GitHub issue!
+
+(Xenops will be submitted to MELPA soon.)
+
+
+# Credit
+
+- [emacs-aio](https://github.com/skeeto/emacs-aio)
+- [auctex](https://www.gnu.org/software/auctex/)
+
 
 <sub>Streaked Xenops (_Xenops rutilans_) image by [Dubi Shapiro](https://conservationtours.rockjumperbirding.com/dt_gallery/gallery-tours-brazils-atlantic-rainforest/streaked-xenops-by-dubi-shapiro-001).</sub>
 
-----------------------------------------------------------------------------------------------------
-
-<sub><sup>1</sup>This is like auctex's [preview-latex](https://www.gnu.org/software/auctex/manual/preview-latex.html), but using SVG.</sub>
-
-<sub><sup>2</sup>This is auctex's `prettify-symbols-mode`, with some additional replacements.</sub>
-
-<sub><sup>3</sup> To execute mathematica code, use something like</sub>
-  ```emacs-lisp
-  (use-package ob-mathematica
-    :load-path "~/path/to/org-mode/contrib/lisp")
-  ```
-  <sub>Org-mode code blocks can be placed within a `verbatim` or `comment` environment.</sub>
