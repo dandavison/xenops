@@ -6,6 +6,7 @@
     (let ((prettify-symbols-alist '(("replacement-specified-outside-xenops" . ?⚡))))
       (save-excursion (insert "replacement-specified-outside-xenops"))
       (xenops-mode)
+      (call-interactively #'xenops-xen-mode)
       (font-lock-fontify-buffer)
       (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
       (should (equal
@@ -18,6 +19,7 @@
   (with-temp-buffer
     (save-excursion (insert "\\grad"))
     (xenops-mode)
+    (call-interactively #'xenops-xen-mode)
     (font-lock-fontify-buffer)
     (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
     (should (equal
@@ -30,6 +32,7 @@
   (with-temp-buffer
     (save-excursion (insert "\\begin{abstract}"))
     (xenops-mode)
+    (call-interactively #'xenops-xen-mode)
     (font-lock-fontify-buffer)
     (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
     (should (equal
@@ -42,6 +45,7 @@
   (with-temp-buffer
     (save-excursion (insert "\\textit{To be italicised}"))
     (xenops-mode)
+    (call-interactively #'xenops-xen-mode)
     (font-lock-fontify-buffer)
     (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
     (should (equal
@@ -54,6 +58,7 @@
   (with-temp-buffer
     (save-excursion (insert "\\subsection*{Section title}"))
     (xenops-mode)
+    (call-interactively #'xenops-xen-mode)
     (font-lock-fontify-buffer)
     (should (plist-get (text-properties-at (point)) 'prettify-symbols-start))
     (should (equal

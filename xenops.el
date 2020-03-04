@@ -113,7 +113,6 @@
     (xenops-font-activate)
     (xenops-math-activate)
     (xenops-auctex-activate)
-    (xenops-xen-mode +1)
     (xenops-font-lock-activate)
 
     ;; Display math and tables as images
