@@ -85,6 +85,7 @@
         (error problems))
 
     (define-key xenops-mode-map "\C-c\C-c" #'xenops-dwim)
+    (define-key xenops-mode-map "\C-cp" #'xenops-xen-mode)
     (define-key xenops-mode-map (kbd "s-0") #'xenops-reset-size)
     (define-key xenops-mode-map (kbd "s-+") #'xenops-increase-size)
     (define-key xenops-mode-map (kbd "s--") #'xenops-decrease-size)
