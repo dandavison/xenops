@@ -13,8 +13,10 @@ RUN add-apt-repository ppa:kelleyk/emacs && \
         mesa-utils \
         texinfo \
         texlive-base \
-        texlive-binaries \
-        texlive-latex-base
+        texlive-binaries \        
+        texlive-latex-base \
+        texlive-fonts-recommended \
+        texlive-generic-recommended
 
 VOLUME /host
 ENV XENOPS_DOCKER 1
