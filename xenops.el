@@ -33,13 +33,13 @@
   "Path to a directory in which xenops can save files.")
 
 (defvar xenops-mode-map (make-sparse-keymap))
-
-(defvar xenops-tooltip-delay 0.2
-  "`tooltip-delay' when xenops-mode is active.")
-
+(defvar xenops-secondary-keymap (make-sparse-keymap))
 (defvar xenops-rendered-element-keymap (make-sparse-keymap)
   "A keymap that is active when point is on a rendered element,
   such as a math/table image.")
+
+(defvar xenops-tooltip-delay 0.2
+  "`tooltip-delay' when xenops-mode is active.")
 
 (xenops-define-apply-command render
                              "Render elements: display LaTeX math, tables and included image files as images, and hide footnotes with tooltips.")
@@ -79,49 +79,20 @@
 \\{xenops-mode-map}"
   :lighter " Xenops"
   (cond
-   (xenops-mode
 
+   (xenops-mode
     (-if-let* ((problems (xenops-doctor 'quiet)))
         (error problems))
-
-    (define-key xenops-mode-map "\C-c\C-c" #'xenops-dwim)
-    (define-key xenops-mode-map "\C-cp" #'xenops-xen-mode)
-    (define-key xenops-mode-map (kbd "s-0") #'xenops-reset-size)
-    (define-key xenops-mode-map (kbd "s-+") #'xenops-increase-size)
-    (define-key xenops-mode-map (kbd "s--") #'xenops-decrease-size)
-    (define-key xenops-mode-map (kbd "s-=") #'xenops-increase-size)
-    (define-key xenops-mode-map (kbd "s-_") #'xenops-decrease-size)
-
-    (define-key xenops-rendered-element-keymap [(return)] #'xenops-reveal-at-point)
-    (define-key xenops-rendered-element-keymap [remap kill-ring-save] #'xenops-copy-at-point)
-
-    (dolist (cmd '(delete-char delete-backward-char kill-line kill-region))
-      (define-key xenops-rendered-element-keymap `[remap ,cmd] #'xenops-delete-at-point))
-
-    (define-key xenops-rendered-element-keymap "+" #'xenops-increase-size)
-    (define-key xenops-rendered-element-keymap "-" #'xenops-decrease-size)
-    (define-key xenops-rendered-element-keymap "0" #'xenops-reset-size)
-    (define-key xenops-rendered-element-keymap "r" #'xenops-rotate)
-    (define-key xenops-rendered-element-keymap "o" #'xenops-save)
-
-    (define-key xenops-rendered-element-keymap [(double-down-mouse-1)] #'xenops-reveal-at-point)
-
-    (xenops-util-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
-    (xenops-util-define-key-with-fallback "\C-y" #'xenops-handle-paste)
-    (xenops-util-define-key-with-fallback "\"" #'xenops-insert-quote)
-
+    (xenops-define-keys)
     (xenops-font-activate)
     (xenops-math-activate)
     (xenops-auctex-activate)
     (xenops-font-lock-activate)
-
-    ;; Display math and tables as images
     (save-excursion
       (goto-char (point-min))
       (xenops-render-if-cached)))
 
-   ;; Deactivate
-   (t
+   ('deactivate
     (save-excursion
       (save-restriction
         (widen)
@@ -131,7 +102,67 @@
     (xenops-auctex-deactivate)
     (xenops-xen-mode -1))))
 
+(defun xenops-define-keys ()
+  ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Keymaps-and-Minor-Modes.html
+  ;;
+  ;; Minor modes may bind commands to key sequences consisting of C-c followed by a punctuation
+  ;; character. However, sequences consisting of C-c followed by one of {}<>:; or a control
+  ;; character or digit, are reserved for major modes. Also, C-c letter is reserved for users.
+
+  ;; Top-level bindings
+  (cl-loop for (key . cmd) in `(("," . ,xenops-secondary-keymap)
+                                ("!" . xenops-dwim)
+                                ("/" . xenops-xen-mode))
+           do
+           (define-key xenops-mode-map (concat "\C-c" key) cmd))
+
+  ;; Sub-keymap bound to C-c,
+  (cl-loop for (key . cmd) in `(("!" . xenops-dwim)
+                                ("/" . xenops-xen-mode)
+                                (,(kbd "s-0") . xenops-reset-size)
+                                (,(kbd "s-+") . xenops-increase-size)
+                                (,(kbd "s--") . xenops-decrease-size)
+                                (,(kbd "s-=") . xenops-increase-size)
+                                (,(kbd "s-_") . xenops-decrease-size))
+           do
+           (define-key xenops-secondary-keymap key cmd))
+
+  ;; Keymap for rendered element overlays
+  (cl-loop for (key . cmd) in '(([(return)] . xenops-reveal-at-point)
+                                ([remap kill-ring-save] . xenops-copy-at-point)
+                                ("+" . xenops-increase-size)
+                                ("-" . xenops-decrease-size)
+                                ("=" . xenops-increase-size)
+                                ("_" . xenops-decrease-size)
+                                ("0" . xenops-reset-size)
+                                ("r" . xenops-rotate)
+                                ("o" . xenops-save)
+                                ([(double-down-mouse-1)] . xenops-reveal-at-point))
+           do
+           (define-key xenops-rendered-element-keymap key cmd))
+
+  (dolist (cmd '(delete-char delete-backward-char kill-line kill-region))
+    (define-key xenops-rendered-element-keymap `[remap ,cmd] #'xenops-delete-at-point))
+
+  (xenops-util-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
+  (xenops-util-define-key-with-fallback "\C-y" #'xenops-handle-paste)
+  (xenops-util-define-key-with-fallback "\"" #'xenops-insert-quote))
+
 (defun xenops-dwim (&optional arg)
+  "Operate on the element at point, if there is one, or on the whole buffer.
+
+By default this command displays LaTeX math/tables/TikZ as
+images, or executes the code block at point. This is equivalent
+to using `xenops-render' or `xenops-execute'.
+
+With a single C-u prefix argument, it reveals the element at
+point for editing (removes the image). This is equivalent to
+`xenops-reveal'.
+
+With two C-u prefix arguments, it regenerates the image (i.e.
+re-runs LaTeX, refusing to use a cached image). This is
+equivalent to `xenops-regenerate'.
+"
   (interactive "P")
   (cond
    ((equal arg '(16))
