@@ -1,5 +1,7 @@
 ;; -*- lexical-binding: t -*-
 
+(setq xenops-apply-post-apply-hook nil)
+
 (defmacro xenops-define-apply-command (op-type docstring)
   `(defun ,(intern (concat "xenops-" (symbol-name op-type))) ()
      ,(concat docstring " "
@@ -26,48 +28,35 @@ buffer.
 Optional argument PRED is a function taking an element plist as
 its only argument. The element will be operated on iff PRED
 returns non-nil."
-  (xenops-apply-handlers (xenops-ops-get-for-ops ops :handlers) pred))
+  (let ((handlers (xenops-ops-get-for-ops ops :handlers)))
+    (cl-destructuring-bind (beg end region-active)
+        (if (region-active-p)
+            `(,(region-beginning) ,(region-end) t)
+          `(,(point-min) ,(point-max) nil))
+      (xenops-apply-handlers handlers beg end region-active pred)
+      (run-hook-with-args 'xenops-apply-post-apply-hook ops beg end region-active pred))))
 
 (defun xenops-apply-at-point (ops &optional pred)
   "Apply operation types OPS to element at point, if there is one."
   (xenops-apply-handlers-at-point (xenops-ops-get-for-ops ops :handlers) pred))
 
-(defun xenops-apply-handlers (handlers &optional pred)
+(defun xenops-apply-handlers (handlers beg end region-active &optional pred)
   "Apply HANDLERS to any elements encountered. The region
 operated on is either the active region, or the entire buffer."
   (cl-flet ((handle (lambda (el) (save-excursion
                               (xenops-element-dispatch el handlers)))))
-    (cl-destructuring-bind (beg end region-active)
-        (if (region-active-p)
-            `(,(region-beginning) ,(region-end) t)
-          `(,(point-min) ,(point-max) nil))
-      (save-excursion
-        (goto-char beg)
-        (let ((parse-at-point-fns (xenops-elements-get-all :parser))
-              (sem-start-value (aref xenops-math-latex-tasks-semaphore 1)))
-          (while (setq el (xenops-apply-get-next-element nil end parse-at-point-fns))
-            (and el
-                 (or (null pred) (funcall pred el))
-                 (ignore-errors (handle el))))
-          (if (-intersection handlers '(xenops-math-render))
-              (message "Started %d latex processing tasks"
-                       (- sem-start-value
-                          (aref xenops-math-latex-tasks-semaphore 1))))))
-      ;; Hack: This should be abstracted.
-      (and region-active (not (-intersection handlers '(xenops-math-image-increase-size
-                                                        xenops-math-image-decrease-size)))
-           (deactivate-mark))
-      ;; Hack: In some sense we want a new image to have the expected size, given any changes to
-      ;; image size that have been applied to existing images. Here we track the overall image
-      ;; scale, paying attention only when a user has resized all the images in the buffer.
-      (unless region-active
-        (cond
-         ((-intersection handlers '(xenops-math-image-increase-size))
-          (setq xenops-math-image-current-scale-factor (* xenops-math-image-current-scale-factor
-                                                          xenops-math-image-change-size-factor)))
-         ((-intersection handlers '(xenops-math-image-decrease-size))
-          (setq xenops-math-image-current-scale-factor (/ xenops-math-image-current-scale-factor
-                                                          xenops-math-image-change-size-factor))))))))
+    (save-excursion
+      (goto-char beg)
+      (let ((parse-at-point-fns (xenops-elements-get-all :parser))
+            (sem-start-value (aref xenops-math-latex-tasks-semaphore 1)))
+        (while (setq el (xenops-apply-get-next-element nil end parse-at-point-fns))
+          (and el
+               (or (null pred) (funcall pred el))
+               (ignore-errors (handle el))))
+        (if (-intersection handlers '(xenops-math-render))
+            (message "Started %d latex processing tasks"
+                     (- sem-start-value
+                        (aref xenops-math-latex-tasks-semaphore 1))))))))
 
 (defun xenops-apply-handlers-at-point (handlers &optional pred)
   "Apply HANDLERS to element at point if there is one."
@@ -99,5 +88,33 @@ section of the buffer that Xenops can do something to."
                       (xenops-apply-get-next-element nil (overlay-end ov)))
     (xenops-util-first-result #'funcall (or parse-at-point-fns
                                             (xenops-elements-get-all :parser)))))
+
+(defun xenops-apply-post-apply-deactivate-mark (ops beg end region-active pred)
+  "Deactivate mark when appropriate.
+
+`increase-size` and `decrease-size` are expected to be applied
+multiple times, and we want to preserve the active region.
+Otherwise, the region should be deactivated after operating on
+it."
+  (and region-active (not (-intersection ops '(increase-size decrease-size)))
+       (deactivate-mark)))
+
+(defun xenops-apply-post-apply-track-image-size-changes (ops beg end region-active pred)
+  "Track image size changes so that new images are displayed with the correct size."
+  ;; Hack: In some sense we want a new image to have the expected size, given any changes to image
+  ;; size that have been applied to existing images. Here we track the overall image scale, paying
+  ;; attention only when a user has resized all the images in the buffer, i.e. not when region is
+  ;; active.
+  (unless region-active
+    (cond
+     ((eq ops '(increase-size))
+      (setq xenops-math-image-current-scale-factor (* xenops-math-image-current-scale-factor
+                                                      xenops-math-image-change-size-factor)))
+     ((eq ops '(decrease-size))
+      (setq xenops-math-image-current-scale-factor (/ xenops-math-image-current-scale-factor
+                                                      xenops-math-image-change-size-factor))))))
+
+(add-hook 'xenops-apply-post-apply-hook #'xenops-apply-post-apply-deactivate-mark)
+(add-hook 'xenops-apply-post-apply-hook #'xenops-apply-post-apply-track-image-size-changes)
 
 (provide 'xenops-apply)
