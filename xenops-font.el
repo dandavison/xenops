@@ -1,17 +1,11 @@
 ;; -*- lexical-binding: t -*-
 
-(defvar xenops-font-font-family nil
-  "The font family used for all text other than math and source
-  code elements in a Xenops buffer. To make this take effect,
-  call `xenops-font-set-faces' or restart `xenops-mode'.")
-
 (defun xenops-font-activate ()
-  (if xenops-font-font-family (xenops-font-set-faces)))
+  (if xenops-font-family (xenops-font-set-faces)))
 
 (defun xenops-font-set-faces ()
-  (interactive)
-  (face-remap-add-relative 'variable-pitch :family xenops-font-font-family)
-  (face-remap-add-relative 'default :family xenops-font-font-family :height 160)
+  (face-remap-add-relative 'variable-pitch :family xenops-font-family)
+  (face-remap-add-relative 'default :family xenops-font-family :height 160)
   (face-remap-add-relative 'font-latex-math-face 'fixed-pitch :height 140)
   (face-remap-add-relative 'font-latex-verbatim-face 'fixed-pitch :height 140)
   (buffer-face-mode))
@@ -33,7 +27,9 @@
          (family
           (substring-no-properties
            (completing-read "Font family: " (xenops-font-get-fontified-family-strings face-spec)))))
-    (setq xenops-font-font-family family)
-    (xenops-font-set-faces)))
+    (setq xenops-font-family family)
+    (xenops-font-set-faces)
+    (message "Changed font to %s. To persist this change, set the variable `xenops-font-family' in your emacs init file."
+             xenops-font-family)))
 
 (provide 'xenops-font)

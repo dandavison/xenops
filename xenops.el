@@ -32,6 +32,12 @@
 (defvar xenops-cache-directory "/tmp/xenops-cache/"
   "Path to a directory in which xenops can save files.")
 
+(defvar xenops-font-family nil
+  "The font family used for all text other than math and source
+  code elements in a Xenops buffer. To make this take effect,
+  restart `xenops-mode'. You can use `xenops-select-font-family'
+  to try out different fonts interactively.")
+
 (defvar xenops-mode-map (make-sparse-keymap))
 (defvar xenops-secondary-keymap (make-sparse-keymap))
 (defvar xenops-rendered-element-keymap (make-sparse-keymap)
