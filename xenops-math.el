@@ -105,10 +105,6 @@
           (if data
               (setf (image-property image :data) (xenops-util-svg-resize data factor)))))))
 
-(defun xenops-math-image-reset-size (element)
-  (xenops-math-reveal element)
-  (xenops-math-render element))
-
 (defun xenops-math-block-delimiter-lines-regexp ()
   "A regexp matching the start or end line of any block math element."
   (format "\\(%s\\)"

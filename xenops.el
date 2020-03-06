@@ -51,8 +51,6 @@
                              "Increase size of images.")
 (xenops-define-apply-command decrease-size
                              "Decrease size of images.")
-(xenops-define-apply-command reset-size
-                             "Reset size of images.")
 
 (xenops-define-apply-at-point-command reveal
                                       "Reveal the element at point.")
@@ -119,7 +117,6 @@
   ;; Sub-keymap bound to C-c,
   (cl-loop for (key . cmd) in `(("!" . xenops-dwim)
                                 ("/" . xenops-xen-mode)
-                                (,(kbd "s-0") . xenops-reset-size)
                                 (,(kbd "s-+") . xenops-increase-size)
                                 (,(kbd "s--") . xenops-decrease-size)
                                 (,(kbd "s-=") . xenops-increase-size)
@@ -134,7 +131,6 @@
                                 ("-" . xenops-decrease-size)
                                 ("=" . xenops-increase-size)
                                 ("_" . xenops-decrease-size)
-                                ("0" . xenops-reset-size)
                                 ([(double-down-mouse-1)] . xenops-reveal-at-point))
            do
            (define-key xenops-rendered-element-keymap key cmd))
@@ -192,8 +188,6 @@ equivalent to `xenops-regenerate'.
     (decrease-size
      . ((:handlers . (xenops-math-image-decrease-size
                       xenops-image-decrease-size))))
-    (reset-size
-     . ((:handlers . (xenops-math-image-reset-size))))
     (execute
      . ((:handlers . (xenops-src-execute)))))
   "Element-specific operation handlers grouped by operation type.")
@@ -208,7 +202,6 @@ equivalent to `xenops-regenerate'.
                        xenops-math-reveal
                        xenops-math-image-increase-size
                        xenops-math-image-decrease-size
-                       xenops-math-image-reset-size
                        xenops-element-copy
                        xenops-element-delete))))
     (inline-math
