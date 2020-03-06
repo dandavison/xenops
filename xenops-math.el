@@ -266,18 +266,36 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-parse-dollar-delimited-inline-element-at-point ()
   "If point is in dollar-delimited inline math element, return plist describing match."
-  ;; This is a bit awkward since the start and end delimiters are the same. It
-  ;; will fail if dollar-delimited inline math extends over multiple lines.
+  ;; This is a bit awkward since the start and end delimiters are the same.
+  ;;
+  ;; There are 3 relevant editing states:
+  ;;
+  ;; 1. Point is outside dollar-delimited math.
+  ;; 2. User has inserted one delimiter and is currently writing dollar-delimited math.
+  ;; 3. Point is inside dollar-delimited math.
+  ;;
+  ;; These are distinguished by the parity of the number of delimiters to the left and right of
+  ;; point:
+  ;;
+  ;; | left count | right count | editing state |
+  ;; |------------+-------------+---------------|
+  ;; | Even       | Even        | Outside       |
+  ;; | Odd        | Even        | Inserting     |
+  ;; | Even       | Odd         | Inserting   |
+  ;; | Odd        | Odd         | Inside        |
   (let ((delimiter "\\$"))
     (save-excursion
-      (let ((odd-count (cl-oddp (count-matches delimiter (point-at-bol) (point)))))
-        (when (and (not odd-count) (looking-at delimiter))
-          (forward-char)
-          (setq odd-count t))
-        (and odd-count
-             (xenops-parse-element-at-point-matching-delimiters
-              'inline-math (list delimiter delimiter)
-              (point-at-bol) (or (save-excursion (re-search-forward delimiter nil t)) (point-max))))))))
+      (and (or (cl-oddp (count-matches delimiter (point-at-bol) (point)))
+               ;; We need the parse to succeed when point is before an opening $, since that is the
+               ;; behavior of `xenops-parse-element-at-point'.
+               (and (looking-at delimiter)
+                    (progn (forward-char) t)))
+           (cl-oddp (count-matches delimiter (point) (point-at-eol)))
+           (xenops-parse-element-at-point-matching-delimiters
+            'inline-math
+            (list delimiter delimiter)
+            (point-at-bol)
+            (point-at-eol))))))
 
 (defun xenops-math-concatenate (beg end)
   (interactive "r")
