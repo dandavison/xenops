@@ -73,6 +73,8 @@
 (xenops-define-apply-at-point-command execute
                                       "Execute the org-src code block at point.")
 
+(defalias 'xenops-execute #'xenops-execute-at-point)
+
 (define-minor-mode xenops-mode
   "A LaTeX editing environment.
 
