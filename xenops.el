@@ -38,8 +38,15 @@
   restart `xenops-mode'. You can use `xenops-select-font-family'
   to try out different fonts interactively.")
 
-(defvar xenops-mode-map (make-sparse-keymap))
-(defvar xenops-secondary-keymap (make-sparse-keymap))
+(defvar xenops-mode-map (make-sparse-keymap)
+  "The main Xenops keymap. Xenops is a minor-mode, so it is not
+  allowed to override major-mode keybindings. Therefore, all
+  Xenops commands are bound in `xenops-secondary-keymap'. A few
+  important commands are also made available in this keymap.")
+
+(defvar xenops-secondary-keymap (make-sparse-keymap)
+  "All Xenops commands are available in this keymap.")
+
 (defvar xenops-rendered-element-keymap (make-sparse-keymap)
   "A keymap that is active when point is on a rendered element,
   such as a math/table image.")
