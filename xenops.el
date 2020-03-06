@@ -53,10 +53,6 @@
                              "Decrease size of images.")
 (xenops-define-apply-command reset-size
                              "Reset size of images.")
-(xenops-define-apply-command rotate
-                             "Rotate image by 90 degrees.")
-(xenops-define-apply-command save
-                             "Save image to file.")
 
 (xenops-define-apply-at-point-command reveal
                                       "Reveal the element at point.")
@@ -139,8 +135,6 @@
                                 ("=" . xenops-increase-size)
                                 ("_" . xenops-decrease-size)
                                 ("0" . xenops-reset-size)
-                                ("r" . xenops-rotate)
-                                ("o" . xenops-save)
                                 ([(double-down-mouse-1)] . xenops-reveal-at-point))
            do
            (define-key xenops-rendered-element-keymap key cmd))
@@ -200,10 +194,6 @@ equivalent to `xenops-regenerate'.
                       xenops-image-decrease-size))))
     (reset-size
      . ((:handlers . (xenops-math-image-reset-size))))
-    (rotate
-     . ((:handlers . (xenops-image-rotate))))
-    (save
-     . ((:handlers . (xenops-image-save))))
     (execute
      . ((:handlers . (xenops-src-execute)))))
   "Element-specific operation handlers grouped by operation type.")
@@ -243,9 +233,7 @@ equivalent to `xenops-regenerate'.
                       xenops-image-increase-size
                       xenops-image-decrease-size
                       xenops-element-copy
-                      xenops-element-delete
-                      xenops-image-rotate
-                      xenops-image-save))))
+                      xenops-element-delete))))
     (footnote
      . ((:delimiters . ((,(concat "\\\\footnote"
                                   xenops-brace-delimited-multiline-expression-regexp))))

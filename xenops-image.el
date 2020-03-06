@@ -32,12 +32,6 @@ pasted from the system clipboard.")
 (defun xenops-image-decrease-size (element)
   (image--change-size (/ 1 xenops-math-image-change-size-factor)))
 
-(defun xenops-image-rotate (element)
-  (image-rotate))
-
-(defun xenops-image-save (element)
-  (image-save))
-
 (defun xenops-image-parse-at-point ()
   (if (looking-at (caar (xenops-elements-get 'image :delimiters)))
       (list :type 'image
