@@ -159,19 +159,4 @@ buffer, as a string."
     (org-src-font-lock-fontify-block lang beg end)
     (add-face-text-property beg end 'fixed-pitch)))
 
-(defun xenops-src-narrow-or-widen ()
-  (interactive)
-  (local-set-key (kbd "C-c '") #'xenops-src-narrow-or-widen)
-  (if (eq major-mode 'latex-mode)
-      (-when-let* ((element (or (xenops-minted-parse-at-point)
-                                (xenops-src-parse-at-point))))
-        (narrow-to-region (plist-get element :begin-content)
-                          (plist-get element :end-content))
-        (emacs-lisp-mode)
-        (local-set-key (kbd "C-c '") #'xenops-src-narrow-or-widen))
-    (widen)
-    (latex-mode)
-    (xenops-mode)))
-
-
 (provide 'xenops-src)
