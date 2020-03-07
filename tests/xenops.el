@@ -36,6 +36,7 @@
          ,@body))))
 
 (defun xenops-render--do-image-test (buffer-contents element-begin expected-type)
+  (ert-skip "Test disabled because LaTeX rendering is now asynchronous.")
   (xenops-render--do-test
    buffer-contents
    (forward-char element-begin)
