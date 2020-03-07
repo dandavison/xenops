@@ -13,9 +13,8 @@
   x
 \\end{align*}
 "))
-                 '(:begin 1 :begin-content 15 :end-content 20 :end 32 :type block-math
-                   :delimiters ("^[ \t]*\\\\begin{align\\*?}"
-                                "^[ \t]*\\\\end{align\\*?}")))))
+                 `(:begin 1 :begin-content 15 :end-content 20 :end 32 :type block-math
+                   :delimiters ,(car (xenops-elements-get 'block-math :delimiters))))))
 
 
 (ert-deftest xenops-math-create-latex-document-for-fragment--single-file ()
