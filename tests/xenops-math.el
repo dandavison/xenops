@@ -42,10 +42,12 @@
       (should
        (member "\\usepackage{amsmath}" preamble)))))
 
-(ert-deftest xenops-math-add-cursor-sensor-property ()
+(defun xenops-math--do-add-cursor-sensor-property-test (insert-1$345$7-fn)
+  "See the docstring for `xenops-math-add-cursor-sensor-property'."
   (with-temp-buffer
     (xenops-mode)
-    (insert "1$345$7")
+    (funcall insert-1$345$7-fn)
+    (should (equal (buffer-string) "1$345$7"))
     (font-lock-fontify-buffer)
     (cl-loop for (pos expected-properties) in
              '((1 nil)
@@ -59,6 +61,43 @@
              do (cl-loop for (key expected) in (-partition 2 expected-properties)
                          do
                          (should (equal (get-text-property pos key) expected))))))
+
+(defun xenops-test--math--insert-1$345$7 ()
+  "This simulates e.g. the case where auctex is not being used,
+and hence $ is bound to `self-insert-command'"
+  (insert "1$345$7"))
+
+(defun xenops-test--math--insert-1$345$7-without-TeX-electric-math ()
+  "This simulates e.g. the case where auctex is being used, but
+the user does not have `TeX-electric-math' set, and therefore
+they type the characters in the straightforward sequence."
+  (insert "1")
+  (TeX-insert-dollar)
+  (insert "345")
+  (TeX-insert-dollar)
+  (insert "7"))
+
+(defun xenops-test--math--insert-1$345$7-with-TeX-electric-math ()
+  "This simulates e.g. the case where auctex is being used, but
+the user does not have `TeX-electric-math' set, and therefore
+they type the characters in the straightforward sequence."
+  (insert "1")
+  (TeX-insert-dollar)
+  (insert "345")
+  (forward-char)
+  (insert "7"))
+
+(ert-deftest xenops-math-add-cursor-sensor-property-as-if-no-auctex ()
+  (xenops-math--do-add-cursor-sensor-property-test #'xenops-test--math--insert-1$345$7))
+
+(ert-deftest xenops-math-add-cursor-sensor-property-as-if-auctex-without-TeX-electric-math ()
+  (let ((TeX-electric-math nil))
+    (xenops-math--do-add-cursor-sensor-property-test #'xenops-test--math--insert-1$345$7-without-TeX-electric-math)))
+
+(ert-deftest xenops-math-add-cursor-sensor-property-as-if-auctex-with-TeX-electric-math ()
+  (let ((TeX-electric-math '("$" . "$")))
+    (xenops-math--do-add-cursor-sensor-property-test #'xenops-test--math--insert-1$345$7)
+    (xenops-math--do-add-cursor-sensor-property-test #'xenops-test--math--insert-1$345$7-with-TeX-electric-math)))
 
 (setq xenops-test-math-single-file-contents "\\documentclass{article}
 \\usepackage{amsmath}
