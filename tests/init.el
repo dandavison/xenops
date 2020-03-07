@@ -3,4 +3,5 @@
 (defun xenops-mode (&rest args)
   (cl-letf (((symbol-function 'xenops-doctor)
              (lambda (&rest args) (interactive) nil)))
+    (latex-mode)
     (funcall xenops-mode-orig args)))
