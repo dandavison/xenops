@@ -45,19 +45,6 @@ The checks run are:
               emacs-mac (https://github.com/railwaycat/homebrew-emacsmacport/)."
              emacs-version) problems))
 
-    (unless window-system
-      (push (xenops-doctor-format
-             "⚠️ You are running Emacs as a terminal application.
-
-              To use Xenops, you must run Emacs as a GUI
-              application. This is because Xenops displays images
-              in the Emacs buffer. A common way to run Emacs as a
-              GUI application is to click on the Emacs
-              application icon. If you are starting emacs from
-              the command line, make sure you are not using the
-              `--no-window-system` or `-nw` command line
-              arguments.") problems))
-
     (unless (executable-find "latex")
       (push (xenops-doctor-format
              "⚠️ Emacs cannot find your `latex` executable.
@@ -106,6 +93,19 @@ The checks run are:
 
              (setq mac-command-modifier 'super)
              (setq mac-option-modifier 'meta)") problems))
+
+    (unless window-system
+      (push (xenops-doctor-format
+             "⚠️ You are running Emacs as a terminal application.
+
+              To use Xenops, you must run Emacs as a GUI
+              application. This is because Xenops displays images
+              in the Emacs buffer. A common way to run Emacs as a
+              GUI application is to click on the Emacs
+              application icon. If you are starting emacs from
+              the command line, make sure you are not using the
+              `--no-window-system` or `-nw` command line
+              arguments.") problems))
 
     (let ((buf (get-buffer-create "*Xenops-Doctor*")))
       (with-current-buffer buf
