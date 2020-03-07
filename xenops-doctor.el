@@ -9,6 +9,7 @@ The checks run are:
 "
   (interactive)
   (let ((problems)
+        (emacs-major-version (string-to-number (car (s-split "\\." emacs-version))))
         (exec-path-help
          (xenops-doctor-format
           "If that all looks good, but I am still reporting this
@@ -23,6 +24,26 @@ The checks run are:
            in Emacs, and search for `exec-path'.\n\nHere is the
            current value of your `exec-path'
            variable:\n\n%s" (s-join "\n\n" exec-path))))
+
+    (unless (>= emacs-major-version 26)
+      (push (xenops-doctor-format
+             "⚠️ Xenops requires Emacs version >= 26.
+
+              This is due to the dependency on the emacs-aio
+              library, but it's good to have a recent Emacs
+              version. Your Emacs version is %s.
+
+              For Linux or Windows, see
+              https://www.gnu.org/software/emacs/download.html,
+              or use your package manager.
+
+              For MacOS, in order to have the required SVG
+              support, I suggest that you install Emacs from
+              Homebrew using either
+              emacs-plus (https://github.com/d12frosted/homebrew-emacs-plus#install)
+              or
+              emacs-mac (https://github.com/railwaycat/homebrew-emacsmacport/)."
+             emacs-version) problems))
 
     (unless window-system
       (push (xenops-doctor-format
