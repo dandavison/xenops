@@ -32,6 +32,25 @@ pasted from the system clipboard.")
 (defun xenops-image-decrease-size (element)
   (image--change-size (/ 1 xenops-math-image-change-size-factor)))
 
+(defun xenops-image-post-apply-hook-function (handlers &optional beg end region-active)
+  "Track image size changes so that new images are displayed with the correct size."
+  ;; Hack: In some sense we want a new image to have the expected size, given any changes to image
+  ;; size that have been applied to existing images. Here we track the overall image scale, paying
+  ;; attention only when a user has resized all the images in the buffer, i.e. not when region is
+  ;; active.
+  (and beg end
+       (eq beg (point-min))
+       (eq end (point-max))
+       (cond
+        ((eq handlers '(xenops-image-increase-size))
+         (setq xenops-math-image-current-scale-factor (* xenops-math-image-current-scale-factor
+                                                         xenops-math-image-change-size-factor)))
+        ((eq handlers '(xenops-image-decrease-size))
+         (setq xenops-math-image-current-scale-factor (/ xenops-math-image-current-scale-factor
+                                                         xenops-math-image-change-size-factor))))))
+
+(add-hook 'xenops-apply-post-apply-hook #'xenops-image-post-apply-hook-function)
+
 (defun xenops-image-parse-at-point ()
   (if (looking-at (caar (xenops-elements-get 'image :delimiters)))
       (list :type 'image
