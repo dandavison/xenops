@@ -9,7 +9,9 @@
 ;;; Code:
 
 (defvar xenops-src-mathematica-use-wolframscript t
-  "If non-nil then use the `wolframscript` executable to execute
+  "Whether to use `wolframscript` or `MathematicaScript` to execute Mathematica code.
+
+If non-nil then use the `wolframscript` executable to execute
 mathematica code; otherwise use `MathematicaScript`. Note that
 graphics cannot be saved to file reliably using MathematicaScript
 under some OSs / Mathematica versions.")
@@ -17,6 +19,7 @@ under some OSs / Mathematica versions.")
 (setq xenops-src-do-in-org-mode-header "* \n")
 
 (defun xenops-src-parse-at-point ()
+  "Parse 'src element at point."
   (-if-let* ((element (xenops-parse-element-at-point 'src))
              (org-element (xenops-src-do-in-org-mode (org-element-context)))
              (org-babel-info (org-babel-get-src-block-info 'light org-element)))
@@ -27,8 +30,9 @@ under some OSs / Mathematica versions.")
        :org-babel-info org-babel-info)))
 
 (defun xenops-src-execute (element)
-  "ELEMENT is an org-babel src block. Execute it using
-`org-babel-execute-src-block'."
+  "Execute parsed src ELEMENT using `org-babel-execute-src-block'.
+
+ELEMENT is an 'src element."
   (let* ((language (plist-get element :language))
          (execute-language-fn
           (intern (concat "xenops-src-execute-src-block:" language))))
@@ -37,16 +41,20 @@ under some OSs / Mathematica versions.")
       (xenops-src-execute-src-block element))))
 
 (defun xenops-src-execute-src-block:python (element)
-  "Execute python src block, with special setup if :sympy header argument is set."
+  "Execute parsed python src element ELEMENT.
+
+If the :sympy header argument is set this delegates to
+`xenops-src-execute-src-block:python-sympy'."
   (let ((info (plist-get element :org-babel-info)))
     (if (cdr (assq :sympy (nth 2 info)))
         (xenops-src-execute-src-block:python-sympy element)
       (xenops-src-execute-src-block element))))
 
 (defun xenops-src-execute-src-block:python-sympy (element)
-  "Execute python sympy src block. Add an `import * from sympy` line and,
-if `:results latex`, arrange for sympy to return the results as
-LaTeX."
+  "Execute parsed python sympy src element ELEMENT.
+
+Add an `import * from sympy` line and, if `:results latex`,
+arrange for sympy to return the results as LaTeX."
   (let ((org-babel-python-wrapper-method
          (concat "from sympy import *\n" org-babel-python-wrapper-method)))
     (if (xenops-src-latex-results? element)
@@ -62,8 +70,10 @@ LaTeX."
     (xenops-src-execute-src-block element)))
 
 (defun xenops-src-execute-src-block:mathematica (element)
-  "Execute mathematica src block. If `:results latex`, arrange
-for mathematica to return the result as LaTeX."
+  "Execute parsed mathematica src element ELEMENT.
+
+If `:results latex`, arrange for mathematica to return the result
+as LaTeX."
   (let* ((info (plist-get element :org-babel-info))
          (body (nth 1 info)))
     (cond ((xenops-src-latex-results? element)
@@ -83,10 +93,13 @@ for mathematica to return the result as LaTeX."
     (xenops-src-execute-src-block element)))
 
 (defun xenops-src-execute-src-block (element)
-  "Execute the src block in a temporary org-mode buffer and
-insert the results in the LaTeX buffer. If `:results latex`,
-post-process by replacing the org-mode LaTeX export block (see
-`org-babel-insert-result') with a LaTeX align environment."
+  "Execute parsed src element ELEMENT.
+
+If `:results latex`, post-process by replacing the org-mode LaTeX
+export block (see `org-babel-insert-result') with a LaTeX align
+environment."
+  ;; ELEMENT is executed in a temporary org-mode buffer and the
+  ;; results are inserted into the LaTeX buffer.
   (let* ((case-fold-search t)
          (result (xenops-src-execute-parsed-src-block (plist-get element :org-babel-info))))
     (save-excursion
@@ -99,6 +112,7 @@ post-process by replacing the org-mode LaTeX export block (see
          (xenops-src-post-process-image-result element))))
 
 (defun xenops-src-post-process-latex-result (element)
+  "Post-process latex result of executing ELEMENT."
   (let* ((lang (downcase (plist-get element :language)))
          (wrap-in-align-environment (member lang '("python" "mathematica"))))
     (save-excursion
@@ -111,6 +125,7 @@ post-process by replacing the org-mode LaTeX export block (see
           (xenops-element-do element 'render)))))
 
 (defun xenops-src-post-process-image-result (element)
+  "Post-process image result of executing ELEMENT."
   (let* ((lang (downcase (plist-get element :language))))
     (save-excursion
       (when (re-search-forward
@@ -122,19 +137,23 @@ post-process by replacing the org-mode LaTeX export block (see
           (xenops-element-do element 'render)))))
 
 (defun xenops-src-org-babel-result-params (element)
+  "Return org-babel result-params for src element ELEMENT."
   (let* ((info (plist-get element :org-babel-info))
          (result-params (cdr (assq :results (nth 2 info)))))
     (split-string (downcase result-params))))
 
 (defun xenops-src-latex-results? (element)
+  "Return non-nil iff latex results were requested for ELEMENT."
   (member "latex" (xenops-src-org-babel-result-params element)))
 
 (defun xenops-src-image-results? (element)
+  "Return non-nil iff image results were requested for ELEMENT."
   (member "graphics" (xenops-src-org-babel-result-params element)))
 
 (defun xenops-src-execute-parsed-src-block (info)
-  "Execute an org-babel src block from the parsed data structure
-INFO. Return the results section that is written to the org-mode
+  "Execute an org-babel src block from the parsed org-babel data structure INFO.
+
+Return the results section that is written to the org-mode
 buffer, as a string."
   (with-temp-buffer
     (org-mode)
@@ -144,6 +163,7 @@ buffer, as a string."
     (buffer-substring (point) (point-max))))
 
 (defmacro xenops-src-do-in-org-mode (&rest body)
+  "Execute forms in BODY with current src block in an org-mode buffer."
   `(save-restriction
      (progn
        (condition-case nil
@@ -158,6 +178,7 @@ buffer, as a string."
            ,@body)))))
 
 (defun xenops-src-apply-syntax-highlighting ()
+  "Syntax highlight the src or minted element at point."
   (-when-let* ((element (or (xenops-minted-parse-at-point)
                             (xenops-src-parse-at-point)))
                (lang (plist-get element :language))

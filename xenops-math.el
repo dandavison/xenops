@@ -15,29 +15,36 @@
 (defvar xenops-math-process 'dvisvgm)
 
 (defvar xenops-math-image-change-size-factor 1.1
-  "The factor by which the image's size will be changed under
-  `xenops-math-image-increase-size' and
+  "The multiplicative factor used when resizing images.
+
+This is the factor by which the image's size will be changed
+  under `xenops-math-image-increase-size' and
   `xenops-math-image-decrease-size'.")
 
 (defvar xenops-math-image-current-scale-factor 1.0
-  "The current relative scaling factor of images, i.e. the net
-  scale factor resulting from multiple applications of
-  `xenops-math-image-increase-size' and
+  "The current size of images, as a multiple of their default size.
+
+This is the net scale factor resulting from multiple applications
+  of `xenops-math-image-increase-size' and
   `xenops-math-image-decrease-size'.")
 
 (defvar xenops-math-image-scale-factor 0.8
-  "Scaling factor for SVG math images. This determines the size
-  of the image in the image file that is cached on disk.")
+  "Scaling factor for SVG math images.
+
+This determines the size of the image in the image file that is
+  cached on disk.")
 
 (defvar xenops-math-image-margin 20
-  "Number of pixels to be used as left margin for non-inline math images")
+  "Number of pixels to be used as left margin for non-inline math images.")
 
 (defun xenops-math-font-lock-keywords ()
+  "Create font-lock entry for math elements."
   `((,(xenops-math-block-delimiter-lines-regexp)
      (0
       (xenops-math-block-math-font-lock-handler)))))
 
 (defun xenops-math-activate ()
+  "Perform xenops-math responsibilities during minor mode activation."
   (setq-local xenops-math-latex-tasks-semaphore
               (aio-sem xenops-math-latex-max-tasks-in-flight))
   (make-directory xenops-cache-directory t)
@@ -51,6 +58,7 @@
   (add-to-list 'fill-nobreak-predicate #'xenops-math-parse-inline-element-at-point))
 
 (defun xenops-math-deactivate ()
+  "Perform xenops-math responsibilities during minor mode deactivation."
   (advice-remove #'mouse-drag-and-drop-region #'xenops-math-mouse-drag-region-around-advice)
   (advice-remove fill-paragraph-function #'xenops-math-fill-paragraph-after-advice)
   (advice-remove #'TeX-insert-dollar #'xenops-math-look-back-and-render-inline-math)
@@ -58,6 +66,12 @@
   (font-lock-remove-keywords nil (xenops-math-font-lock-keywords)))
 
 (defun xenops-math-render (element &optional cached-only)
+  "Render math element ELEMENT (asynchronously).
+
+If the element is cached, then display the image synchronously.
+Otherwise, if CACHED-ONLY is non-nil, schedule an asynchronous
+task that will run the necessary external processes to compile
+the LaTeX to SVG, and insert the SVG into the buffer."
   (unless (or (xenops-element-get-image element)
               (xenops-element-overlay-get element 'xenops-math-latex-waiting)
               (string-equal "" (s-trim (buffer-substring (plist-get element :begin-content)
@@ -82,6 +96,10 @@
           (xenops-math-latex-create-image element latex -image-type colors cache-file display-image)))))))
 
 (defun xenops-math-regenerate (element)
+  "Regenerate math element ELEMENT.
+
+This is equivalent to deleting any cached image that may exist
+and then calling `xenops-render'."
   (let ((cache-file (xenops-math-get-cache-file element)))
     (when cache-file
       (delete-file cache-file)
@@ -154,8 +172,7 @@ In addition, we require the following text property inheritance behavior on inse
 |-----+---------------------------+------------------------------------------|
 |   2 | do not inherit from right | front-nonsticky: default Emacs behaviour |
 | 3-6 | inherit from left         | rear sticky: default Emacs behaviour     |
-|   7 | do not inherit from left  | set rear-nonsticky on 6                  |
-"
+|   7 | do not inherit from left  | set rear-nonsticky on 6                  |"
   (-when-let* ((element (xenops-math-parse-element-at-point)))
     (let ((beg (1+ (plist-get element :begin)))
           (end (plist-get element :end))
@@ -165,6 +182,7 @@ In addition, we require the following text property inheritance behavior on inse
 
 (defun xenops-math-handle-paste ()
   "If the text to be pasted is a math element then handle the paste.
+
 If we are in a math element, then paste without the delimiters"
   (let ((copied-text (current-kill 0 'do-not-rotate)))
     (-if-let* ((element (xenops-math-parse-element-from-string copied-text)))
@@ -182,6 +200,7 @@ If we are in a math element, then paste without the delimiters"
           t))))
 
 (defun xenops-math-paste ()
+  "Paste handler for math elements"
   (or (xenops-math-handle-paste) (yank)))
 
 (defun xenops-math-look-back-and-render-inline-math ()
@@ -211,6 +230,7 @@ If we are in a math element, then paste without the delimiters"
   (xenops-math-look-back-and-render-inline-math))
 
 (defun xenops-math-fill-paragraph-after-advice (&rest args)
+  "Re-render cached images after `fill-paragraph'."
   (let ((forward-paragraph-fn (if (fboundp 'LaTeX-forward-paragraph)
                                   'LaTeX-forward-paragraph
                                 'forward-paragraph))
@@ -227,6 +247,7 @@ If we are in a math element, then paste without the delimiters"
           (xenops-render-if-cached)))))
 
 (defun xenops-math-parse-element-from-string (element-string)
+  "Parse a math element from a string."
   (with-temp-buffer
     (save-excursion (insert element-string))
     (-if-let* ((element (xenops-math-parse-element-at-point)))
@@ -238,14 +259,14 @@ If we are in a math element, then paste without the delimiters"
 (defun xenops-math-handle-element-transgression (window oldpos event-type)
   "Render a math element when point leaves it."
   ;; TODO: check window
-  (message "xenops-math-handle-element-transgression")
   (if (eq event-type 'left)
       (-if-let* ((was-in (xenops-math-parse-element-at oldpos)))
           (unless (xenops-element-get-image was-in)
             (xenops-math-render was-in)))))
 
 (defun xenops-math-mouse-drag-region-around-advice (mouse-drag-region-fn start-event)
-  "If point is in a math element, then cause mouse drag to appear to drag the associated image:
+  "If point is in a math element, then cause mouse drag to appear to drag the associated image.
+
 1. Select the math element as the currently active region.
 2. Temporarily alter tooltip-show so that it displays the image."
   (-if-let* ((element (xenops-math-parse-element-at (posn-point (event-start start-event)))))
@@ -267,27 +288,32 @@ If we are in a math element, then paste without the delimiters"
     (funcall mouse-drag-region-fn start-event)))
 
 (defun xenops-math-parse-element-at (pos)
+  "Parse math element at buffer position POS."
   (save-excursion
     (goto-char pos)
     (xenops-math-parse-element-at-point)))
 
 (defun xenops-math-parse-element-at-point ()
+  "Parse any math element at point."
   (or (xenops-math-parse-inline-element-at-point)
       (xenops-math-parse-block-element-at-point)
       (xenops-math-parse-table-at-point)))
 
 (defun xenops-math-parse-block-element-at-point ()
+  "Parse block math element at point."
   (xenops-parse-element-at-point 'block-math))
 
 (defun xenops-math-parse-table-at-point ()
+  "Parse table element at point."
   (xenops-parse-element-at-point 'table))
 
 (defun xenops-math-parse-inline-element-at-point ()
+  "Parse any inline math element at point."
   (or (xenops-math-parse-dollar-delimited-inline-element-at-point)
       (xenops-math-parse-paren-delimited-inline-element-at-point)))
 
 (defun xenops-math-parse-paren-delimited-inline-element-at-point ()
-  "If point is in backslash-paren-delimited inline math element, return plist describing match."
+  "Parse a backslash-paren-delimited inline math element at point."
   (cl-letf (((symbol-function 'xenops-elements-get)
              (lambda (type key)
                (if (and (eq type 'inline-math) (eq key :delimiters))
@@ -295,7 +321,7 @@ If we are in a math element, then paste without the delimiters"
     (xenops-parse-element-at-point 'inline-math)))
 
 (defun xenops-math-parse-dollar-delimited-inline-element-at-point ()
-  "If point is in dollar-delimited inline math element, return plist describing match."
+  "Parse a dollar-delimited inline math element at point."
   ;; This is a bit awkward since the start and end delimiters are the same.
   ;;
   ;; There are 3 relevant editing states:
@@ -328,6 +354,7 @@ If we are in a math element, then paste without the delimiters"
             (point-at-eol))))))
 
 (defun xenops-math-concatenate (beg end)
+  "Concatenate and re-render contiguous block math elements in region."
   (interactive "r")
   (let* ((delimiters )
          (boundary-regexp
@@ -350,10 +377,12 @@ If we are in a math element, then paste without the delimiters"
       (pop-mark))))
 
 (defun xenops-avy-goto-math ()
+  "Jump to a math element using avy."
   (interactive)
   (let (avy-action) (xenops-avy-do-at-math)))
 
 (defun xenops-avy-copy-math-and-paste ()
+  "Copy and paste a math element using avy."
   (interactive)
   (let ((element)
         (avy-action
@@ -371,9 +400,11 @@ If we are in a math element, then paste without the delimiters"
     (xenops-avy-do-at-math)))
 
 (defun xenops-avy-do-at-math ()
+  "Perform an avy action on a math element."
   (avy-jump (xenops-elements-delimiter-start-regexp '(block-math inline-math))))
 
 (defun xenops-math-get-cache-file (element)
+  "Return the name of the SVG image cache file for ELEMENT."
   ;; TODO: the file path should be stored somewhere, not recomputed.
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
@@ -387,12 +418,14 @@ If we are in a math element, then paste without the delimiters"
     (xenops-math-compute-file-name latex image-type colors)))
 
 (defun xenops-math-file-name-static-hash-data ()
+  "Return static data used to compute the math content hash."
   (list org-format-latex-header
         org-latex-default-packages-alist
         org-latex-packages-alist
         org-format-latex-options))
 
 (defun xenops-math-compute-file-name (latex image-type colors)
+  "Compute the cache file name for LATEX math content."
   (let* ((data (append (xenops-math-file-name-static-hash-data) (list latex colors)))
          (hash (sha1 (prin1-to-string data))))
     (format "%s.%s" (f-join (f-expand xenops-cache-directory) hash) image-type)))

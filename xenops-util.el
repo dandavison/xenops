@@ -5,9 +5,11 @@
 ;;; Code:
 
 (defmacro xenops-util-define-key-with-fallback (key handler &optional fallback-key)
-  "Bind `handler' to `key' in `xenops-mode-map' such that if
-`handler' returns `nil', then the function is called that would
-have been bound to `key' were `xenops-mode' not active."
+  "Bind HANDLER to KEY in `xenops-mode-map'.
+
+The binding is such that if HANDLER returns nil, then the
+function is called that would have been bound to KEY were
+`xenops-mode' not active."
   `(define-key xenops-mode-map ,key
      (lambda ()
        (interactive)
@@ -16,8 +18,9 @@ have been bound to `key' were `xenops-mode' not active."
            (execute-kbd-macro ,(or fallback-key key)))))))
 
 (defun xenops-util-first-index (list)
-  "Return smallest index for which the corresponding element is
-non-nil, or nil if no such index exists."
+  "Return smallest index for which the corresponding element in LIST is non-nil.
+
+Return nil if no such index exists."
   (catch :index
     (let ((i 0))
       (dolist (el list)
@@ -25,20 +28,24 @@ non-nil, or nil if no such index exists."
         (setq i (1+ i))))))
 
 (defun xenops-util-first-result (fn list)
-  "Call FN on each element of LIST until a non-nil return value
-is encountered. Return this value without further evaluations."
+  "Call FN on each element of LIST until a non-nil return value is encountered.
+
+Return this value without further evaluations."
   (catch :result
     (dolist (el list)
       (-if-let* ((result (funcall fn el)))
           (throw :result result)))))
 
 (defun xenops-util-plist-update (plist &rest args)
+  "Update PLIST according to ARGS.
+
+ARGS will typically look like :k1 v1 :k2 v2 ..."
   (dolist (pair (-partition 2 args))
     (setq plist (apply #'plist-put plist pair)))
   plist)
 
 (defun xenops-util-svg-resize (svg scale)
-  "Return SVG data with height and width scaled by `scale'"
+  "Return SVG data with height and width scaled by SCALE"
   (cl-flet ((resize (match)
                     (cl-destructuring-bind (size . units)
                         (xenops-util-svg-parse-length-or-percent (match-string 1 match))
@@ -52,7 +59,9 @@ is encountered. Return this value without further evaluations."
     svg))
 
 (defun xenops-util-svg-parse-length-or-percent (string)
-  "Parse a string like '1.5pt' or '50.5%'"
+  "Parse STRING, returning the numerical coefficient and the unit specifier.
+
+For example, STRING might look like '1.5pt' or '50.5%'"
   (let* ((n (length string))
          (unit-specifier (if (s-ends-with? "%" string)
                              "%"

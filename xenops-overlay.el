@@ -5,6 +5,7 @@
 ;;; Code:
 
 (defun xenops-overlay-create (beg end)
+  "Create a Xenops overlay between BEG and END."
   (let* ((ov (make-overlay beg end))
          (keymap (make-sparse-keymap)))
     (overlay-put ov 'xenops-overlay-type 'xenops-overlay)
@@ -17,9 +18,11 @@
     ov))
 
 (defun xenops-overlay-at-point ()
+  "Return a Xenops overlay at point, if there is one."
   (--first (overlay-get it 'xenops-overlay-type) (overlays-at (point))))
 
 (defun xenops-overlay-delete-overlays (&optional beg end)
+  "Delete Xenops overlays between BEG and END."
   (interactive "r")
   (dolist (ov (overlays-in (or beg (point-min)) (or end (point-max))))
     (delete-overlay ov)))

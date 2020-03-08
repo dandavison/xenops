@@ -78,18 +78,21 @@
     "{\\\\it +\\([^\n}]+\\)}"))
 
 (defun xenops-xen-begin-latex-environment-formatter (env)
+  "Return visual replacement for environment ENV begin token."
   (cond
    ((member env '("src" "minted" "align")) "⚡")
    ((member env '("enumerate" "itemize" "mdframed")) " ")
    (t (upcase-initials env))))
 
 (defun xenops-xen-end-latex-environment-formatter (env)
+  "Return visual replacement for environment ENV end token."
   (cond
    ((member env '("align" "src" "minted")) "⚡")
    ((member env '("proof")) "□")
    (t " ")))
 
 (defun xenops-xen-section-title-formatter (title)
+  "Return visual replacement for section title TITLE."
   (let* ((match (match-string 0))
          (indent (cond
                   ((string-match "^\\\\subsubsection" match)

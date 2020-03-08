@@ -9,6 +9,7 @@
 ;;; Code:
 
 (defun xenops-minted-parse-at-point ()
+  "Parse a minted element at point."
   (-if-let* ((element (xenops-parse-element-at-point 'minted)))
       (let* ((language (xenops-minted-get-babel-language (match-string 2)))
              (parameters (match-string 3))
@@ -26,6 +27,7 @@
     ("wolfram" . "mathematica")))
 
 (defun xenops-minted-get-babel-language (language)
+  "Return org-babel language name corresponding to LANGUAGE."
   (or (cdr (assoc language xenops-minted-language-to-babel-language))
       language))
 

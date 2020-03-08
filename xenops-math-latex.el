@@ -90,8 +90,7 @@
         (aio-sem-post xenops-math-latex-tasks-semaphore)))))
 
 (defun xenops-math-latex-display-waiting (element)
-  "Style a math element to indicate that its processing task is
-waiting in the queue to be executed."
+  "Style a math element to indicate that its processing task is waiting in the queue to be executed."
   (xenops-element-overlays-delete element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
@@ -114,9 +113,10 @@ Use `M-x xenops-cancel-waiting-tasks` to make this element editable.") ov))
     (xenops-math-image-change-size element xenops-math-image-current-scale-factor)))
 
 (defun xenops-math-latex-display-error (element error)
-  "Style a math element to indicate that an error occurred during
-execution of its processing task; make error details available
-via hover-over text and contextual menu."
+  "Style a math element to indicate that an error occurred during execution of its processing task.
+
+Make error details available via hover-over text and contextual
+menu."
   (xenops-element-overlays-delete element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :begin-content))
@@ -152,8 +152,7 @@ Right-click on the warning badge to copy the failing command or view its output.
     ov))
 
 (defun xenops-math-latex-make-overlay (element commands help-echo)
-  "Make an overlay used to style a math element and display
-images and error information."
+  "Make an overlay used to style a math element and display images and error information."
   (xenops-element-overlays-delete element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
@@ -209,8 +208,7 @@ images and error information."
           (delete-overlay ov)))))
 
 (defun xenops-math-latex-get-colors ()
-  "Return the foreground and background colors to be used for SVG
-images of LaTeX content."
+  "Return the foreground and background colors to be used for SVG images of LaTeX content."
   (let* ((face (face-at-point))
          (fg
           (let ((color (plist-get org-format-latex-options :foreground)))
@@ -242,8 +240,7 @@ images of LaTeX content."
   (sha1 (prin1-to-string (list (buffer-file-name) TeX-master))))
 
 (defun xenops-math-latex-get-preamble-lines ()
-  "Get the preamble for a LaTeX document for a single math
-element."
+  "Get the preamble for a LaTeX document for a single math element."
   (let ((key (xenops-math-latex-make-preamble-cache-key)))
     (unless (assoc key xenops-math-latex-preamble-cache)
       (push (cons key (xenops-math-latex-make-preamble-lines))
@@ -251,8 +248,7 @@ element."
     (cdr (assoc key xenops-math-latex-preamble-cache))))
 
 (defun xenops-math-latex-make-preamble-lines ()
-  "Make the preamble for a LaTeX document for a single math
-element."
+  "Make the preamble for a LaTeX document for a single math element."
   (let ((file (make-temp-file "xenops-math-TeX-region-create" nil ".tex")))
     (TeX-region-create file "" (buffer-file-name) 0)
     (with-temp-buffer
@@ -264,6 +260,7 @@ element."
        "\n" t "[ \t\n]+"))))
 
 (defun xenops-clear-latex-preamble-cache ()
+  "Clear the LaTeX preamble cache."
   (interactive)
   (setq xenops-math-latex-preamble-cache
         (assoc-delete-all (xenops-math-latex-make-preamble-cache-key)

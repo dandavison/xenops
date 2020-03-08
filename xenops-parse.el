@@ -46,9 +46,10 @@ the beginning of the overlay and attempt the parse there."
     (and (eq (car display) 'image) display)))
 
 (defun xenops-parse-element-at-point-matching-delimiters (type delimiters lim-up lim-down)
-  "If point is between regexps, return plist describing
-  match. Like `org-between-regexps-p', but modified to return
-  more match data."
+  "If point is between regexps, return plist describing match.
+
+Like `org-between-regexps-p', but modified to return more match
+  data."
   (-if-let* ((coords
               (save-excursion
                 (when (looking-at (car (last delimiters)))

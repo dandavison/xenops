@@ -1,6 +1,13 @@
 ;;; xenops.el --- A LaTeX editing environment for mathematical documents -*- lexical-binding: t; -*-
 
+;; Author: Dan Davison <dandavison7@gmail.com>
+;; URL: https://github.com/dandavison/xenops
+;; Version: 0.0
+;; Package-Requires: ((emacs "26.1"))
+
 ;;; Commentary:
+
+;; See README.md
 
 ;;; Code:
 
@@ -36,35 +43,41 @@
   "Path to a directory in which xenops can save files.")
 
 (defvar xenops-font-family nil
-  "The font family used for all text other than math and source
-  code elements in a Xenops buffer. To make this take effect,
-  restart `xenops-mode'. You can use `xenops-select-font-family'
-  to try out different fonts interactively.")
+  "The font family used for all text other than math and source code elements in a Xenops buffer.
+
+To make this take effect, restart `xenops-mode'. You can use
+`xenops-select-font-family' to try out different fonts
+interactively.")
 
 (defvar xenops-mode-map (make-sparse-keymap)
-  "The main Xenops keymap. Xenops is a minor-mode, so it is not
-  allowed to override major-mode keybindings. Therefore, all
-  Xenops commands are bound in `xenops-secondary-keymap'. A few
-  important commands are also made available in this keymap.")
+  "The main Xenops keymap.
+
+Xenops is a minor-mode, so it is not allowed to override
+major-mode keybindings. Therefore, all Xenops commands are bound
+in `xenops-secondary-keymap'. A few important commands are also
+made available in this keymap.")
 
 (defvar xenops-secondary-keymap (make-sparse-keymap)
   "All Xenops commands are available in this keymap.")
 
 (defvar xenops-rendered-element-keymap (make-sparse-keymap)
-  "A keymap that is active when point is on a rendered element,
-  such as a math/table image.")
+  "A keymap that is active when point is on a rendered element, such as a math/table image.")
 
 (defvar xenops-tooltip-delay 0.2
-  "`tooltip-delay' when xenops-mode is active.")
+  "The value of the variable `tooltip-delay' when xenops-mode is active.")
 
 (xenops-define-apply-command render
                              "Render elements: display LaTeX math, tables and included image files as images, and hide footnotes with tooltips.")
+
 (xenops-define-apply-command reveal
                              "Reveal elements: this is the opposite of `xenops-render'. For LaTeX math, tables, and footnotes, reveal the LaTeX code for editing")
+
 (xenops-define-apply-command regenerate
                              "Regenerate elements: for LaTeX math and footnotes, send the LaTeX to an external process to regenerate the image file, and display the new image.")
+
 (xenops-define-apply-command increase-size
                              "Increase size of images.")
+
 (xenops-define-apply-command decrease-size
                              "Decrease size of images.")
 
@@ -160,7 +173,7 @@
 
   (xenops-util-define-key-with-fallback [(super v)] #'xenops-handle-paste "\C-y")
   (xenops-util-define-key-with-fallback "\C-y" #'xenops-handle-paste)
-  (xenops-util-define-key-with-fallback "\"" #'xenops-insert-quote))
+  (xenops-util-define-key-with-fallback "\"" #'xenops-insert-double-quote))
 
 (defun xenops-dwim (&optional arg)
   "Operate on the element at point, if there is one, or on the whole buffer.
@@ -175,8 +188,7 @@ point for editing (removes the image). This is equivalent to
 
 With two C-u prefix arguments, it regenerates the image (i.e.
 re-runs LaTeX, refusing to use a cached image). This is
-equivalent to `xenops-regenerate'.
-"
+equivalent to `xenops-regenerate'."
   (interactive "P")
   (cond
    ((equal arg '(16))
@@ -278,9 +290,9 @@ equivalent to `xenops-regenerate'.
       value)))
 
 (defun xenops-get-for-types (data types key)
-  "Concatenated list of all items under key KEY for any type in
-TYPES. If TYPES is 'all, then all items under key KEY for any
-type."
+  "Concatenated list of all items under key KEY for any type in TYPES.
+
+If TYPES is 'all, then all items under key KEY for any type."
   (-uniq
    (apply #'append
           (cl-loop for (type _) in data
@@ -289,8 +301,7 @@ type."
                                      (if (listp val) val (list val))))))))
 
 (defun xenops-font-lock-activate ()
-  "Configure font-lock for all element types by adding entries to
-`font-lock-keywords`."
+  "Configure font-lock for element types defined in `xenops-elements'."
   (cl-loop for (type . _) in xenops-elements
            do
            (-if-let* ((keywords (xenops-elements-get type :font-lock-keywords)))
@@ -310,18 +321,21 @@ type."
   (xenops-get-for-types xenops-ops ops key))
 
 (defun xenops-render-if-cached ()
+  "Render elements if they have a cached image available."
   (let ((fn (symbol-function 'xenops-math-render)))
     (cl-letf (((symbol-function 'xenops-math-render)
                (lambda (element) (funcall fn element 'cached-only))))
       (xenops-render))))
 
 (defun xenops-handle-paste ()
+  "Handle a paste event, if the clipboard data contains an element that Xenops can paste."
   (interactive)
   (or (xenops-math-handle-paste)
       (xenops-image-handle-paste)
       (xenops-handle-paste-default)))
 
 (defun xenops-handle-paste-default ()
+  "Default Xenops paste handler."
   (let ((pos (point)))
     (call-interactively #'yank)
     (unless (xenops-parse-any-element-at-point)
@@ -331,7 +345,8 @@ type."
         (xenops-render)))
     t))
 
-(defun xenops-insert-quote ()
+(defun xenops-insert-double-quote ()
+  "Insert double-quote specially in a Xenops element."
   (interactive)
   (if (xenops-parse-any-element-at-point)
       (insert "\"")))
