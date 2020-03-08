@@ -99,7 +99,7 @@ post-process by replacing the org-mode LaTeX export block (see
         (replace-match
          (if wrap-in-align-environment "\\\\begin{align*}\\1\\\\end{align*}" "\\1") t)))
     (save-excursion
-      (-if-let* ((element (xenops-apply-get-next-element)))
+      (-if-let* ((element (xenops-apply-parse-next-element)))
           (xenops-element-do element 'render)))))
 
 (defun xenops-src-post-process-image-result (element)
@@ -111,7 +111,7 @@ post-process by replacing the org-mode LaTeX export block (see
         (replace-match
          "\\\\includegraphics{\\1}" t)))
     (save-excursion
-      (-if-let* ((element (xenops-apply-get-next-element)))
+      (-if-let* ((element (xenops-apply-parse-next-element)))
           (xenops-element-do element 'render)))))
 
 (defun xenops-src-org-babel-result-params (element)

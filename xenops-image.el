@@ -84,7 +84,7 @@ pasted from the system clipboard.")
         (save-excursion
           (insert (format xenops-image-latex-template
                           (file-relative-name output-file))))
-        (xenops-image-render (xenops-apply-get-next-element))
+        (xenops-image-render (xenops-apply-parse-next-element))
         t))))
 
 (defun xenops-image-suggest-file-name (&optional suffix)

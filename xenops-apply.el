@@ -46,7 +46,7 @@ buffer."
       (goto-char beg)
       (let ((parse-at-point-fns (xenops-elements-get-all :parser))
             (sem-start-value (aref xenops-math-latex-tasks-semaphore 1)))
-        (while (setq el (xenops-apply-get-next-element nil end parse-at-point-fns))
+        (while (setq el (xenops-apply-parse-next-element nil end parse-at-point-fns))
           (and el
                (or (null pred) (funcall pred el))
                (ignore-errors (handle el))))
@@ -67,7 +67,7 @@ buffer."
   (-if-let* ((el (xenops-apply-parse-at-point)))
       (xenops-element-dispatch el handlers)))
 
-(defun xenops-apply-get-next-element (&optional start-regexp end parse-at-point-fns)
+(defun xenops-apply-parse-next-element (&optional start-regexp end parse-at-point-fns)
   "If there is another element, return it and leave point after it.
 An element is a plist containing data about a regexp match for a
 section of the buffer that Xenops can do something to."
@@ -86,7 +86,7 @@ section of the buffer that Xenops can do something to."
   ;; even if point somehow isn't actually on the element.
   (-if-let* ((ov (and (not parse-at-point-fns) (xenops-overlay-at-point))))
       (save-excursion (goto-char (overlay-start ov))
-                      (xenops-apply-get-next-element nil (overlay-end ov)))
+                      (xenops-apply-parse-next-element nil (overlay-end ov)))
     (xenops-util-first-result #'funcall (or parse-at-point-fns
                                             (xenops-elements-get-all :parser)))))
 
