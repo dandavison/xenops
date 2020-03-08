@@ -65,6 +65,9 @@
 (xenops-define-apply-command decrease-size
                              "Decrease size of images.")
 
+(xenops-define-apply-at-point-command render
+                                      "Render the element at point.")
+
 (xenops-define-apply-at-point-command reveal
                                       "Reveal the element at point.")
 
