@@ -333,28 +333,4 @@ type."
   (if (xenops-apply-parse-at-point)
       (insert "\"")))
 
-(defun xenops-avy-goto-math ()
-  (interactive)
-  (let (avy-action) (xenops-avy-do-at-math)))
-
-(defun xenops-avy-copy-math-and-paste ()
-  (interactive)
-  (let ((element)
-        (avy-action
-         (lambda (pt)
-           (save-excursion
-             (goto-char
-              ;; TODO: hack: This should be just `pt`, but inline
-              ;; math elements are not recognized when point is on
-              ;; match for first delimiter.
-              (1+ pt))
-             (setq element (xenops-math-parse-element-at-point))
-             (when element (xenops-element-copy element)))
-           (when element
-             (save-excursion (xenops-math-paste))))))
-    (xenops-avy-do-at-math)))
-
-(defun xenops-avy-do-at-math ()
-  (avy-jump (xenops-elements-delimiter-start-regexp '(block-math inline-math))))
-
 (provide 'xenops)
