@@ -1,4 +1,4 @@
-EMACS ?= emacs
+EMACS = emacs
 
 deps:
 	mkdir -p /tmp/xenops-packages
@@ -27,7 +27,10 @@ test:
 		-l tests/xenops-xen.el \
 		-f ert-run-tests-batch-and-exit
 
+lint:
+	emacs -Q --batch -l elisp-lint.el -f elisp-lint-files-batch *.el
+
 build:
 	@:
 
-.PHONY: deps test build
+.PHONY: deps test lint build
