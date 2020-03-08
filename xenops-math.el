@@ -141,8 +141,7 @@ tables shows required behavior for cursor position transitions.
 |       5 |       6 | do not render |                                         |
 
 The above is achieved by setting the `cursor-sensor-functions'
-property on positions 3-6 inclusive (which are the :begin-content
-and :end-content indices).
+property on positions 3-6 inclusive (which are 1+:begin and :end indices).
 
 In addition, we require the following text property inheritance behavior on insertion
 | pos | behavior                  | implementation                           |
@@ -151,12 +150,12 @@ In addition, we require the following text property inheritance behavior on inse
 | 3-6 | inherit from left         | rear sticky: default Emacs behaviour     |
 |   7 | do not inherit from left  | set rear-nonsticky on 6                  |
 "
-  (-if-let* ((element (xenops-math-parse-element-at-point)))
-      (let ((beg (plist-get element :begin-content))
-            (end (1+ (plist-get element :end-content)))
-            (props '(cursor-sensor-functions (xenops-math-handle-element-transgression))))
-        (add-text-properties beg end props)
-        (add-text-properties (1- end) end '(rear-nonsticky (cursor-sensor-functions))))))
+  (-when-let* ((element (xenops-math-parse-element-at-point)))
+    (let ((beg (1+ (plist-get element :begin)))
+          (end (plist-get element :end))
+          (props '(cursor-sensor-functions (xenops-math-handle-element-transgression))))
+      (add-text-properties beg end props)
+      (add-text-properties (1- end) end '(rear-nonsticky (cursor-sensor-functions))))))
 
 (defun xenops-math-handle-paste ()
   "If the text to be pasted is a math element then handle the paste.
