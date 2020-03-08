@@ -144,7 +144,8 @@
                                 ("-" . xenops-decrease-size)
                                 ("=" . xenops-increase-size)
                                 ("_" . xenops-decrease-size)
-                                ([(double-down-mouse-1)] . xenops-reveal-at-point))
+                                ([(double-down-mouse-1)] . (lambda () (interactive) nil))
+                                ([(double-mouse-1)] . xenops-reveal-at-point))
            do
            (define-key xenops-rendered-element-keymap key cmd))
 

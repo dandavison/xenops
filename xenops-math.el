@@ -86,7 +86,12 @@
 
 (defun xenops-math-reveal (element)
   (xenops-element-overlays-delete element)
-  (goto-char (plist-get element :begin-content)))
+  ;; TODO: is :begin-content for block math off by one?
+  (let ((element-type (plist-get element :type))
+        (begin-content (plist-get element :begin-content)))
+    (goto-char (if (eq element-type 'block-math)
+                   (1+ begin-content)
+                 begin-content))))
 
 (defun xenops-math-image-increase-size (element)
   (xenops-math-image-change-size element xenops-math-image-change-size-factor))
