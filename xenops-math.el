@@ -113,10 +113,12 @@
 
 (defun xenops-math-block-math-font-lock-handler ()
   (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch)
-  (xenops-math-add-cursor-sensor-property))
+  (xenops-math-add-cursor-sensor-property)
+  nil)
 
 (defun xenops-math-inline-math-font-lock-handler ()
-  (xenops-math-add-cursor-sensor-property))
+  (xenops-math-add-cursor-sensor-property)
+  nil)
 
 (defun xenops-math-add-cursor-sensor-property ()
   "Arrange for math elements to be rendered whenever the cursor leaves the element.
