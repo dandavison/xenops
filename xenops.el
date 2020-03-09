@@ -18,7 +18,6 @@
 
 (require 'xenops-apply)
 (require 'xenops-auctex)
-(require 'xenops-compat)
 (require 'xenops-doctor)
 (require 'xenops-element)
 (require 'xenops-elements)
