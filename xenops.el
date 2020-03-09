@@ -321,7 +321,7 @@ type."
 (defun xenops-handle-paste-default ()
   (let ((pos (point)))
     (call-interactively #'yank)
-    (unless (xenops-apply-parse-at-point)
+    (unless (xenops-parse-any-element-at-point)
       (save-excursion
         (push-mark (point) t t)
         (goto-char pos)
@@ -330,7 +330,7 @@ type."
 
 (defun xenops-insert-quote ()
   (interactive)
-  (if (xenops-apply-parse-at-point)
+  (if (xenops-parse-any-element-at-point)
       (insert "\"")))
 
 (provide 'xenops)

@@ -40,7 +40,7 @@
   (xenops-render--do-test
    buffer-contents
    (forward-char element-begin)
-   (let ((element (xenops-apply-parse-at-point)))
+   (let ((element (xenops-parse-any-element-at-point)))
      (should (equal (plist-get element :type) expected-type)))
    (let ((image (xenops-parse-image-at (point))))
      (should (equal (image-property image :type) 'svg)))))
@@ -51,7 +51,7 @@
    (forward-char element-begin)
    (should (or (looking-at (caar (xenops-elements-get 'src :delimiters)))
                (looking-at (caar (xenops-elements-get 'minted :delimiters)))))
-   (let ((element (xenops-apply-parse-at-point)))
+   (let ((element (xenops-parse-any-element-at-point)))
      (should (equal (plist-get element :type) expected-type)))
    (should (not (xenops-parse-image-at (point))))
    (search-forward keyword)

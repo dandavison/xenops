@@ -64,7 +64,7 @@ buffer."
 
 (defun xenops-apply-handlers-at-point (handlers &optional pred)
   "Apply HANDLERS to element at point if there is one."
-  (-if-let* ((el (xenops-apply-parse-at-point)))
+  (-if-let* ((el (xenops-parse-any-element-at-point)))
       (xenops-element-dispatch el handlers)))
 
 (defun xenops-apply-parse-next-element (&optional start-regexp end parse-at-point-fns)
@@ -76,19 +76,10 @@ section of the buffer that Xenops can do something to."
         (parse-at-point-fns (or parse-at-point-fns (xenops-elements-get-all :parser))))
     (-if-let* ((_ (re-search-forward start-regexp end t))
                (_ (goto-char (match-beginning 0)))
-               (element (xenops-apply-parse-at-point parse-at-point-fns))
+               (element (xenops-parse-any-element-at-point parse-at-point-fns))
                (_ (goto-char (plist-get element :end))))
         element)))
 
-(defun xenops-apply-parse-at-point (&optional parse-at-point-fns)
-  "Return the element at point if there is one."
-  ;; If there's a xenops overlay at point, then the user will expect that element to be returned,
-  ;; even if point somehow isn't actually on the element.
-  (-if-let* ((ov (and (not parse-at-point-fns) (xenops-overlay-at-point))))
-      (save-excursion (goto-char (overlay-start ov))
-                      (xenops-apply-parse-next-element nil (overlay-end ov)))
-    (xenops-util-first-result #'funcall (or parse-at-point-fns
-                                            (xenops-elements-get-all :parser)))))
 
 (defun xenops-apply-post-apply-deactivate-mark (handlers &optional beg end region-active)
   "Deactivate mark when appropriate.

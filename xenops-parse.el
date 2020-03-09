@@ -1,11 +1,33 @@
 ;; -*- lexical-binding: t -*-
 
-(defun xenops-parse-element-at-point (type)
-  "A base `parse-at-point` implementation that is used by some
-concrete element types. It is not expected to work for all
-types.
+(defun xenops-parse-any-element-at-point (&optional parse-at-point-fns no-recurse)
+  "Return the element at point if there is one.
 
-If point is in element, return parsed element as a plist."
+Try a list of parser functions until first success. If
+PARSE-AT-POINT-FNS is non-nil, use this as the list of parser
+functions. Otherwise, use the `parser` entries in
+`xenops-elements'.
+
+If NO-RECURSE is nil and there is an overlay at point, move to
+the beginning of the overlay and attempt the parse there."
+  ;; If there's a xenops overlay at point, then the user will expect that element to be returned,
+  ;; even if point somehow isn't actually on the element.
+  (-if-let* ((ov (and (not (or parse-at-point-fns no-recurse))
+                      (xenops-overlay-at-point))))
+      (save-excursion
+        (goto-char (overlay-start ov))
+        (xenops-parse-any-element-at-point nil t))
+    (xenops-util-first-result
+     #'funcall
+     (or parse-at-point-fns
+         (xenops-elements-get-all :parser)))))
+
+(defun xenops-parse-element-at-point (type)
+  "Return the element at point if there is one and it is of type TYPE."
+  ;; This is a base `parse-at-point` implementation that is used by
+  ;; some concrete element types. It is not expected to work for all
+  ;; types.
+  ;; TODO: make this more consistent.
   (xenops-util-first-result
    (lambda (pair)
      (xenops-parse-element-at-point-matching-delimiters
