@@ -1,10 +1,15 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-math.el --- Functions for working with elements of type 'block-math, 'inline-math, and 'table  -*- lexical-binding: t; -*-
+
+;;; Commentary:
 
 ;; Terminology
 ;;
 ;; | math element   | either an inline element or a block element    |
 ;; | inline element | inline math delimited by $...$                 |
 ;; | block element  | e.g. a \begin{align}...\end{align} environment |
+
+;;; Code:
+
 (require 'xenops-math-latex)
 
 (defvar xenops-math-process 'dvisvgm)
@@ -393,3 +398,5 @@ If we are in a math element, then paste without the delimiters"
     (format "%s.%s" (f-join (f-expand xenops-cache-directory) hash) image-type)))
 
 (provide 'xenops-math)
+
+;;; xenops-math.el ends here

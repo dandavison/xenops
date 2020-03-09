@@ -1,3 +1,9 @@
+;;; xenops-elements.el --- API for working with `xenops-elements' -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
+
 ;; -*- lexical-binding: t -*-
 
 (defun xenops-elements-get (type key)
@@ -19,3 +25,5 @@
                   (mapcar #'car (xenops-elements-get-for-types (or types 'all) :delimiters)))))
 
 (provide 'xenops-elements)
+
+;;; xenops-elements.el ends here

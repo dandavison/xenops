@@ -1,3 +1,9 @@
+;;; xenops-doctor.el --- Cure unhappy Xenopsen -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
+
 (defun xenops-doctor (&optional quiet)
   "Check your Emacs environment for any problems that will
 prevent Xenops from working correctly.
@@ -123,3 +129,5 @@ The checks run are:
   (apply #'format (s-replace-regexp "\n  +" "\n" s) args))
 
 (provide 'xenops-doctor)
+
+;;; xenops-doctor.el

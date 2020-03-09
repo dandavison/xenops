@@ -1,9 +1,13 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-element.el --- Functions for operating generically on an element -*- lexical-binding: t; -*-
+
+;;; Commentary:
 
 ;; Generic operations on an element. Functions in this file should determine behavior based on the
 ;; type of the element and requested operations, by consulting the `xenops-elements' and
 ;; `xenops-ops' data structures. They should not directly call functions that are specific to
 ;; element type (e.g. in xenops-math, xenops-image, xenops-text).
+
+;;; Code:
 
 (defun xenops-element-overlays-get (element)
   (let ((beg (plist-get element :begin))
@@ -56,3 +60,5 @@
       (set-marker marker nil)))
 
 (provide 'xenops-element)
+
+;;; xenops-element.el ends here

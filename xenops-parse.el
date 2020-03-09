@@ -1,4 +1,8 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-parse.el --- Functions for parsing elements from their text representation -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
 
 (defun xenops-parse-any-element-at-point (&optional parse-at-point-fns no-recurse)
   "Return the element at point if there is one.
@@ -75,3 +79,5 @@ the beginning of the overlay and attempt the parse there."
               (list :begin beg-beg :begin-content beg-end :end-content end-beg :end end-end)))))))
 
 (provide 'xenops-parse)
+
+;;; xenops-parse.el ends here

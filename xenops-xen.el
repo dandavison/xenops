@@ -1,4 +1,8 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-xen.el --- A alternative cleaner view of a LaTeX buffer -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
 
 (require 'style)
 
@@ -113,3 +117,5 @@
     '(face underline))))
 
 (provide 'xenops-xen)
+
+;;; xenops-xen.el ends here

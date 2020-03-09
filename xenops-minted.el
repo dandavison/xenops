@@ -1,4 +1,12 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-minted.el --- Utilities for working with elements of type 'minted -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; Elements of type 'minted represent LaTeX minted environments (https://github.com/gpoore/minted).
+;; They contain code. Xenops enables execution (via org-babel) and syntax highlighting of elements
+;; of type 'minted and 'src.
+
+;;; Code:
 
 (defun xenops-minted-parse-at-point ()
   (-if-let* ((element (xenops-parse-element-at-point 'minted)))
@@ -22,3 +30,5 @@
       language))
 
 (provide 'xenops-minted)
+
+;;; xenops-minted.el ends here

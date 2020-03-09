@@ -1,4 +1,8 @@
-;; -*- lexical-binding: t -*-
+;;; xenops.el --- A LaTeX editing environment for mathematical documents -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
 
 (require 'cl-lib)
 (require 'org)
@@ -334,3 +338,5 @@ type."
       (insert "\"")))
 
 (provide 'xenops)
+
+;;; xenops.el ends here

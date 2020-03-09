@@ -1,4 +1,12 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-image.el --- Functions for working with elements of type 'image -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; Elements of type 'image represent (bitmap) images whose point of truth is an image file on disk
+;; (as opposed to (SVG) images of typeset LaTeX fragments which may be cached on disk but for which
+;; the point of truth is the LaTeX code).
+
+;;; Code:
 
 (defvar xenops-image-width 512)
 
@@ -104,3 +112,5 @@ pasted from the system clipboard.")
               (or suffix "")))))
 
 (provide 'xenops-image)
+
+;;; xenops-image.el ends here

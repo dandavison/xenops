@@ -1,4 +1,8 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-font.el --- Functions for setting fonts in a Xenops buffer -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
 
 (defun xenops-font-activate ()
   (if xenops-font-family (xenops-font-set-faces)))
@@ -33,3 +37,5 @@
              xenops-font-family)))
 
 (provide 'xenops-font)
+
+;;; xenops-font.el ends here

@@ -1,4 +1,8 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-aio.el --- Xenops-aio integration -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
 
 (defmacro xenops-aio-with-async-with-buffer (buffer &rest body)
   "Evaluate BODY under `aio-with-async' with current buffer set to BUFFER."
@@ -44,3 +48,5 @@ with an error status, then the value function signals the error."
        :sentinel sentinel))))
 
 (provide 'xenops-aio)
+
+;;; xenops-aio.el ends here

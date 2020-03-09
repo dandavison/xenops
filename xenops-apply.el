@@ -1,4 +1,8 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-apply.el --- Functions for applying operations to elements in a region -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
 
 (setq xenops-apply-post-apply-hook nil)
 
@@ -92,6 +96,10 @@ it."
                                                     xenops-image-decrease-size)))
        (deactivate-mark)))
 
+
+
 (add-hook 'xenops-apply-post-apply-hook #'xenops-apply-post-apply-deactivate-mark)
 
 (provide 'xenops-apply)
+
+;;; xenops-apply.el ends here

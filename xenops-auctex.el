@@ -1,5 +1,8 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-auctex.el --- Xenops-auctex integration -*- lexical-binding: t; -*-
 
+;;; Commentary:
+
+;;; Code:
 
 (setq xenops-auctex-electric-insert-commands
       #'(LaTeX-insert-left-brace TeX-insert-sub-or-superscript))
@@ -23,3 +26,5 @@ and `TeX-insert-sub-or-superscript' should not trigger render-on-exit."
     (run-with-idle-timer 0 nil (lambda () (setq cursor-sensor-inhibit orig-value)))))
 
 (provide 'xenops-auctex)
+
+;;; xenops-auctex.el ends here

@@ -1,4 +1,8 @@
-;; -*- lexical-binding: t -*-
+;;; style.el --- A library for visual styling of text in a buffer, inspired by `prettify-symbols-mode' -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
 
 ;; This module implements a self-contained minor mode `style-mode' which is essentially an
 ;; extension of `prettify-symbols-mode'.
@@ -203,3 +207,5 @@ for more information."
       (push '(Br . Bl) composition))))
 
 (provide 'style)
+
+;;; style.el ends here

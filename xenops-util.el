@@ -1,4 +1,8 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-util.el --- Miscellaneous utility functions  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
 
 (defmacro xenops-util-define-key-with-fallback (key handler &optional fallback-key)
   "Bind `handler' to `key' in `xenops-mode-map' such that if
@@ -57,3 +61,5 @@ is encountered. Return this value without further evaluations."
           unit-specifier)))
 
 (provide 'xenops-util)
+
+;; xenops-util.el ends here

@@ -1,4 +1,12 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-src.el --- Utilities for working with elements of type 'src -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; Elements of type 'src represent alien org-mode 'src blocks in a LaTeX buffer. They contain code.
+;; Xenops enables execution (via org-babel) and syntax highlighting of elements of type 'minted and
+;; 'src.
+
+;;; Code:
 
 (defvar xenops-src-mathematica-use-wolframscript t
   "If non-nil then use the `wolframscript` executable to execute
@@ -160,3 +168,5 @@ buffer, as a string."
     (add-face-text-property beg end 'fixed-pitch)))
 
 (provide 'xenops-src)
+
+;;; xenops-src.el ends here

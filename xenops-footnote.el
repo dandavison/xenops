@@ -1,4 +1,8 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-footnote.el --- Functions for working with elements of type 'footnote -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
 
 (defun xenops-footnote-render (element)
   (let ((ov (xenops-overlay-create (plist-get element :begin)
@@ -18,3 +22,5 @@
 
 
 (provide 'xenops-footnote)
+
+;;; xenops-footnote.el ends here

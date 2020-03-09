@@ -1,4 +1,8 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-overlay.el --- Create/Read/Delete API for xenops overlays used to render Xenops elements -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
 
 (defun xenops-overlay-create (beg end)
   (let* ((ov (make-overlay beg end))

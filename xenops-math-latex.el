@@ -1,4 +1,9 @@
-;; -*- lexical-binding: t -*-
+;;; xenops-math-latex.el --- Asynchronous processing of LaTeX fragments to SVG, and associated UI -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Code:
+
 (require 'xenops-aio)
 
 (setq xenops-math-latex-max-tasks-in-flight 56)
@@ -265,3 +270,5 @@ element."
                           xenops-math-latex-preamble-cache)))
 
 (provide 'xenops-math-latex)
+
+;;; xenops-math-latex.el ends here
