@@ -184,7 +184,7 @@ If we are in a math element, then paste without the delimiters"
 (defun xenops-math-paste ()
   (or (xenops-math-handle-paste) (yank)))
 
-(defun xenops-math-look-back-and-render-inline-math (&rest args)
+(defun xenops-math-look-back-and-render-inline-math ()
   ;; Hack:
   ;;
   ;; Unless `TeX-electric-math' is set to '("$" . "$") then, without the following, an inline
@@ -197,8 +197,8 @@ If we are in a math element, then paste without the delimiters"
   ;; This code executes on every insert! Hard-coding the delimiters, instead of
   ;; (let ((closing-delimiters
   ;;         (apply #'append (mapcar #'cdr (xenops-elements-get 'inline-math :delimiters)))))
-  (if (or (looking-back "\\$")
-          (looking-back "\\\\)"))
+  (if (or (looking-back "\\$" (- (point) 1))
+          (looking-back "\\\\)" (- (point) 2)))
       (save-excursion
         (goto-char (match-beginning 0))
         (if-let* ((element (xenops-math-parse-inline-element-at-point)))

@@ -111,8 +111,7 @@ post-process by replacing the org-mode LaTeX export block (see
           (xenops-element-do element 'render)))))
 
 (defun xenops-src-post-process-image-result (element)
-  (let* ((lang (downcase (plist-get element :language)))
-         (wrap-in-align-environment (member lang '("python" "mathematica"))))
+  (let* ((lang (downcase (plist-get element :language))))
     (save-excursion
       (when (re-search-forward
              "#\\+RESULTS:\n\\[\\[file:\\([^]\n]+\\)\\]\\]" nil t)
