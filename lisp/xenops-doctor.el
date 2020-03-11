@@ -10,8 +10,10 @@ prevent Xenops from working correctly.
 
 The checks run are:
 
+- This Emacs version works with Xenops.
 - External latex and dvisvgm executables can be located.
 - This Emacs is able to display SVGs.
+- Emacs is not running as a terminal application.
 "
   (interactive)
   (let ((problems)

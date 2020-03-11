@@ -8,7 +8,13 @@
 
 (defvar-local xenops-math-latex-tasks-semaphore nil)
 
-(setq xenops-math-latex-max-tasks-in-flight 56)
+(defvar xenops-math-latex-max-tasks-in-flight 32
+  "The maximum number of latex processing tasks that are permitted
+to be simultaneously active. Your operating system will schedule
+these processes onto available CPU cores. Any other waiting
+Xenops tasks will remain in the Xenops task queue until one of
+the active tasks completes.")
+
 (setq xenops-math-latex-tasks-semaphore-value-copy nil)
 
 (defun xenops-math-latex-make-latex-document (latex colors)
