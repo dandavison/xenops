@@ -12,10 +12,10 @@ test:
 	$(EMACS) \
 		-batch \
 		-l tests/setup/init.el \
-		--eval "(add-to-list 'load-path \".\")" \
+		--eval "(add-to-list 'load-path \"lisp\")" \
 		--eval "(add-to-list 'load-path \"/tmp/xenops-packages/auctex\")" \
 		--eval '(setq ert-batch-backtrace-right-margin 9999)' \
-		-l xenops.el \
+		-l lisp/xenops.el \
 		-l tests/init.el \
 		-l tests/xenops.el \
 		-l tests/xenops-apply.el \
