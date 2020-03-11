@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t -*-
 
-(ert-deftest xenops-elements-get--handlers ()
+(ert-deftest xenops-test-elements--test-get--handlers ()
   (let ((inline-math-handlers (xenops-elements-get 'inline-math :handlers))
         (block-math-handlers (xenops-elements-get 'block-math :handlers)))
     (should (and
@@ -8,7 +8,7 @@
              block-math-handlers
              (equal inline-math-handlers block-math-handlers)))))
 
-(ert-deftest xenops-elements-get--delimiters ()
+(ert-deftest xenops-test-elements--test-get--delimiters ()
   (let ((inline-math-delimiters (xenops-elements-get 'inline-math :delimiters))
         (block-math-delimiters (xenops-elements-get 'block-math :delimiters)))
     (should (and

@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t -*-
 
-(ert-deftest xenops-xen-prettify-symbols-replacement ()
+(ert-deftest xenops-test-xen--test-prettify-symbols-replacement ()
   "An entry in  `prettify-symbols-alist' set outside xenops should be honored."
   (with-temp-buffer
     (let ((prettify-symbols-alist '(("replacement-specified-outside-xenops" . ?⚡))))
@@ -14,7 +14,7 @@
                 (plist-get (text-properties-at (point)) 'composition))
                "⚡")))))
 
-(ert-deftest xenops-xen-character-replacement ()
+(ert-deftest xenops-test-xen--test-character-replacement ()
   "Test replacement by a single character."
   (with-temp-buffer
     (save-excursion (insert "\\grad"))
@@ -27,7 +27,7 @@
               (plist-get (text-properties-at (point)) 'composition))
              "∇"))))
 
-(ert-deftest xenops-xen-string-replacement ()
+(ert-deftest xenops-test-xen--test-string-replacement ()
   "Test replacement by a multi-character string."
   (with-temp-buffer
     (save-excursion (insert "\\begin{abstract}"))
@@ -40,7 +40,7 @@
               (plist-get (text-properties-at (point)) 'composition))
              "Abstract"))))
 
-(ert-deftest xenops-xen-regexp-replacement-1 ()
+(ert-deftest xenops-test-xen--test-regexp-replacement-1 ()
   "Test replacement by regexp captured text."
   (with-temp-buffer
     (save-excursion (insert "\\textit{To be italicised}"))
@@ -53,7 +53,7 @@
               (plist-get (text-properties-at (point)) 'composition))
              "To be italicised"))))
 
-(ert-deftest xenops-xen-regexp-replacement-2 ()
+(ert-deftest xenops-test-xen--test-regexp-replacement-2 ()
   "Test replacement by regexp captured text employing a formatting function."
   (with-temp-buffer
     (save-excursion (insert "\\subsection*{Section title}"))
