@@ -73,7 +73,7 @@ Otherwise, if CACHED-ONLY is non-nil, schedule an asynchronous
 task that will run the necessary external processes to compile
 the LaTeX to SVG, and insert the SVG into the buffer."
   (unless (or (xenops-element-get-image element)
-              (xenops-element-overlay-get element 'xenops-math-latex-waiting)
+              (xenops-element-overlay-get element 'xenops-math-waiting)
               (string-equal "" (s-trim (buffer-substring (plist-get element :begin-content)
                                                          (plist-get element :end-content)))))
     (let ((latex (buffer-substring-no-properties (plist-get element :begin)
@@ -87,12 +87,12 @@ the LaTeX to SVG, and insert the SVG into the buffer."
              (cache-file-exists? (file-exists-p cache-file))
              (display-image
               (lambda (element &optional commands)
-                (xenops-math-latex-display-image element commands latex cache-file -image-type))))
+                (xenops-math-display-image element commands latex cache-file -image-type))))
         (cond
          (cache-file-exists?
           (funcall display-image element))
          ((not cached-only)
-          (xenops-math-latex-display-waiting element)
+          (xenops-math-display-waiting element)
           (xenops-math-latex-create-image element latex -image-type colors cache-file display-image)))))))
 
 (defun xenops-math-regenerate (element)
@@ -116,6 +116,102 @@ and then calling `xenops-render'."
     (goto-char (if (eq element-type 'block-math)
                    (1+ begin-content)
                  begin-content))))
+
+(defun xenops-math-display-waiting (element)
+  "Style a math element to indicate that its processing task is waiting in the queue to be executed."
+  (xenops-element-overlays-delete element)
+  (let* ((beg (plist-get element :begin))
+         (end (plist-get element :end))
+         (ov (xenops-overlay-create beg end)))
+    (overlay-put ov 'face `(:background ,(if (eq (frame-parameter nil 'background-mode) 'light)
+                                             "OldLace" "#362b2b")))
+    (overlay-put ov 'xenops-overlay-type 'xenops-math-waiting)
+    (overlay-put ov 'help-echo "Image-generation task in-progress. \
+Use `M-x xenops-cancel-waiting-tasks` to make this element editable.") ov))
+
+(defun xenops-math-display-image (element commands help-echo cache-file -image-type)
+  "Display SVG image resulting from successful LaTeX compilation."
+  (let ((margin (if (eq 'inline-math (plist-get element :type))
+                    0 `(,xenops-math-image-margin . 0)))
+        (ov (xenops-math-make-overlay element commands help-echo)))
+    (overlay-put ov 'display
+                 `(image :type ,(intern -image-type)
+                         :file ,cache-file :ascent center :margin ,margin)))
+  (unless (equal xenops-math-image-current-scale-factor 1.0)
+    (xenops-math-image-change-size element xenops-math-image-current-scale-factor)))
+
+(defun xenops-math-display-error (element error)
+  "Style a math element to indicate that an error occurred during execution of its processing task.
+
+Make error details available via hover-over text and contextual
+menu."
+  (xenops-element-overlays-delete element)
+  (let* ((beg (plist-get element :begin))
+         (end (plist-get element :begin-content))
+         (ov (xenops-overlay-create beg end))
+         (keymap (overlay-get ov 'keymap))
+         (error-badge "⚠️")
+         help-echo)
+    (-if-let* ((error-data (plist-get (cdr error) :xenops-aio-subprocess-error-data)))
+        (cl-destructuring-bind (failing-command failure-description output) error-data
+          (let* ((xenops-math-image-overlay-menu
+                  (lambda (event)
+                    (interactive "e")
+                    (popup-menu
+                     `("Xenops"
+                       ["View failing command output" (xenops-math-display-process-output ,output)]
+                       ["Copy failing command" (kill-new ,failing-command)]))
+                    event)))
+            (setq help-echo (format "External running external process: %s
+Right-click on the warning badge to copy the failing command or view its output.
+
+%s"
+                                    failure-description
+                                    failing-command))
+            (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
+            ov))
+      (setq help-echo (format "Error processing LaTeX fragment:\n\n%s"
+                              (s-join "\n\n" (--map (format "%S" it) error)))))
+    (add-text-properties 0 (length error-badge)
+                         `(help-echo ,help-echo keymap ,keymap)
+                         error-badge)
+    (overlay-put ov 'after-string error-badge)
+    (overlay-put ov 'help-echo help-echo)
+    ov))
+
+(defun xenops-math-make-overlay (element commands help-echo)
+  "Make an overlay used to style a math element and display images and error information."
+  (xenops-element-overlays-delete element)
+  (let* ((beg (plist-get element :begin))
+         (end (plist-get element :end))
+         (ov (xenops-overlay-create beg end))
+         (keymap (overlay-get ov 'keymap))
+         (xenops-math-image-overlay-menu
+          (lambda (event)
+            (interactive "e")
+            (popup-menu
+             `("Xenops"
+               ["Edit" (progn (goto-char ,beg) (xenops-reveal-at-point))]
+               ["Copy LaTeX command" (xenops-math-copy-latex-command ,ov)]))
+            event)))
+    (overlay-put ov 'help-echo help-echo)
+    (overlay-put ov 'commands commands)
+    (set-keymap-parent keymap xenops-rendered-element-keymap)
+    (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
+    ov))
+
+(defun xenops-math-display-process-output (output)
+  "Display external process output OUTPUT in a buffer"
+  (let ((buf (get-buffer-create "*Xenops external command output*")))
+    (with-current-buffer buf
+      (erase-buffer)
+      (insert output))
+    (display-buffer buf)))
+
+(defun xenops-math-copy-latex-command (overlay)
+  "Copy external latex command to clipboard (kill-ring)."
+  (let ((latex-command (car (overlay-get overlay 'commands))))
+    (kill-new (s-join " " latex-command))))
 
 (defun xenops-math-image-increase-size (element)
   (xenops-math-image-change-size element xenops-math-image-change-size-factor))

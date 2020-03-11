@@ -1,4 +1,4 @@
-;;; xenops-math-latex.el --- Asynchronous processing of LaTeX fragments to SVG, and associated UI -*- lexical-binding: t; -*-
+;;; xenops-math-latex.el --- Asynchronous processing of LaTeX fragments to SVG -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
@@ -84,106 +84,10 @@
                 (xenops-aio-with-async-with-buffer
                  buffer
                  (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-                   (xenops-math-latex-display-error element error)
+                   (xenops-math-display-error element error)
                    (xenops-element-deactivate-marker element))))))
       (with-current-buffer buffer
         (aio-sem-post xenops-math-latex-tasks-semaphore)))))
-
-(defun xenops-math-latex-display-waiting (element)
-  "Style a math element to indicate that its processing task is waiting in the queue to be executed."
-  (xenops-element-overlays-delete element)
-  (let* ((beg (plist-get element :begin))
-         (end (plist-get element :end))
-         (ov (xenops-overlay-create beg end)))
-    (overlay-put ov 'face `(:background ,(if (eq (frame-parameter nil 'background-mode) 'light)
-                                             "OldLace" "#362b2b")))
-    (overlay-put ov 'xenops-overlay-type 'xenops-math-latex-waiting)
-    (overlay-put ov 'help-echo "Image-generation task in-progress. \
-Use `M-x xenops-cancel-waiting-tasks` to make this element editable.") ov))
-
-(defun xenops-math-latex-display-image (element commands help-echo cache-file -image-type)
-  "Display SVG image resulting from successful LaTeX compilation."
-  (let ((margin (if (eq 'inline-math (plist-get element :type))
-                    0 `(,xenops-math-image-margin . 0)))
-        (ov (xenops-math-latex-make-overlay element commands help-echo)))
-    (overlay-put ov 'display
-                 `(image :type ,(intern -image-type)
-                         :file ,cache-file :ascent center :margin ,margin)))
-  (unless (equal xenops-math-image-current-scale-factor 1.0)
-    (xenops-math-image-change-size element xenops-math-image-current-scale-factor)))
-
-(defun xenops-math-latex-display-error (element error)
-  "Style a math element to indicate that an error occurred during execution of its processing task.
-
-Make error details available via hover-over text and contextual
-menu."
-  (xenops-element-overlays-delete element)
-  (let* ((beg (plist-get element :begin))
-         (end (plist-get element :begin-content))
-         (ov (xenops-overlay-create beg end))
-         (keymap (overlay-get ov 'keymap))
-         (error-badge "⚠️")
-         help-echo)
-    (-if-let* ((error-data (plist-get (cdr error) :xenops-aio-subprocess-error-data)))
-        (cl-destructuring-bind (failing-command failure-description output) error-data
-          (let* ((xenops-math-image-overlay-menu
-                  (lambda (event)
-                    (interactive "e")
-                    (popup-menu
-                     `("Xenops"
-                       ["View failing command output" (xenops-math-latex-display-process-output ,output)]
-                       ["Copy failing command" (kill-new ,failing-command)]))
-                    event)))
-            (setq help-echo (format "External running external process: %s
-Right-click on the warning badge to copy the failing command or view its output.
-
-%s"
-                                    failure-description
-                                    failing-command))
-            (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
-            ov))
-      (setq help-echo (format "Error processing LaTeX fragment:\n\n%s"
-                              (s-join "\n\n" (--map (format "%S" it) error)))))
-    (add-text-properties 0 (length error-badge)
-                         `(help-echo ,help-echo keymap ,keymap)
-                         error-badge)
-    (overlay-put ov 'after-string error-badge)
-    (overlay-put ov 'help-echo help-echo)
-    ov))
-
-(defun xenops-math-latex-make-overlay (element commands help-echo)
-  "Make an overlay used to style a math element and display images and error information."
-  (xenops-element-overlays-delete element)
-  (let* ((beg (plist-get element :begin))
-         (end (plist-get element :end))
-         (ov (xenops-overlay-create beg end))
-         (keymap (overlay-get ov 'keymap))
-         (xenops-math-image-overlay-menu
-          (lambda (event)
-            (interactive "e")
-            (popup-menu
-             `("Xenops"
-               ["Edit" (progn (goto-char ,beg) (xenops-reveal-at-point))]
-               ["Copy LaTeX command" (xenops-math-latex-copy-latex-command ,ov)]))
-            event)))
-    (overlay-put ov 'help-echo help-echo)
-    (overlay-put ov 'commands commands)
-    (set-keymap-parent keymap xenops-rendered-element-keymap)
-    (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
-    ov))
-
-(defun xenops-math-latex-display-process-output (output)
-  "Display external process output OUTPUT in a buffer"
-  (let ((buf (get-buffer-create "*Xenops external command output*")))
-    (with-current-buffer buf
-      (erase-buffer)
-      (insert output))
-    (display-buffer buf)))
-
-(defun xenops-math-latex-copy-latex-command (overlay)
-  "Copy external latex command to clipboard (kill-ring)."
-  (let ((latex-command (car (overlay-get overlay 'commands))))
-    (kill-new (s-join " " latex-command))))
 
 (defun xenops-math-latex-waiting-tasks-count ()
   "Return the number of processing tasks currently waiting in the queue."
@@ -204,7 +108,7 @@ Right-click on the warning badge to copy the failing command or view its output.
     (xenops-aio-sem-cancel-waiting-tasks xenops-math-latex-tasks-semaphore
                                          xenops-math-latex-max-tasks-in-flight)
     (dolist (ov (overlays-in (point-min) (point-max)))
-      (if (eq (overlay-get ov 'xenops-overlay-type) 'xenops-math-latex-waiting)
+      (if (eq (overlay-get ov 'xenops-overlay-type) 'xenops-math-waiting)
           (delete-overlay ov)))))
 
 (defun xenops-math-latex-get-colors ()
