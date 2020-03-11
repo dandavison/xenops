@@ -4,7 +4,7 @@ emacs \
     --no-init-file \
     --load tests/setup/init.el \
     --load tests/setup/install-deps.el \
-    --eval "(add-to-list 'load-path \"$PWD\")" \
+    --eval "(add-to-list 'load-path \"$PWD/lisp\")" \
     --eval "(require 'xenops)" \
     --eval "(add-hook 'LaTeX-mode-hook #'xenops-mode)" \
     $@
