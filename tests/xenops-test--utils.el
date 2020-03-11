@@ -39,8 +39,7 @@
 (defun xenops-test--do-apply-parse-next-element-test (input-text &rest expected-properties)
   (with-temp-buffer
     (save-excursion (insert input-text))
-    (let ((element (xenops-apply-parse-next-element
-                    (xenops-elements-delimiter-start-regexp) (point-max))))
+    (let ((element (xenops-apply-parse-next-element)))
       (cl-loop for (k v) in (-partition 2 expected-properties)
                do (should (equal (plist-get element k) v))))))
 
