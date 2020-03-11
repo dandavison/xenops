@@ -9,11 +9,19 @@
 </g>
 </svg>")
 
+(setq xenops-test--example-svg--cache-file (make-temp-file "xenops-test" nil ".tex"))
+
 (defun xenops-test--mock-xenops-math-latex-create-image (element _ _ _ file callback)
   (with-temp-buffer
     (insert xenops-test--example-svg)
     (write-file file))
   (funcall callback element))
+
+(defun xenops-test--mock-xenops-math-render (element &optional _)
+  "A mock of `xenops-math-render'."
+  (xenops-test--mock-xenops-math-latex-create-image element nil nil nil
+                                                    xenops-test--example-svg--cache-file #'identity)
+  (xenops-math-display-image element nil nil xenops-test--example-svg--cache-file "svg"))
 
 (defmacro xenops-test--with-xenops-render (buffer-contents &rest body)
   `(cl-letf (((symbol-function 'xenops-math-latex-create-image)

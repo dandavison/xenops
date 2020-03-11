@@ -42,7 +42,8 @@ After blocks.
       (should
        (member "\\newcommand{\\CommandInFile}{\\text{CommandInFileOutput}}" preamble))
       (should
-       (member "\\usepackage{amsmath}" preamble)))))
+       (member "\\usepackage{amsmath}" preamble)))
+    (f-delete file)))
 
 (ert-deftest xenops-test-math-latex--create-latex-document-for-fragment--multi-file ()
   (let ((child-file (make-temp-file "xenops-test-child" nil ".tex"))
@@ -56,7 +57,9 @@ After blocks.
       (should
        (member "\\newcommand{\\CommandInMasterFile}{\\text{CommandInMasterFileOutput}}" preamble))
       (should
-       (member "\\usepackage{amsmath}" preamble)))))
+       (member "\\usepackage{amsmath}" preamble)))
+    (f-delete child-file)
+    (f-delete master-file)))
 
 ;;; TODO: The following tests are all skipped: code paths that use aio cannot be tested under ert.
 (defun xenops-test-math-latex--do-image-test (buffer-contents element-begin expected-type)
