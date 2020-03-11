@@ -17,7 +17,7 @@ test:
 		--eval '(setq ert-batch-backtrace-right-margin 9999)' \
 		-l lisp/xenops.el \
 		-l tests/xenops-test--utils.el \
-		-l tests/xenops-test--init.el \
+		-l tests/xenops-test--mocks.el \
 		-l tests/xenops-test-elements.el \
 		-l tests/xenops-test-footnote.el \
 		-l tests/xenops-test-image.el \

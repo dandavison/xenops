@@ -8,6 +8,23 @@ After.")
 
 (setq xenops-test-math--inline-math-example--dollar-delimited "Before. $e^{2i\pi}$ After.")
 
+(defun xenops-test-math--assert-image-is-displayed (element)
+  "Perform a `render` operation, and assert that the image is present."
+  (save-excursion
+    (goto-char (plist-get element :begin-marker))
+    (let ((ov (xenops-overlay-at-point)))
+      (should ov)
+      (let ((image (overlay-get ov 'display)))
+        (should image)
+        (should (equal (image-property image :type) 'svg))
+        (should (equal (image-property image :file) xenops-test--example-svg--cache-file))))))
+
+(defun xenops-test-math--assert-image-is-not-displayed (element)
+  "Perform a `reveal` operation, and assert that the image has gone."
+  (save-excursion
+    (goto-char (plist-get element :begin-marker))
+    (should (not (xenops-overlay-at-point)))))
+
 (ert-deftest xenops-test-math--test-apply-parse-next-element--block-math ()
   (xenops-test--do-apply-parse-next-element-test
    xenops-test-math--block-math-example :type 'block-math))
@@ -42,6 +59,36 @@ After.")
                    :delimiters ,(car (xenops-elements-get 'block-math :delimiters))))))
 
 
+(defun xenops-test-math--do-render-and-reveal-test (text)
+  "Render a math image overlay and use `xenops-reveal' to remove it."
+  (with-temp-buffer
+    (xenops-mode)
+    (insert text)
+    (goto-char (point-min))
+    (let ((element (xenops-apply-parse-next-element)))
+      (xenops-element-create-marker element)
+
+      ;; render
+      (save-excursion
+        (goto-char (point-min))
+        (xenops-render))
+      (xenops-test-math--assert-image-is-displayed element)
+
+      ;; reveal
+      (save-excursion
+        (goto-char (point-min))
+        (xenops-reveal))
+      (xenops-test-math--assert-image-is-not-displayed element))))
+
+(ert-deftest xenops-test-math--test-render-and-reveal--inline-math--dollar-delimited ()
+  "Test render and reveal for an inline math element."
+  (xenops-test-math--do-render-and-reveal-test
+   xenops-test-math--inline-math-example--dollar-delimited))
+
+(ert-deftest xenops-test-math--test-render-and-reveal--block-math ()
+  "Test render and reveal for a block math element."
+  (xenops-test-math--do-render-and-reveal-test
+   xenops-test-math--block-math-example))
 (defun xenops-test-math--do-add-cursor-sensor-property-test (insert-1$345$7-fn)
   "See the docstring for `xenops-math-add-cursor-sensor-property'."
   (with-temp-buffer
