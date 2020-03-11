@@ -6,22 +6,6 @@
 
 (setq xenops-apply-post-apply-hook nil)
 
-(defmacro xenops-define-apply-command (op docstring)
-  `(defun ,(intern (concat "xenops-" (symbol-name op))) ()
-     ,(concat docstring "\n\n"
-              "The elements operated on are determined by trying the following:
-1. The element at point, if any.
-2. Elements in the active region, if there is an active region.
-3. All elements in the buffer.")
-     (interactive)
-     (xenops-apply '(,op))))
-
-(defmacro xenops-define-apply-at-point-command (op docstring)
-  `(defun ,(intern (concat "xenops-" (symbol-name op) "-at-point")) ()
-     ,docstring
-     (interactive)
-     (xenops-apply-at-point '(,op))))
-
 (defun xenops-apply (ops &optional pred)
   "Apply operation types OPS to any elements encountered.
 

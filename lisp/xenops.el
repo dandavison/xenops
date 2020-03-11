@@ -66,6 +66,16 @@ made available in this keymap.")
 (defvar xenops-tooltip-delay 0.2
   "The value of the variable `tooltip-delay' when xenops-mode is active.")
 
+(defmacro xenops-define-apply-command (op docstring)
+  `(defun ,(intern (concat "xenops-" (symbol-name op))) ()
+     ,(concat docstring "\n\n"
+              "The elements operated on are determined by trying the following:
+1. The element at point, if any.
+2. Elements in the active region, if there is an active region.
+3. All elements in the buffer.")
+     (interactive)
+     (xenops-apply '(,op))))
+
 (xenops-define-apply-command render
                              "Render elements: display LaTeX math, tables and included image files as images, and hide footnotes with tooltips.")
 
@@ -80,6 +90,12 @@ made available in this keymap.")
 
 (xenops-define-apply-command decrease-size
                              "Decrease size of images.")
+
+(defmacro xenops-define-apply-at-point-command (op docstring)
+  `(defun ,(intern (concat "xenops-" (symbol-name op) "-at-point")) ()
+     ,docstring
+     (interactive)
+     (xenops-apply-at-point '(,op))))
 
 (xenops-define-apply-at-point-command render
                                       "Render the element at point.")
