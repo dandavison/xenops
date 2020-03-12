@@ -80,6 +80,40 @@ After.")
         (xenops-reveal))
       (xenops-test-math--assert-image-is-not-displayed element))))
 
+(defun xenops-test-math--do-render-and-reveal-test--malformed-element (text)
+  "Test that reveal works when the element has become malformed."
+  (with-temp-buffer
+    (xenops-mode)
+    (insert text)
+    (goto-char (point-min))
+    (let ((element (xenops-apply-parse-next-element)))
+      (xenops-element-create-marker element)
+
+      ;; render
+      (save-excursion
+        (goto-char (point-min))
+        (xenops-render))
+      (xenops-test-math--assert-image-is-displayed element)
+
+      ;; Alter buffer text so that element is malformed.
+      (goto-char (point-min))
+      (message "buffer-string is %s" (buffer-string))
+      (message "point is %s" (point))
+      (should (save-excursion (xenops-apply-parse-next-element)))
+      (save-excursion
+        (re-search-forward (xenops-elements-delimiter-start-regexp))
+        (goto-char (match-beginning 0))
+        (insert "X")
+        (message "buffer-string is %s" (buffer-string)))
+      (xenops-test-math--assert-image-is-displayed element)
+      (should (not (save-excursion (xenops-apply-parse-next-element))))
+
+      ;; reveal
+      (save-excursion
+        (goto-char (point-min))
+        (xenops-reveal))
+      (xenops-test-math--assert-image-is-not-displayed element))))
+
 (ert-deftest xenops-test-math--test-render-and-reveal--inline-math--dollar-delimited ()
   "Test render and reveal for an inline math element."
   (xenops-test-math--do-render-and-reveal-test
@@ -89,6 +123,7 @@ After.")
   "Test render and reveal for a block math element."
   (xenops-test-math--do-render-and-reveal-test
    xenops-test-math--block-math-example))
+
 (defun xenops-test-math--do-add-cursor-sensor-property-test (insert-1$345$7-fn)
   "See the docstring for `xenops-math-add-cursor-sensor-property'."
   (with-temp-buffer
@@ -146,3 +181,7 @@ they type the characters in the straightforward sequence."
     (xenops-test-math--do-add-cursor-sensor-property-test #'xenops-test-math--insert-1$345$7)
     (xenops-test-math--do-add-cursor-sensor-property-test #'xenops-test-math--insert-1$345$7-with-TeX-electric-math)))
 
+(ert-deftest xenops-test-math--test-render-and-reveal--block-math--malformed-element ()
+  "Test render and reveal for a block math element."
+  (xenops-test-math--do-render-and-reveal-test--malformed-element
+   xenops-test-math--block-math-example))
