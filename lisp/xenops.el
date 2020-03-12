@@ -91,29 +91,28 @@ made available in this keymap.")
 (xenops-define-apply-command decrease-size
                              "Decrease size of images.")
 
-(defmacro xenops-define-apply-at-point-command (op docstring)
+(defmacro xenops-define-apply-at-point-function (op docstring)
   `(defun ,(intern (concat "xenops-" (symbol-name op) "-at-point")) ()
      ,docstring
-     (interactive)
      (xenops-apply-at-point '(,op))))
 
-(xenops-define-apply-at-point-command render
-                                      "Render the element at point.")
+(xenops-define-apply-at-point-function render
+                                       "Render the element at point.")
 
-(xenops-define-apply-at-point-command reveal
-                                      "Reveal the element at point.")
+(xenops-define-apply-at-point-function reveal
+                                       "Reveal the element at point.")
 
-(xenops-define-apply-at-point-command regenerate
-                                      "Regenerate the element at point.")
+(xenops-define-apply-at-point-function regenerate
+                                       "Regenerate the element at point.")
 
-(xenops-define-apply-at-point-command copy
-                                      "Copy the element at point.")
+(xenops-define-apply-at-point-function copy
+                                       "Copy the element at point.")
 
-(xenops-define-apply-at-point-command delete
-                                      "Delete the element at point.")
+(xenops-define-apply-at-point-function delete
+                                       "Delete the element at point.")
 
-(xenops-define-apply-at-point-command execute
-                                      "Execute the org-src code block at point.")
+(xenops-define-apply-at-point-function execute
+                                       "Execute the org-src code block at point.")
 
 (defalias 'xenops-execute #'xenops-execute-at-point)
 
@@ -172,13 +171,13 @@ made available in this keymap.")
 
   ;; Keymap for rendered element overlays
   (cl-loop for (key . cmd) in '(([(return)] . xenops-reveal-at-point)
-                                ([remap kill-ring-save] . xenops-copy-at-point)
+                                ([remap kill-ring-save] . (lambda () (interactive) (xenops-copy-at-point)))
                                 ("+" . xenops-increase-size)
                                 ("-" . xenops-decrease-size)
                                 ("=" . xenops-increase-size)
                                 ("_" . xenops-decrease-size)
                                 ([(double-down-mouse-1)] . (lambda () (interactive) nil))
-                                ([(double-mouse-1)] . xenops-reveal-at-point))
+                                ([(double-mouse-1)] . (lambda (interactive) (xenops-reveal-at-point))))
            do
            (define-key xenops-rendered-element-keymap key cmd))
 
