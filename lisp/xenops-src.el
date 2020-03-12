@@ -122,7 +122,7 @@ environment."
          (if wrap-in-align-environment "\\\\begin{align*}\\1\\\\end{align*}" "\\1") t)))
     (save-excursion
       (-if-let* ((element (xenops-apply-parse-next-element)))
-          (xenops-element-do element 'render)))))
+          (xenops-dispatch-operation 'render element)))))
 
 (defun xenops-src-post-process-image-result (element)
   "Post-process image result of executing ELEMENT."
@@ -134,7 +134,7 @@ environment."
          "\\\\includegraphics{\\1}" t)))
     (save-excursion
       (-if-let* ((element (xenops-apply-parse-next-element)))
-          (xenops-element-do element 'render)))))
+          (xenops-dispatch-operation 'render element)))))
 
 (defun xenops-src-org-babel-result-params (element)
   "Return org-babel result-params for src element ELEMENT."

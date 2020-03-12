@@ -34,19 +34,6 @@
                (plist-get element :end))
   t)
 
-(defun xenops-element-dispatch (el handlers)
-  "Call the first handler in HANDLERS that is valid for an element of this type."
-  (-if-let* ((handler (car (-intersection handlers (xenops-element-handlers-for-el el)))))
-      (funcall handler el)))
-
-(defun xenops-element-do (element op)
-  "Do operation OP on ELEMENT."
-  (xenops-element-dispatch element (xenops-ops-get op :handlers)))
-
-(defun xenops-element-handlers-for-el (el)
-  "The valid operations for an element of this type."
-  (xenops-elements-get (plist-get el :type) :handlers))
-
 (defun xenops-element-get-image (element)
   (xenops-parse-image-at (plist-get element :begin)))
 

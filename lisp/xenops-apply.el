@@ -7,7 +7,7 @@
 (setq xenops-apply-pre-apply-hook nil)
 (setq xenops-apply-post-apply-hook nil)
 
-(defun xenops-apply (ops &optional pred)
+(defun xenops-apply-operations (ops &optional pred)
   "Apply operation types OPS to any elements encountered.
 
 The region operated on is either the active region, or the entire
@@ -22,16 +22,16 @@ returns non-nil."
             `(,(region-beginning) ,(region-end) t)
           `(,(point-min) ,(point-max) nil))
       (run-hook-with-args 'xenops-apply-pre-apply-hook handlers beg end region-active)
-      (xenops-apply-handlers handlers beg end region-active pred)
+      (xenops-apply-handlers-over-region handlers beg end region-active pred)
       (run-hook-with-args 'xenops-apply-post-apply-hook handlers beg end region-active))))
 
-(defun xenops-apply-handlers (handlers beg end region-active &optional pred)
+(defun xenops-apply-handlers-over-region (handlers beg end region-active &optional pred)
   "Apply HANDLERS to any elements encountered.
 
 The region operated on is either the active region, or the entire
 buffer."
   (cl-flet ((handle (lambda (el) (save-excursion
-                              (xenops-element-dispatch el handlers)))))
+                              (xenops-dispatch-handlers handlers el)))))
     (save-excursion
       (goto-char beg)
       (let ((parse-at-point-fns (xenops-elements-get-all :parser)))
@@ -40,7 +40,7 @@ buffer."
                (or (null pred) (funcall pred el))
                (ignore-errors (handle el))))))))
 
-(defun xenops-apply-at-point (ops &optional pred)
+(defun xenops-apply-operations-at-point (ops &optional pred)
   "Apply operation types OPS to element at point, if there is one."
   (let ((handlers (xenops-ops-get-for-ops ops :handlers)))
     (run-hook-with-args 'xenops-apply-pre-apply-hook handlers)
@@ -51,7 +51,7 @@ buffer."
 (defun xenops-apply-handlers-at-point (handlers &optional pred)
   "Apply HANDLERS to element at point if there is one."
   (-if-let* ((el (xenops-parse-any-element-at-point)))
-      (xenops-element-dispatch el handlers)))
+      (xenops-dispatch-handlers handlers el)))
 
 (defun xenops-apply-parse-next-element (&optional end parse-at-point-fns)
   "If there is another element, return it and leave point after it.

@@ -74,7 +74,7 @@ made available in this keymap.")
 2. Elements in the active region, if there is an active region.
 3. All elements in the buffer.")
      (interactive)
-     (xenops-apply '(,op))))
+     (xenops-apply-operations '(,op))))
 
 (xenops-define-apply-command render
                              "Render elements: display LaTeX math, tables and included image files as images, and hide footnotes with tooltips.")
@@ -94,7 +94,7 @@ made available in this keymap.")
 (defmacro xenops-define-apply-at-point-function (op docstring)
   `(defun ,(intern (concat "xenops-" (symbol-name op) "-at-point")) ()
      ,docstring
-     (xenops-apply-at-point '(,op))))
+     (xenops-apply-operations-at-point '(,op))))
 
 (xenops-define-apply-at-point-function render
                                        "Render the element at point.")
@@ -209,7 +209,7 @@ equivalent to `xenops-regenerate'."
         (xenops-regenerate)))
    ((equal arg '(4))
     (xenops-reveal))
-   (t (or (xenops-apply-at-point '(render execute))
+   (t (or (xenops-apply-operations-at-point '(render execute))
           (xenops-render)))))
 
 (defvar xenops-ops
@@ -312,6 +312,16 @@ If TYPES is 'all, then all items under key KEY for any type."
                    collecting (and (or (eq types 'all) (memq type types))
                                    (let ((val (xenops-get data type key)))
                                      (if (listp val) val (list val))))))))
+
+(defun xenops-dispatch-handlers (handlers el)
+  "Call the first handler in HANDLERS that is valid for an element of this type."
+  (-if-let* ((handler (car (-intersection handlers
+                                          (xenops-elements-get (plist-get el :type) :handlers)))))
+      (funcall handler el)))
+
+(defun xenops-dispatch-operation (op element)
+  "Call a valid handler for operation OP on element ELEMENT."
+  (xenops-dispatch-handlers (xenops-ops-get op :handlers) element))
 
 (defun xenops-font-lock-activate ()
   "Configure font-lock for element types defined in `xenops-elements'."

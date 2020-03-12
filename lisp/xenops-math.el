@@ -469,7 +469,7 @@ If we are in a math element, then paste without the delimiters"
       (push-mark)
       (save-excursion
         (goto-char beg)
-        (xenops-apply '(render)))
+        (xenops-apply-operations '(render)))
       (pop-mark))))
 
 (defun xenops-avy-goto-math ()
