@@ -141,9 +141,7 @@ made available in this keymap.")
       (save-restriction
         (widen)
         (goto-char (point-min))
-        (xenops-reveal)
-        ;; Ensure overlays are deleted e.g. for malformed elements.
-        (xenops-overlay-delete-overlays)))
+        (xenops-reveal)))
     (xenops-math-deactivate)
     (xenops-auctex-deactivate)
     (xenops-xen-mode -1))))

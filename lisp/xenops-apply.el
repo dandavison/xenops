@@ -68,7 +68,6 @@ section of the buffer that Xenops can do something to."
                (_ (goto-char (plist-get element :end))))
         element)))
 
-
 (defun xenops-apply-post-apply-deactivate-mark (handlers &optional beg end region-active)
   "Deactivate mark when appropriate.
 
@@ -80,9 +79,18 @@ it."
                                                     xenops-image-decrease-size)))
        (deactivate-mark)))
 
+(defun xenops-apply-post-reveal-delete-overlays (handlers &optional beg end region-active)
+  "Delete any image overlays that may remain after a `reveal` operation.
 
+If the underlying textual representation of an element has become
+malformed, `xenops-reveal' will fail to delete its overlay."
+  (if (-intersection handlers '(xenops-math-reveal
+                                xenops-element-reveal
+                                xenops-image-reveal))
+      (xenops-overlay-delete-overlays beg end)))
 
 (add-hook 'xenops-apply-post-apply-hook #'xenops-apply-post-apply-deactivate-mark)
+(add-hook 'xenops-apply-post-apply-hook #'xenops-apply-post-reveal-delete-overlays)
 
 (provide 'xenops-apply)
 
