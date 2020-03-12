@@ -168,9 +168,9 @@ and hence $ is bound to `self-insert-command'"
 the user does not have `TeX-electric-math' set, and therefore
 they type the characters in the straightforward sequence."
   (insert "1")
-  (TeX-insert-dollar)
+  (call-interactively #'TeX-insert-dollar)
   (insert "345")
-  (TeX-insert-dollar)
+  (call-interactively #'TeX-insert-dollar)
   (insert "7"))
 
 (defun xenops-test-math--insert-1$345$7-with-TeX-electric-math ()
@@ -178,7 +178,7 @@ they type the characters in the straightforward sequence."
 the user does not have `TeX-electric-math' set, and therefore
 they type the characters in the straightforward sequence."
   (insert "1")
-  (TeX-insert-dollar)
+  (call-interactively #'TeX-insert-dollar)
   (insert "345")
   (forward-char)
   (insert "7"))
