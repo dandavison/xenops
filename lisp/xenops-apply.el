@@ -34,16 +34,11 @@ buffer."
                               (xenops-element-dispatch el handlers)))))
     (save-excursion
       (goto-char beg)
-      (let ((parse-at-point-fns (xenops-elements-get-all :parser))
-            (sem-start-value (aref xenops-math-latex-tasks-semaphore 1)))
+      (let ((parse-at-point-fns (xenops-elements-get-all :parser)))
         (while (setq el (xenops-apply-parse-next-element end parse-at-point-fns))
           (and el
                (or (null pred) (funcall pred el))
-               (ignore-errors (handle el))))
-        (if (-intersection handlers '(xenops-math-render))
-            (message "Started %d latex processing tasks"
-                     (- sem-start-value
-                        (aref xenops-math-latex-tasks-semaphore 1))))))))
+               (ignore-errors (handle el))))))))
 
 (defun xenops-apply-at-point (ops &optional pred)
   "Apply operation types OPS to element at point, if there is one."

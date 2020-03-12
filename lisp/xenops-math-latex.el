@@ -6,9 +6,10 @@
 
 (require 'xenops-aio)
 
-(setq xenops-math-latex-max-tasks-in-flight 56)
-
 (defvar-local xenops-math-latex-tasks-semaphore nil)
+
+(setq xenops-math-latex-max-tasks-in-flight 56)
+(setq xenops-math-latex-tasks-semaphore-value-copy nil)
 
 (defun xenops-math-latex-make-latex-document (latex colors)
   "Make the LaTeX document for a single math image."
@@ -169,6 +170,25 @@
   (setq xenops-math-latex-preamble-cache
         (assoc-delete-all (xenops-math-latex-make-preamble-cache-key)
                           xenops-math-latex-preamble-cache)))
+
+(defun xenops-math-latex-pre-apply-copy-semaphore-value (handlers &rest args)
+  "Copy current semaphore value to a global variable.
+
+This allows the number of started tasks to be shown by
+`xenops-math-latex-post-apply-show-started-tasks'."
+  (if (memq 'xenops-math-render handlers)
+      (setq xenops-math-latex-tasks-semaphore-value-copy
+            (aref xenops-math-latex-tasks-semaphore 1))))
+
+(defun xenops-math-latex-post-apply-show-started-tasks (handlers &rest args)
+  "Show number of asynchronous processing tasks started by `xenops-render'."
+  (if (memq 'xenops-math-render handlers)
+      (message "Started %d latex processing tasks"
+               (- xenops-math-latex-tasks-semaphore-value-copy
+                  (aref xenops-math-latex-tasks-semaphore 1)))))
+
+(add-hook 'xenops-apply-pre-apply-hook #'xenops-math-latex-pre-apply-copy-semaphore-value)
+(add-hook 'xenops-apply-post-apply-hook #'xenops-math-latex-post-apply-show-started-tasks)
 
 (provide 'xenops-math-latex)
 
