@@ -4,6 +4,7 @@
 
 ;;; Code:
 
+(setq xenops-apply-pre-apply-hook nil)
 (setq xenops-apply-post-apply-hook nil)
 
 (defun xenops-apply (ops &optional pred)
@@ -20,6 +21,7 @@ returns non-nil."
         (if (region-active-p)
             `(,(region-beginning) ,(region-end) t)
           `(,(point-min) ,(point-max) nil))
+      (run-hook-with-args 'xenops-apply-pre-apply-hook handlers beg end region-active)
       (xenops-apply-handlers handlers beg end region-active pred)
       (run-hook-with-args 'xenops-apply-post-apply-hook handlers beg end region-active))))
 
@@ -46,6 +48,7 @@ buffer."
 (defun xenops-apply-at-point (ops &optional pred)
   "Apply operation types OPS to element at point, if there is one."
   (let ((handlers (xenops-ops-get-for-ops ops :handlers)))
+    (run-hook-with-args 'xenops-apply-pre-apply-hook handlers)
     (xenops-apply-handlers-at-point handlers pred)
     (run-hook-with-args 'xenops-apply-post-apply-hook handlers))
   t)
