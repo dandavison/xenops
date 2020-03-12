@@ -299,7 +299,7 @@ If we are in a math element, then paste without the delimiters"
   "Paste handler for math elements"
   (or (xenops-math-handle-paste) (yank)))
 
-(defun xenops-math-look-back-and-render-inline-math ()
+(defun xenops-math-look-back-and-render-inline-math (&rest args)
   ;; Hack:
   ;;
   ;; Unless `TeX-electric-math' is set to '("$" . "$") then, without the following, an inline
