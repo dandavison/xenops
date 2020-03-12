@@ -39,7 +39,7 @@
 (require 'xenops-util)
 (require 'xenops-xen)
 
-(defvar xenops-cache-directory "/tmp/xenops-cache/"
+(defvar xenops-cache-directory (expand-file-name (f-join "xenops" "cache") user-emacs-directory)
   "Path to a directory in which xenops can save files.")
 
 (defvar xenops-font-family nil
