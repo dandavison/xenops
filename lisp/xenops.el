@@ -315,9 +315,10 @@ If TYPES is 'all, then all items under key KEY for any type."
 
 (defun xenops-dispatch-handlers (handlers el)
   "Call the first handler in HANDLERS that is valid for an element of this type."
-  (-if-let* ((handler (car (-intersection handlers
-                                          (xenops-elements-get (plist-get el :type) :handlers)))))
-      (funcall handler el)))
+  (-when-let* ((handler (car (-intersection handlers
+                                            (xenops-elements-get (plist-get el :type) :handlers)))))
+    (funcall handler el)
+    t))
 
 (defun xenops-dispatch-operation (op element)
   "Call a valid handler for operation OP on element ELEMENT."

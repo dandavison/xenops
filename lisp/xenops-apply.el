@@ -44,9 +44,8 @@ buffer."
   "Apply operation types OPS to element at point, if there is one."
   (let ((handlers (xenops-ops-get-for-ops ops :handlers)))
     (run-hook-with-args 'xenops-apply-pre-apply-hook handlers)
-    (xenops-apply-handlers-at-point handlers pred)
-    (run-hook-with-args 'xenops-apply-post-apply-hook handlers))
-  t)
+    (prog1 (xenops-apply-handlers-at-point handlers pred)
+      (run-hook-with-args 'xenops-apply-post-apply-hook handlers))))
 
 (defun xenops-apply-handlers-at-point (handlers &optional pred)
   "Apply HANDLERS to element at point if there is one."
