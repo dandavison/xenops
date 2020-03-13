@@ -177,6 +177,7 @@ made available in this keymap.")
       (xenops-render-if-cached)))
 
    ('deactivate
+    (xenops-cancel-waiting-tasks)
     (save-excursion
       (save-restriction
         (widen)
