@@ -80,10 +80,13 @@ it."
   "Delete any image overlays that may remain after a `reveal` operation.
 
 If the underlying textual representation of an element has become
-malformed, `xenops-reveal' will fail to delete its overlay."
-  (if (-intersection handlers '(xenops-math-reveal
-                                xenops-element-reveal
-                                xenops-image-reveal))
+malformed, `xenops-reveal' will fail to delete its overlay, which
+makes this hook function necessary."
+  ;; We require beg and end to be non-nil so that we only delete overlays in the appropriate
+  ;; region. I.e. we will not delete overlays if the action was a reveal-at-point.
+  (if (and beg end (-intersection handlers '(xenops-math-reveal
+                                             xenops-element-reveal
+                                             xenops-image-reveal)))
       (xenops-overlay-delete-overlays beg end)))
 
 (add-hook 'xenops-apply-post-apply-hook #'xenops-apply-post-apply-deactivate-mark)
