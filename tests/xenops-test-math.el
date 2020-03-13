@@ -75,6 +75,9 @@ After.")
           ('dwim
            (goto-char (point-min))
            (call-interactively #'xenops-dwim))
+          ('at-point
+           (goto-char (plist-get element :begin))
+           (call-interactively #'xenops-render-at-point))
           (t
            (goto-char (point-min))
            (call-interactively #'xenops-render)))
@@ -88,6 +91,9 @@ After.")
            (goto-char (point-min))
            (let ((current-prefix-arg '(4)))
              (call-interactively #'xenops-dwim)))
+          ('at-point
+           (goto-char (plist-get element :begin))
+           (call-interactively #'xenops-reveal-at-point))
           (t
            (goto-char (point-min))
            (call-interactively #'xenops-reveal))))
@@ -137,6 +143,18 @@ After.")
   "Test render and reveal for a block math element."
   (xenops-test-math--do-render-and-reveal-test
    xenops-test-math--block-math-example))
+
+(ert-deftest xenops-test-math--test-render-and-reveal--inline-math--dollar-delimited--at-point ()
+  "Test render and reveal for an inline math element."
+  (xenops-test-math--do-render-and-reveal-test
+   xenops-test-math--inline-math-example--dollar-delimited
+   'at-point))
+
+(ert-deftest xenops-test-math--test-render-and-reveal--block-math--at-point ()
+  "Test render and reveal for a block math element."
+  (xenops-test-math--do-render-and-reveal-test
+   xenops-test-math--block-math-example
+   'at-point))
 
 (ert-deftest xenops-test-math--test-render-and-reveal--inline-math--dollar-delimited--dwim ()
   "Test render and reveal for an inline math element."
