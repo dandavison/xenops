@@ -59,7 +59,7 @@ After.")
                    :delimiters ,(car (xenops-elements-get 'block-math :delimiters))))))
 
 
-(defun xenops-test-math--do-render-and-reveal-test (text &optional use-xenops-dwim)
+(defun xenops-test-math--do-render-and-reveal-test (text &optional command-type)
   "Render a math image overlay and use `xenops-reveal' to remove it."
   (with-temp-buffer
     (xenops-mode)
@@ -70,16 +70,28 @@ After.")
 
       ;; render
       (save-excursion
-        (goto-char (point-min))
-        (if use-xenops-dwim
-            (call-interactively #'xenops-dwim)
-          (call-interactively #'xenops-render)))
-      (xenops-test-math--assert-image-is-displayed element)
+
+        (case command-type
+          ('dwim
+           (goto-char (point-min))
+           (call-interactively #'xenops-dwim))
+          (t
+           (goto-char (point-min))
+           (call-interactively #'xenops-render)))
+
+        (xenops-test-math--assert-image-is-displayed element))
 
       ;; reveal
       (save-excursion
-        (goto-char (point-min))
-        (call-interactively #'xenops-reveal))
+        (case command-type
+          ('dwim
+           (goto-char (point-min))
+           (let ((current-prefix-arg '(4)))
+             (call-interactively #'xenops-dwim)))
+          (t
+           (goto-char (point-min))
+           (call-interactively #'xenops-reveal))))
+
       (xenops-test-math--assert-image-is-not-displayed element))))
 
 (defun xenops-test-math--do-render-and-reveal-test--malformed-element (text)
@@ -130,13 +142,13 @@ After.")
   "Test render and reveal for an inline math element."
   (xenops-test-math--do-render-and-reveal-test
    xenops-test-math--inline-math-example--dollar-delimited
-   'use-xenops-dwim))
+   'dwim))
 
 (ert-deftest xenops-test-math--test-render-and-reveal--block-math--dwim ()
   "Test render and reveal for a block math element."
   (xenops-test-math--do-render-and-reveal-test
    xenops-test-math--block-math-example
-   'use-xenops-dwim))
+   'dwim))
 
 (defun xenops-test-math--do-add-cursor-sensor-property-test (insert-1$345$7-fn)
   "See the docstring for `xenops-math-add-cursor-sensor-property'."
