@@ -19,14 +19,17 @@ the active tasks completes.")
 
 (defun xenops-math-latex-make-latex-document (latex colors)
   "Make the LaTeX document for a single math image."
-  (cl-destructuring-bind (org-latex-packages-alist org-latex-default-packages-alist)
-      (if (eq major-mode 'org-mode)
-          (list org-latex-packages-alist org-latex-default-packages-alist)
-        (list (xenops-math-latex-get-preamble-lines) nil))
-    (let* ((latex-header (org-latex-make-preamble
-                          (org-export-get-environment (org-export-get-backend 'latex))
-                          org-format-latex-header
-                          'snippet)))
+  (cl-flet ((get-latex-header () (org-latex-make-preamble
+                                  (org-export-get-environment (org-export-get-backend 'latex))
+                                  org-format-latex-header
+                                  'snippet)))
+    (let ((latex-header
+           (if (eq major-mode 'org-mode)
+               (get-latex-header)
+             (cl-destructuring-bind
+                 (org-format-latex-header org-latex-packages-alist org-latex-default-packages-alist)
+                 (xenops-math-latex-get-org-format-latex-header-variables)
+               (get-latex-header)))))
       (cl-destructuring-bind (fg bg) colors
         (concat latex-header
                 "\n\\begin{document}\n"
@@ -37,6 +40,21 @@ the active tasks completes.")
                 latex
                 "\n}\n"
                 "\n\\end{document}\n")))))
+
+(defun xenops-math-latex-get-org-format-latex-header-variables ()
+  "Return list of variables used by `org-latex-make-preamble'.
+
+The returned list supplies the value of
+\(`org-format-latex-header' `org-latex-packages-alist' `org-latex-default-packages-alist'\).
+
+We assume that the first line of `org-format-latex-header' is the \\documentclass."
+  (cl-destructuring-bind
+      (documentclass . packages)
+      (xenops-math-latex-get-preamble-lines)
+    (list
+     (s-join "\n" (cons documentclass (cdr (s-split "\n" org-format-latex-header))))
+     packages
+     nil)))
 
 (defun xenops-math-latex-make-commands (element dir tex-file dvi-file svg-file)
   "Construct the external process invocations used to convert a single LaTeX fragment to SVG."
@@ -151,7 +169,11 @@ the active tasks completes.")
   (sha1 (prin1-to-string (list (buffer-file-name) TeX-master))))
 
 (defun xenops-math-latex-get-preamble-lines ()
-  "Get the preamble for a LaTeX document for a single math element."
+  "Return preamble lines used for the LaTeX document used to render a single math element.
+
+The first element of the returned list is the \\documentclass;
+subsequent elements are \\usepackage lines, macro definitions,
+etc."
   (let ((key (xenops-math-latex-make-preamble-cache-key)))
     (unless (assoc key xenops-math-latex-preamble-cache)
       (push (cons key (xenops-math-latex-make-preamble-lines))
@@ -165,7 +187,9 @@ the active tasks completes.")
     (with-temp-buffer
       (insert-file-contents file)
       (split-string
-       (buffer-substring (re-search-forward "\\\\documentclass.+$")
+       (buffer-substring (progn
+                           (re-search-forward "\\\\documentclass.+$")
+                           (match-beginning 0))
                          (progn (search-forward "\\begin{document}")
                                 (match-beginning 0)))
        "\n" t "[ \t\n]+"))))
