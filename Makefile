@@ -14,7 +14,7 @@ test:
 		-l tests/setup/init.el \
 		--eval "(add-to-list 'load-path \"lisp\")" \
 		--eval "(add-to-list 'load-path \"/tmp/xenops-packages/auctex\")" \
-		--eval '(setq ert-batch-backtrace-right-margin 9999)' \
+		--eval '(setq ert-batch-backtrace-right-margin 230)' \
 		-l lisp/xenops.el \
 		-l tests/xenops-test--utils.el \
 		-l tests/xenops-test--mocks.el \
