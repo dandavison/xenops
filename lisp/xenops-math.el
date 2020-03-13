@@ -109,7 +109,12 @@ and then calling `xenops-render'."
     (xenops-math-render element)))
 
 (defun xenops-math-reveal (element)
+  "Remove image overlay for ELEMENT.
+
+If a prefuix argument is in effect, also delete its cache file."
   (xenops-element-overlays-delete element)
+  (if current-prefix-arg
+      (delete-file (xenops-math-get-cache-file element)))
   ;; TODO: is :begin-content for block math off by one?
   (let ((element-type (plist-get element :type))
         (begin-content (plist-get element :begin-content)))
