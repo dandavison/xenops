@@ -165,7 +165,7 @@ the active tasks completes.")
     (with-temp-buffer
       (insert-file-contents file)
       (split-string
-       (buffer-substring (re-search-forward "\\documentclass.+$")
+       (buffer-substring (re-search-forward "\\\\documentclass.+$")
                          (progn (search-forward "\\begin{document}")
                                 (match-beginning 0)))
        "\n" t "[ \t\n]+"))))
