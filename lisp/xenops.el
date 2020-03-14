@@ -296,6 +296,7 @@ equivalent to `xenops-regenerate'."
     (inline-math
      . ((:delimiters . (,xenops-math-dollar-delimited-inline-math-delimiters
                         ,xenops-math-paren-delimited-inline-math-delimiters
+                        ,xenops-math-square-bracket-delimited-inline-math-delimiters
                         ,xenops-math-environment-delimited-inline-math-delimiters))
         (:font-lock-keywords . (((((0 (xenops-math-inline-math-font-lock-handler)))))
                                 ((((0 (xenops-math-inline-math-font-lock-handler)))))

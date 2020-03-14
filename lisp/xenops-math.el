@@ -45,6 +45,10 @@ This determines the size of the image in the image file that is
       '("\\\\("
         "\\\\)"))
 
+(setq xenops-math-square-bracket-delimited-inline-math-delimiters
+      '("\\\\\\["
+        "\\\\\\]"))
+
 (setq xenops-math-environment-delimited-inline-math-delimiters
       '("\\\\begin{\\(align\\|equation\\|tikzpicture\\)\\*?}"
         "\\\\end{\\(align\\|equation\\|tikzpicture\\)\\*?}"))
@@ -429,6 +433,7 @@ If we are in a math element, then paste without the delimiters"
       (xenops-util-first-result
        #'xenops-math-parse-hetero-delimited-inline-element-at-point
        (list xenops-math-paren-delimited-inline-math-delimiters
+             xenops-math-square-bracket-delimited-inline-math-delimiters
              xenops-math-environment-delimited-inline-math-delimiters))))
 
 (defun xenops-math-parse-hetero-delimited-inline-element-at-point (delimiters)
