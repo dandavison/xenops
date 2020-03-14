@@ -42,10 +42,15 @@ After.")
     :type 'inline-math)
    :type 'ert-test-failed))
 
-(ert-deftest xenops-test-math--parse-inline-math-from-string ()
+(ert-deftest xenops-test-math--parse-inline-math-from-string--dollar ()
   (should (equal (xenops-math-parse-element-from-string "$x$")
                  '(:begin 1 :begin-content 2 :end-content 3 :end 4 :type inline-math
                    :delimiters ("\\$" "\\$")))))
+
+(ert-deftest xenops-test-math--parse-inline-math-from-string--paren ()
+  (should (equal (xenops-math-parse-element-from-string "\\(x\\)")
+                 `(:begin 1 :begin-content 3 :end-content 4 :end 6 :type inline-math
+                   :delimiters ,xenops-math-paren-delimited-inline-math-delimiters))))
 
 (ert-deftest xenops-test-math--parse-block-math-from-string ()
   (should (equal (xenops-math-parse-element-from-string
