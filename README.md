@@ -280,49 +280,49 @@ In the example below, Xen-mode has made the following changes to the visual appe
 # Command and variable reference
 
 For commands that operate on one or more elements the rule is:
-- If there is an element at the current cursopr position, operate on that element.
+- If there is an element at the current cursor position, operate on that element.
 - If there is an active selection, operate on elements in the selected region.
 - Otherwise, operate on all elements in the buffer.
 
 
 
-| Command                             |                                                                                                                                         | Default<br>keybinding |
-|-------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
-| `xenops-dwim`                       | Render, Reveal, Regenerate, or Execute element(s).<br>(_do-what-i-mean_)                                                                | `C-c !`               |
-|                                     |                                                                                                                                         |                       |
-| `xenops-render`                     | Render element(s) as an image.                                                                                                          |                       |
-|                                     |                                                                                                                                         |                       |
-| `xenops-reveal`                     | Remove image and reveal element(s) for editing.                                                                                         |                       |
-|                                     |                                                                                                                                         |                       |
-| `xenops-regenerate`                 | Regenerate image for element(s),<br>refusing to use a cached version.                                                                   |                       |
-|                                     |                                                                                                                                         |                       |
-| `xenops-execute`                    | Execute code block.                                                                                                                     |                       |
-|                                     |                                                                                                                                         |                       |
-| `xenops-doctor`                     | Check your Emacs environment for any problems<br>that will prevent Xenops from working correctly.                                       |                       |
-|                                     |                                                                                                                                         |                       |
-| `xenops-show-waiting-tasks`         | Display a count of latex background processing tasks<br>that are waiting in the queue                                                   |                       |
-|                                     |                                                                                                                                         |                       |
-| `xenops-cancel-waiting-tasks`       | Cancel all latex background processing tasks<br>that are waiting in the queue                                                           |                       |
-|                                     |                                                                                                                                         |                       |
-| `xenops-increase-size`              | Increase size of image(s).                                                                                                              |                       |
-|                                     |                                                                                                                                         |                       |
-| `xenops-decrease-size`              | Decrease size of image(s).                                                                                                              |                       |
-|                                     |                                                                                                                                         |                       |
-| `xenops-xen-mode`                   | Toggle Xen mode on/off.                                                                                                                 | `C-c /`               |
-|                                     |                                                                                                                                         |                       |
-| `xenops-select-font-family`         | Select a font for the Xenops buffer.                                                                                                    |                       |
-|                                     |                                                                                                                                         |                       |
-| `<copy>`                            | If the cursor is on a rendered element, copy the entire element.                                                                        | `C-w` etc             |
-|                                     |                                                                                                                                         |                       |
-| `<paste>`                           | If the clipboard contains an image, write the image<br>to disk and insert an `\includegraphics` link.                                   | `C-y` etc             |
-|                                     |                                                                                                                                         |                       |
-| `xenops-clear-latex-preamble-cache` | Force Xenops to recreate the latex preamble for the<br>current document. This is necessary if you have added e.g. a `\usepackage` line. |                       |
-|                                     |                                                                                                                                         |                       |
-| `xenops-avy-goto-math`              | Use [avy](https://github.com/abo-abo/avy) to jump to a math element.                                                                    |                       |
-|                                     |                                                                                                                                         |                       |
-| `xenops-avy-copy-math-and-paste`    | Use [avy](https://github.com/abo-abo/avy) to copy a math element from elsewhere<br>and paste it at point.                               |                       |
-|                                     |                                                                                                                                         |                       |
-| `xenops-math-concatenate`           | Concatenate contiguous math blocks in the active region.                                                                                |                       |
+| Command                             |                                                                                                                                            | Default<br>keybinding                       |
+|-------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
+| `xenops-dwim`                       | Render, Reveal, Regenerate, or Execute element(s).<br>(_do-what-i-mean_)                                                                   | `C-c !`                                     |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-render`                     | Render element(s) as an image.                                                                                                             |                                             |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-reveal`                     | Remove image and reveal element(s) for editing.                                                                                            | `RET` on an element,<br>click on an element |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-regenerate`                 | Regenerate image for element(s),<br>refusing to use a cached version.                                                                      |                                             |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-execute`                    | Execute code block.                                                                                                                        |                                             |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-doctor`                     | Check your Emacs environment for any problems<br>that will prevent Xenops from working correctly.                                          |                                             |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-goto-element`               | Use [avy](https://github.com/abo-abo/avy) to jump to an element.                                                                           | `C-c , g`                                   |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-copy-and-paste-element`     | Use [avy](https://github.com/abo-abo/avy) to copy an element from elsewhere<br>and paste it at point.                                      | `C-c , c`                                   |
+|                                     |                                                                                                                                            |                                             |
+| `<copy>`                            | If the cursor is on a rendered element,<br>copy the entire element.                                                                        | `C-w` etc                                   |
+|                                     |                                                                                                                                            |                                             |
+| `<paste>`                           | If the clipboard contains an image, write the image<br>to disk and insert an `\includegraphics` link.                                      | `C-y` etc                                   |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-show-waiting-tasks`         | Display a count of latex background processing tasks<br>that are waiting in the queue                                                      |                                             |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-cancel-waiting-tasks`       | Cancel all latex background processing tasks<br>that are waiting in the queue                                                              |                                             |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-increase-size`              | Increase size of image(s).                                                                                                                 |                                             |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-decrease-size`              | Decrease size of image(s).                                                                                                                 |                                             |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-xen-mode`                   | Toggle Xen mode on/off.                                                                                                                    | `C-c /`                                     |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-select-font-family`         | Select a font for the Xenops buffer.                                                                                                       |                                             |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-clear-latex-preamble-cache` | Force Xenops to recreate the latex preamble for the<br>current document. This is necessary if you have added<br>e.g. a `\usepackage` line. |                                             |
+|                                     |                                                                                                                                            |                                             |
+| `xenops-math-concatenate`           | Concatenate contiguous math blocks in the active region.                                                                                   |                                             |
 
 
 In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops commands are available.
