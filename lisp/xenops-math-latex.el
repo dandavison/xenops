@@ -15,24 +15,6 @@ these processes onto available CPU cores. Any other waiting
 Xenops tasks will remain in the Xenops task queue until one of
 the active tasks completes.")
 
-(defvar xenops-math-latex-documentclass-honored-options
-  '("leqno" "reqno" "fleqno")
-  "List of strings which, if they occur as documentclass options,
-  will be passed to the \\documentclass used when render
-  individual math elements.
-
-By default, Xenops only honors \"leqno\", \"reqno\", and
-\"fleqno\". In that case, for example, if your document starts
-with this line:
-
-\\documentclass[12pt,a4paper,reqno]{amsart}
-
- Then the \\documentclass that will be used when processing
- individual math elements will look be
-
-\\documentclass[reqno]{article}
-")
-
 (setq xenops-math-latex-tasks-semaphore-value-copy nil)
 
 (defun xenops-math-latex-make-latex-document (latex colors)
@@ -59,10 +41,6 @@ with this line:
                 "\n}\n"
                 "\n\\end{document}\n")))))
 
-;; (let ((s "\\documentclass[12pt,a4paper,reqno]{amsart}"))
-;;   (and (string-match "\\\\documentclass\\[\\([^]]+\\)\\]"  s)
-;;        (substring-no-properties (match-string 1 s))))
-
 (defun xenops-math-latex-get-org-format-latex-header-variables ()
   "Return list of variables used by `org-latex-make-preamble'.
 
@@ -73,15 +51,10 @@ We assume that the first line of `org-format-latex-header' is the \\documentclas
   (cl-destructuring-bind
       (documentclass . packages)
       (xenops-math-latex-get-preamble-lines)
-    (let* ((documentclass-options
-            (if (string-match "\\\\documentclass\\[\\([^]]+\\)\\]" documentclass)
-                (-intersection xenops-math-latex-documentclass-honored-options
-                               (-map #'s-trim (s-split "," (match-string 1 documentclass))))))
-           (documentclass
-            (format "\\documentclass[%s]{article}" (s-join "," documentclass-options)))
-           (latex-header
-            (s-join "\n" (cons documentclass (cdr (s-split "\n" org-format-latex-header))))))
-      (list latex-header packages nil))))
+    (list
+     (s-join "\n" (cons documentclass (cdr (s-split "\n" org-format-latex-header))))
+     packages
+     nil)))
 
 (defun xenops-math-latex-make-commands (element dir tex-file dvi-file svg-file)
   "Construct the external process invocations used to convert a single LaTeX fragment to SVG."
