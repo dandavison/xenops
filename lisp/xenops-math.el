@@ -432,7 +432,7 @@ If we are in a math element, then paste without the delimiters"
              (lambda (type key)
                (if (and (eq type 'inline-math) (eq key :delimiters))
                    (list delimiters)))))
-    (xenops-parse-element-at-point 'inline-math)))
+    (xenops-parse-element-at-point 'inline-math (point-at-bol) (point-at-eol))))
 
 (defun xenops-math-parse-homo-delimited-inline-element-at-point (delimiter)
   "Parse an inline math element at point for which both the start and end delimiter are DELIMITER."

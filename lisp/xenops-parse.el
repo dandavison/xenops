@@ -26,7 +26,7 @@ the beginning of the overlay and attempt the parse there."
      (or parse-at-point-fns
          (xenops-elements-get-all :parser)))))
 
-(defun xenops-parse-element-at-point (type)
+(defun xenops-parse-element-at-point (type &optional lim-up lim-down)
   "Return the element at point if there is one and it is of type TYPE."
   ;; This is a base `parse-at-point` implementation that is used by
   ;; some concrete element types. It is not expected to work for all
@@ -37,8 +37,8 @@ the beginning of the overlay and attempt the parse there."
      (xenops-parse-element-at-point-matching-delimiters
       type
       pair
-      (point-min)
-      (point-max)))
+      (or lim-up (point-min))
+      (or lim-down (point-max))))
    (xenops-elements-get type :delimiters)))
 
 (defun xenops-parse-image-at (pos)
@@ -64,13 +64,14 @@ Like `org-between-regexps-p', but modified to return more match
   (save-excursion
     (let (beg-beg beg-end end-beg end-end)
       (and (or (org-in-regexp (car delimiters))
-               (re-search-backward (car delimiters) lim-up t))
+               (and (< lim-up (point)) (re-search-backward (car delimiters) lim-up t)))
            (save-match-data
              (and
               (setq beg-beg (match-beginning 0))
               (goto-char (match-end 0))
               (setq beg-end (point))
               (skip-chars-forward " \t\n")
+              (> lim-down (point))
               (re-search-forward (car (last delimiters)) lim-down t)
               (> (setq end-end (match-end 0)) pos)
               (goto-char (match-beginning 0))
