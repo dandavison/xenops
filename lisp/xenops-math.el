@@ -119,8 +119,7 @@ and then calling `xenops-render'."
   (let ((cache-file (xenops-math-get-cache-file element)))
     (when cache-file
       (delete-file cache-file)
-      (clear-image-cache cache-file)
-      (message "Xenops: deleted file: %s" cache-file))
+      (clear-image-cache cache-file))
     (xenops-element-overlays-delete element)
     (xenops-math-render element)))
 
