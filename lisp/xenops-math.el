@@ -37,6 +37,14 @@ This determines the size of the image in the image file that is
 (defvar xenops-math-image-margin 20
   "Number of pixels to be used as left margin for non-inline math images.")
 
+(setq xenops-math-dollar-delimited-inline-math-delimiters
+      '("\\$" .
+        "\\$"))
+
+(setq xenops-math-paren-delimited-inline-math-delimiters
+      '("\\\\("
+        "\\\\)"))
+
 (defun xenops-math-font-lock-keywords ()
   "Create font-lock entry for math elements."
   `((,(xenops-math-block-delimiter-lines-regexp)
@@ -317,8 +325,10 @@ If we are in a math element, then paste without the delimiters"
   ;; This code executes on every insert! Hard-coding the delimiters, instead of
   ;; (let ((closing-delimiters
   ;;         (apply #'append (mapcar #'cdr (xenops-elements-get 'inline-math :delimiters)))))
-  (if (or (looking-back "\\$" (- (point) 1))
-          (looking-back "\\\\)" (- (point) 2)))
+  (if (or (looking-back (cdr xenops-math-dollar-delimited-inline-math-delimiters)
+                        (- (point) 1))
+          (looking-back (cdr xenops-math-paren-delimited-inline-math-delimiters)
+                        (- (point) 2)))
       (save-excursion
         (goto-char (match-beginning 0))
         (if-let* ((element (xenops-math-parse-inline-element-at-point)))
@@ -410,7 +420,8 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-parse-inline-element-at-point ()
   "Parse any inline math element at point."
-  (or (xenops-math-parse-dollar-delimited-inline-element-at-point)
+  (or (xenops-math-parse-dollar-delimited-inline-element-at-point
+       (car xenops-math-dollar-delimited-inline-math-delimiters))
       (xenops-math-parse-paren-delimited-inline-element-at-point)))
 
 (defun xenops-math-parse-paren-delimited-inline-element-at-point ()
@@ -418,10 +429,10 @@ If we are in a math element, then paste without the delimiters"
   (cl-letf (((symbol-function 'xenops-elements-get)
              (lambda (type key)
                (if (and (eq type 'inline-math) (eq key :delimiters))
-                   '(("\\\\(" "\\\\)"))))))
+                   (list xenops-math-paren-delimited-inline-math-delimiters)))))
     (xenops-parse-element-at-point 'inline-math)))
 
-(defun xenops-math-parse-dollar-delimited-inline-element-at-point ()
+(defun xenops-math-parse-dollar-delimited-inline-element-at-point (delimiter)
   "Parse a dollar-delimited inline math element at point."
   ;; This is a bit awkward since the start and end delimiters are the same.
   ;;
@@ -440,19 +451,18 @@ If we are in a math element, then paste without the delimiters"
   ;; | Odd        | Even        | Inserting     |
   ;; | Even       | Odd         | Inserting   |
   ;; | Odd        | Odd         | Inside        |
-  (let ((delimiter "\\$"))
-    (save-excursion
-      (and (or (cl-oddp (count-matches delimiter (point-at-bol) (point)))
-               ;; We need the parse to succeed when point is before an opening $, since that is the
-               ;; behavior of `xenops-parse-element-at-point'.
-               (and (looking-at delimiter)
-                    (progn (forward-char) t)))
-           (cl-oddp (count-matches delimiter (point) (point-at-eol)))
-           (xenops-parse-element-at-point-matching-delimiters
-            'inline-math
-            (list delimiter delimiter)
-            (point-at-bol)
-            (point-at-eol))))))
+  (save-excursion
+    (and (or (cl-oddp (count-matches delimiter (point-at-bol) (point)))
+             ;; We need the parse to succeed when point is before an opening $, since that is the
+             ;; behavior of `xenops-parse-element-at-point'.
+             (and (looking-at delimiter)
+                  (progn (forward-char) t)))
+         (cl-oddp (count-matches delimiter (point) (point-at-eol)))
+         (xenops-parse-element-at-point-matching-delimiters
+          'inline-math
+          (list delimiter delimiter)
+          (point-at-bol)
+          (point-at-eol)))))
 
 (defun xenops-math-concatenate (beg end)
   "Concatenate and re-render contiguous block math elements in region."
