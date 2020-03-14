@@ -420,27 +420,29 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-parse-inline-element-at-point ()
   "Parse any inline math element at point."
-  (or (xenops-math-parse-dollar-delimited-inline-element-at-point
+  (or (xenops-math-parse-homo-delimited-inline-element-at-point
        (car xenops-math-dollar-delimited-inline-math-delimiters))
-      (xenops-math-parse-paren-delimited-inline-element-at-point)))
+      (xenops-util-first-result
+       #'xenops-math-parse-hetero-delimited-inline-element-at-point
+       (list xenops-math-paren-delimited-inline-math-delimiters))))
 
-(defun xenops-math-parse-paren-delimited-inline-element-at-point ()
-  "Parse a backslash-paren-delimited inline math element at point."
+(defun xenops-math-parse-hetero-delimited-inline-element-at-point (delimiters)
+  "Parse an inline math element at point for which the start and end delimiters differ."
   (cl-letf (((symbol-function 'xenops-elements-get)
              (lambda (type key)
                (if (and (eq type 'inline-math) (eq key :delimiters))
-                   (list xenops-math-paren-delimited-inline-math-delimiters)))))
+                   (list delimiters)))))
     (xenops-parse-element-at-point 'inline-math)))
 
-(defun xenops-math-parse-dollar-delimited-inline-element-at-point (delimiter)
-  "Parse a dollar-delimited inline math element at point."
+(defun xenops-math-parse-homo-delimited-inline-element-at-point (delimiter)
+  "Parse an inline math element at point for which both the start and end delimiter are DELIMITER."
   ;; This is a bit awkward since the start and end delimiters are the same.
   ;;
   ;; There are 3 relevant editing states:
   ;;
-  ;; 1. Point is outside dollar-delimited math.
-  ;; 2. User has inserted one delimiter and is currently writing dollar-delimited math.
-  ;; 3. Point is inside dollar-delimited math.
+  ;; 1. Point is outside homo-delimited math.
+  ;; 2. User has inserted one delimiter and is currently writing homo-delimited math.
+  ;; 3. Point is inside homo-delimited math.
   ;;
   ;; These are distinguished by the parity of the number of delimiters to the left and right of
   ;; point:
@@ -453,8 +455,8 @@ If we are in a math element, then paste without the delimiters"
   ;; | Odd        | Odd         | Inside        |
   (save-excursion
     (and (or (cl-oddp (count-matches delimiter (point-at-bol) (point)))
-             ;; We need the parse to succeed when point is before an opening $, since that is the
-             ;; behavior of `xenops-parse-element-at-point'.
+             ;; We need the parse to succeed when point is before an opening delimiter, since that
+             ;; is the behavior of `xenops-parse-element-at-point'.
              (and (looking-at delimiter)
                   (progn (forward-char) t)))
          (cl-oddp (count-matches delimiter (point) (point-at-eol)))
