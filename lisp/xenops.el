@@ -64,6 +64,7 @@
 (require 's)
 
 (require 'xenops-apply)
+(require 'xenops-avy)
 (require 'xenops-auctex)
 (require 'xenops-doctor)
 (require 'xenops-element)
@@ -204,6 +205,8 @@ made available in this keymap.")
   ;; Sub-keymap bound to C-c,
   (cl-loop for (key . cmd) in `(("!" . xenops-dwim)
                                 ("/" . xenops-xen-mode)
+                                ("c" . xenops-copy-and-paste-element)
+                                ("g" . xenops-goto-element)
                                 (,(kbd "s-+") . xenops-increase-size)
                                 (,(kbd "s--") . xenops-decrease-size)
                                 (,(kbd "s-=") . xenops-increase-size)

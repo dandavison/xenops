@@ -499,14 +499,8 @@ If we are in a math element, then paste without the delimiters"
         (xenops-apply-operations '(render)))
       (pop-mark))))
 
-(defun xenops-avy-goto-math ()
-  "Jump to a math element using avy."
-  (interactive)
-  (let (avy-action) (xenops-avy-do-at-math)))
-
-(defun xenops-avy-copy-math-and-paste ()
+(defun xenops-math-copy-and-paste-element ()
   "Copy and paste a math element using avy."
-  (interactive)
   (let ((element)
         (avy-action
          (lambda (pt)
@@ -520,11 +514,7 @@ If we are in a math element, then paste without the delimiters"
              (when element (xenops-element-copy element)))
            (when element
              (save-excursion (xenops-math-paste))))))
-    (xenops-avy-do-at-math)))
-
-(defun xenops-avy-do-at-math ()
-  "Perform an avy action on a math element."
-  (avy-jump (xenops-elements-delimiter-start-regexp '(block-math inline-math))))
+    (xenops-avy-do-at-element '(block-math inline-math))))
 
 (defun xenops-math-get-cache-file (element)
   "Return the name of the SVG image cache file for ELEMENT."
