@@ -96,6 +96,17 @@ After.")
                  `(:begin 1 :begin-content 18 :end-content 23 :end 38 :type block-math
                    :delimiters ,(car (xenops-elements-get 'block-math :delimiters))))))
 
+(ert-deftest xenops-test-math--parse-block-math--square-bracket ()
+  (should (equal (xenops-math-parse-element-from-string
+                  (s-trim
+                   "
+\\[
+  x
+\\]
+"))
+                 `(:begin 1 :begin-content 3 :end-content 8 :end 10 :type block-math
+                   :delimiters ,(cadr (xenops-elements-get 'block-math :delimiters))))))
+
 (defun xenops-test-math--do-render-and-reveal-test (text &optional command-type)
   "Render a math image overlay and use `xenops-reveal' to remove it."
   (with-temp-buffer
