@@ -17,6 +17,14 @@ the active tasks completes.")
 
 (setq xenops-math-latex-tasks-semaphore-value-copy nil)
 
+(defvar xenops-math-latex-excluded-preamble-line-regexps
+  '("^\\\\numberwithin")
+  "List of preamble-line exclusion regular expressions.
+
+Any preamble line in the original document that matches one of
+these will be excluded when constructing the LaTeX document for
+individual math elements.")
+
 (defun xenops-math-latex-make-latex-document (latex colors)
   "Make the LaTeX document for a single math image."
   (cl-flet ((get-latex-header () (org-latex-make-preamble
@@ -27,8 +35,8 @@ the active tasks completes.")
            (if (eq major-mode 'org-mode)
                (get-latex-header)
              (cl-destructuring-bind
-                 (org-format-latex-header org-latex-packages-alist org-latex-default-packages-alist)
-                 (xenops-math-latex-get-org-format-latex-header-variables)
+                 (org-latex-packages-alist org-latex-default-packages-alist)
+                 (list (cdr (xenops-math-latex-get-preamble-lines)) nil)
                (get-latex-header)))))
       (cl-destructuring-bind (fg bg) colors
         (concat latex-header
@@ -40,21 +48,6 @@ the active tasks completes.")
                 latex
                 "\n}\n"
                 "\n\\end{document}\n")))))
-
-(defun xenops-math-latex-get-org-format-latex-header-variables ()
-  "Return list of variables used by `org-latex-make-preamble'.
-
-The returned list supplies the value of
-\(`org-format-latex-header' `org-latex-packages-alist' `org-latex-default-packages-alist'\).
-
-We assume that the first line of `org-format-latex-header' is the \\documentclass."
-  (cl-destructuring-bind
-      (documentclass . packages)
-      (xenops-math-latex-get-preamble-lines)
-    (list
-     (s-join "\n" (cons documentclass (cdr (s-split "\n" org-format-latex-header))))
-     packages
-     nil)))
 
 (defun xenops-math-latex-make-commands (element dir tex-file dvi-file svg-file)
   "Construct the external process invocations used to convert a single LaTeX fragment to SVG."
@@ -186,13 +179,15 @@ etc."
     (TeX-region-create file "" (buffer-file-name) 0)
     (with-temp-buffer
       (insert-file-contents file)
-      (split-string
-       (buffer-substring (progn
-                           (re-search-forward "\\\\documentclass.+$")
-                           (match-beginning 0))
-                         (progn (search-forward "\\begin{document}")
-                                (match-beginning 0)))
-       "\n" t "[ \t\n]+"))))
+      (-remove
+       (lambda (line) (--any (string-match it line) xenops-math-latex-excluded-preamble-line-regexps))
+       (split-string
+        (buffer-substring (progn
+                            (re-search-forward "\\\\documentclass.+$")
+                            (match-beginning 0))
+                          (progn (search-forward "\\begin{document}")
+                                 (match-beginning 0)))
+        "\n" t "[ \t\n]+")))))
 
 (defun xenops-clear-latex-preamble-cache ()
   "Clear the LaTeX preamble cache."
