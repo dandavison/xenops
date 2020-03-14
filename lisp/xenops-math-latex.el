@@ -71,17 +71,21 @@ The returned list supplies the value of
 
 We assume that the first line of `org-format-latex-header' is the \\documentclass."
   (cl-destructuring-bind
-      (documentclass . packages)
+      (documentclass . user-preamble-lines)
       (xenops-math-latex-get-preamble-lines)
-    (let* ((documentclass-options
-            (if (string-match "\\\\documentclass\\[\\([^]]+\\)\\]" documentclass)
-                (-intersection xenops-math-latex-documentclass-honored-options
-                               (-map #'s-trim (s-split "," (match-string 1 documentclass))))))
-           (documentclass
-            (format "\\documentclass[%s]{article}" (s-join "," documentclass-options)))
-           (latex-header
-            (s-join "\n" (cons documentclass (cdr (s-split "\n" org-format-latex-header))))))
-      (list latex-header packages nil))))
+    (cl-destructuring-bind
+        (options class)
+        (if (string-match "\\\\documentclass\\[\\([^]]+\\)\\]{\\([^}]+\\)}" documentclass)
+            (list (s-join "," (-intersection xenops-math-latex-documentclass-honored-options
+                                             (-map #'s-trim (s-split "," (match-string 1 documentclass)))))
+                  (match-string 2 documentclass))
+          '(nil "article"))
+      (let* ((documentclass
+              (format "\\documentclass[%s]{%s}" options class))
+             (org-format-latex-header (cdr (s-split "\n" org-format-latex-header)))
+             (latex-header
+              (s-join "\n" (cons documentclass org-format-latex-header))))
+        (list latex-header user-preamble-lines nil)))))
 
 (defun xenops-math-latex-make-commands (element dir tex-file dvi-file svg-file)
   "Construct the external process invocations used to convert a single LaTeX fragment to SVG."
