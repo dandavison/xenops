@@ -42,17 +42,28 @@ After.")
     :type 'inline-math)
    :type 'ert-test-failed))
 
-(ert-deftest xenops-test-math--parse-inline-math-from-string--dollar ()
+(ert-deftest xenops-test-math--parse-inline-math--dollar-delimited ()
   (should (equal (xenops-math-parse-element-from-string "$x$")
                  '(:begin 1 :begin-content 2 :end-content 3 :end 4 :type inline-math
                    :delimiters ("\\$" "\\$")))))
 
-(ert-deftest xenops-test-math--parse-inline-math-from-string--paren ()
+(ert-deftest xenops-test-math--parse-inline-math--paren-delimited ()
   (should (equal (xenops-math-parse-element-from-string "\\(x\\)")
                  `(:begin 1 :begin-content 3 :end-content 4 :end 6 :type inline-math
                    :delimiters ,xenops-math-paren-delimited-inline-math-delimiters))))
 
-(ert-deftest xenops-test-math--parse-block-math-from-string ()
+(ert-deftest xenops-test-math--parse-block-math--align ()
+  (should (equal (xenops-math-parse-element-from-string
+                  (s-trim
+                   "
+\\begin{align}
+  x
+\\end{align}
+"))
+                 `(:begin 1 :begin-content 14 :end-content 19 :end 30 :type block-math
+                   :delimiters ,(car (xenops-elements-get 'block-math :delimiters))))))
+
+(ert-deftest xenops-test-math--parse-block-math--align* ()
   (should (equal (xenops-math-parse-element-from-string
                   (s-trim
                    "
@@ -63,6 +74,27 @@ After.")
                  `(:begin 1 :begin-content 15 :end-content 20 :end 32 :type block-math
                    :delimiters ,(car (xenops-elements-get 'block-math :delimiters))))))
 
+(ert-deftest xenops-test-math--parse-block-math--equation ()
+  (should (equal (xenops-math-parse-element-from-string
+                  (s-trim
+                   "
+\\begin{equation}
+  x
+\\end{equation}
+"))
+                 `(:begin 1 :begin-content 17 :end-content 22 :end 36 :type block-math
+                   :delimiters ,(car (xenops-elements-get 'block-math :delimiters))))))
+
+(ert-deftest xenops-test-math--parse-block-math--equation* ()
+  (should (equal (xenops-math-parse-element-from-string
+                  (s-trim
+                   "
+\\begin{equation*}
+  x
+\\end{equation*}
+"))
+                 `(:begin 1 :begin-content 18 :end-content 23 :end 38 :type block-math
+                   :delimiters ,(car (xenops-elements-get 'block-math :delimiters))))))
 
 (defun xenops-test-math--do-render-and-reveal-test (text &optional command-type)
   "Render a math image overlay and use `xenops-reveal' to remove it."
