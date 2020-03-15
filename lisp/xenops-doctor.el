@@ -31,7 +31,19 @@ The checks run are:
            variable. One way to do that is to run `M-x customize`
            in Emacs, and search for `exec-path'.\n\nHere is the
            current value of your `exec-path'
-           variable:\n\n%s" (s-join "\n\n" exec-path))))
+           variable:\n\n%s" (s-join "\n\n" exec-path)))
+        (mac-install-help
+         "For MacOS, in order to have support for displaying
+          LaTeX preview images on \"Retina\" screens, I recommend
+          using the emacs-mac package from Homebrew (aka
+          Mitsuharu Emacs, see
+          https://github.com/railwaycat/homebrew-emacsmacport/).
+
+          Please note that with a \"Retina\" screen, LaTeX
+          preview images will be fuzzy with any of the following:
+          - GNU Emacs from https://www.gnu.org/software/emacs/
+          - The emacs package on Homebrew
+          - The emacs-plus package on Homebrew"))
 
     (unless (>= emacs-major-version 25)
       (push (xenops-doctor-format
@@ -43,13 +55,8 @@ The checks run are:
               https://www.gnu.org/software/emacs/download.html,
               or use your package manager.
 
-              For MacOS, in order to have the required SVG
-              support, I suggest that you install Emacs from
-              Homebrew using either
-              emacs-plus (https://github.com/d12frosted/homebrew-emacs-plus#install)
-              or
-              emacs-mac (https://github.com/railwaycat/homebrew-emacsmacport/)."
-             emacs-version) problems))
+              %s" emacs-version mac-install-help)
+            problems))
 
     (unless (executable-find "latex")
       (push (xenops-doctor-format
@@ -88,17 +95,9 @@ The checks run are:
 
              You will have this problem if you are using MacOS
              and you are using default homebrew Emacs or \"Emacs
-             For Mac OS X\". Fortunately the solution is not
-             painful: install Emacs from homebrew using either
-             emacs-plus (https://github.com/d12frosted/homebrew-emacs-plus#install)
-             or
-             emacs-mac (https://github.com/railwaycat/homebrew-emacsmacport/).
-             With emacs-mac, you will probably want to switch the
-             roles of the option and command keys. To do so, add
-             the following code to your emacs init file:
+             For Mac OS X\".
 
-             (setq mac-command-modifier 'super)
-             (setq mac-option-modifier 'meta)") problems))
+             %s" mac-install-help) problems))
 
     (unless window-system
       (push (xenops-doctor-format
