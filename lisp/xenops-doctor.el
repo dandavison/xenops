@@ -33,13 +33,11 @@ The checks run are:
            current value of your `exec-path'
            variable:\n\n%s" (s-join "\n\n" exec-path))))
 
-    (unless (>= emacs-major-version 26)
+    (unless (>= emacs-major-version 25)
       (push (xenops-doctor-format
-             "⚠️ Xenops requires Emacs version >= 26.
+             "⚠️ Xenops requires Emacs version >= 25.
 
-              This is due to the dependency on the emacs-aio
-              library, but it's good to have a recent Emacs
-              version. Your Emacs version is %s.
+              Your emacs version is %s.
 
               For Linux or Windows, see
               https://www.gnu.org/software/emacs/download.html,

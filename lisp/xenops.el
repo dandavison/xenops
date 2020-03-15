@@ -3,7 +3,7 @@
 ;; Author: Dan Davison <dandavison7@gmail.com>
 ;; URL: https://github.com/dandavison/xenops
 ;; Version: 0.0
-;; Package-Requires: ((emacs "26.1"))
+;; Package-Requires: ((emacs "25"))
 
 ;;; Commentary:
 

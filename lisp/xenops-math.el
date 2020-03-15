@@ -62,7 +62,7 @@ This determines the size of the image in the image file that is
 (defun xenops-math-activate ()
   "Perform xenops-math responsibilities during minor mode activation."
   (setq-local xenops-math-latex-tasks-semaphore
-              (aio-sem xenops-math-latex-max-tasks-in-flight))
+              (xenops-aio-sem xenops-math-latex-max-tasks-in-flight))
   (make-directory xenops-cache-directory t)
   (setq mouse-drag-and-drop-region t)
   (advice-add #'mouse-drag-region :around #'xenops-math-mouse-drag-region-around-advice)

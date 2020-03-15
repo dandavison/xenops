@@ -21,7 +21,7 @@
 Resolve the promise when the process exits. The value function
 does nothing if the exit is successful, but if the process exits
 with an error status, then the value function signals the error."
-  (let* ((promise (aio-promise))
+  (let* ((promise (xenops-aio-promise))
          (name (format "xenops-aio-subprocess-%s"
                        (sha1 (prin1-to-string command))))
          (output-buffer (generate-new-buffer name))
@@ -46,6 +46,21 @@ with an error status, then the value function signals the error."
        :buffer output-buffer
        :command command
        :sentinel sentinel))))
+
+(if (fboundp 'record)
+    (progn
+      (defalias 'xenops-aio-promise #'aio-promise)
+      (defalias 'xenops-aio-sem #'aio-sem))
+
+  ;; Shims for Emacs <26
+  (cl-defstruct aio-promise result callbacks)
+  (cl-defstruct aio-sem value waiting-functions)
+
+  (defun xenops-aio-promise ()
+    (make-aio-promise :result nil :callbacks ()))
+
+  (defun xenops-aio-sem (init)
+    (make-aio-sem :value init :waiting-functions (cons nil nil))))
 
 (provide 'xenops-aio)
 
