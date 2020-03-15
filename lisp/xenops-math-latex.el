@@ -6,6 +6,51 @@
 
 (require 'xenops-aio)
 
+(defvar xenops-math-latex-process 'dvisvgm
+  "The process used for producing images from LaTeX fragments.
+
+Possible values are
+
+'dvisvgm     - LaTeX DVI output is converted to SVG and Emacs displays the SVG.
+'imagemagick - LaTeX PDF output is converted to PNG and Emacs displays the PNG.
+'dvipng      - LaTeX DVI output is converted to PNG and Emacs displays the PNG.
+
+See `xenops-math-latex-process-alist' for specifications of
+the commands used to run these processes.")
+
+(defvar xenops-math-latex-process-alist
+  '((dvipng
+     :programs ("latex" "dvipng")
+     :description "dvi > png"
+     :message "you need to install the programs: latex and dvipng."
+     :image-input-type "dvi"
+     :image-output-type "png"
+     :image-size-adjust (1.0 . 1.0)
+     :latex-compiler ("latex -interaction nonstopmode -shell-escape -output-directory %o %f")
+     :image-converter ("dvipng -D %D -T tight -o %O %f"))
+    (dvisvgm
+     :programs ("latex" "dvisvgm")
+     :description "dvi > svg"
+     :message "you need to install the programs: latex and dvisvgm."
+     :image-input-type "dvi"
+     :image-output-type "svg"
+     :image-size-adjust (1.7 . 1.5)
+     :latex-compiler ("latex -interaction nonstopmode -shell-escape -output-directory %o %f")
+     :image-converter ("dvisvgm %f -n -b %B -c %S -o %O"))
+    (imagemagick
+     :programs ("latex" "convert")
+     :description "pdf > png"
+     :message "you need to install the programs: latex and imagemagick."
+     :image-input-type "pdf"
+     :image-output-type "png"
+     :image-size-adjust (1.0 . 1.0)
+     :latex-compiler ("pdflatex -interaction nonstopmode -shell-escape -output-directory %o %f")
+     :image-converter ("convert -density %D -trim -antialias %f -quality 100 %O")))
+  "Definitions of external processes for LaTeX previewing.
+
+See the documentation of Org-mode variable `org-preview-latex-process-alist'.
+This variable plays exactly the same role for Xenops.")
+
 (defvar-local xenops-math-latex-tasks-semaphore nil)
 
 (defvar xenops-math-latex-max-tasks-in-flight 32
@@ -49,34 +94,37 @@ individual math elements.")
                 "\n}\n"
                 "\n\\end{document}\n")))))
 
-(defun xenops-math-latex-make-commands (element dir tex-file dvi-file img-file)
+(defun xenops-math-latex-make-commands (element dir tex-file image-input-file image-output-file)
   "Construct the external process invocations used to convert a single LaTeX fragment to SVG."
   ;; See `org-preview-latex-process-alist'
-  (let* ((image-type (xenops-math-image-type))
-         (processing-info (cdr (assq xenops-math-dvi-to-image-process org-preview-latex-process-alist)))
-         (dpi (* (org--get-display-dpi)
-                 (car (plist-get processing-info :image-size-adjust))
-                 xenops-math-image-scale-factor))
-         (scale (/ dpi 140))
+  (let* ((dpi (xenops-math-latex-calculate-dpi))
          (bounding-box (if (eq 'inline-math (plist-get element :type)) 1 10))
-         (latex-command
-          `("latex" "-shell-escape" "-interaction" "nonstopmode" "-output-directory" ,dir ,tex-file))
-         (dvi-to-image-command
-          (cond
-           ((string-equal image-type "svg")
-            `("dvisvgm" ,dvi-file
-              "-n"
-              "-b" ,(number-to-string bounding-box)
-              "-c" ,(number-to-string scale)
-              "-o" ,img-file))
-           ((string-equal image-type "png")
-            `("dvipng"
-              "-D" ,(number-to-string dpi)
-              "-T" "tight"
-              "-o" ,img-file
-              ,dvi-file))
-           (t (error "Invalid image type: %S" image-type)))))
-    (list latex-command dvi-to-image-command)))
+         (format-data
+          `((?o . ,dir)
+            (?B . ,(number-to-string bounding-box))
+            (?D . ,(number-to-string dpi))
+            (?S . ,(number-to-string (/ dpi 140))))))
+    (append (xenops-math-latex-format-commands (xenops-math-latex-process-get :latex-compiler)
+                                               tex-file image-input-file format-data)
+            (xenops-math-latex-format-commands (xenops-math-latex-process-get :image-converter)
+                                               image-input-file image-output-file format-data))))
+
+(defun xenops-math-latex-calculate-dpi ()
+  (* (org--get-display-dpi)
+     (car (xenops-math-latex-process-get :image-size-adjust))
+     xenops-math-image-scale-factor))
+
+(defun xenops-math-latex-process-get (key)
+  "Return the value of KEY in `xenops-math-latex-process-alist' for `xenops-math-latex-process'."
+  (plist-get (cdr (assq xenops-math-latex-process xenops-math-latex-process-alist)) key))
+
+(defun xenops-math-latex-format-commands (command-templates input-file output-file format-data)
+  "Return a formatted command as a list of strings, suitable for `make-process'."
+  (let ((format-data (append format-data `((?f . ,input-file)
+                                           (?O . ,output-file)))))
+    (mapcar (lambda (template)
+              (--map (format-spec it format-data) (s-split " " template)))
+            command-templates)))
 
 (aio-defun xenops-math-latex-create-image (element latex colors cache-file display-image)
   "Process LaTeX string to image via external processes, asynchronously."
@@ -87,10 +135,10 @@ individual math elements.")
     (let* ((dir temporary-file-directory)
            (base-name (f-base cache-file))
            (make-file-name (lambda (ext) (f-join dir (concat base-name "." ext))))
-           (tex-file (funcall make-file-name ".tex"))
-           (dvi-file (funcall make-file-name ".dvi"))
-           (img-file (funcall make-file-name (xenops-math-image-type)))
-           (commands (xenops-math-latex-make-commands element dir tex-file dvi-file img-file)))
+           (tex-file (funcall make-file-name "tex"))
+           (image-input-file (funcall make-file-name (xenops-math-latex-process-get :image-input-type)))
+           (image-output-file (funcall make-file-name  (xenops-math-latex-process-get :image-output-type)))
+           (commands (xenops-math-latex-make-commands element dir tex-file image-input-file image-output-file)))
       (condition-case error
           (progn
             (aio-await
@@ -101,7 +149,7 @@ individual math elements.")
                   (insert latex-document)))))
             (dolist (command commands)
               (aio-await (xenops-aio-subprocess command)))
-            (aio-await (aio-with-async (copy-file img-file cache-file 'replace)))
+            (aio-await (aio-with-async (copy-file image-output-file cache-file 'replace)))
             (aio-await
              (xenops-aio-with-async-with-buffer
               buffer
