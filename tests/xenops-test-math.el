@@ -164,32 +164,32 @@ After.")
       ;; render
       (save-excursion
 
-        (case command-type
-          ('dwim
-           (goto-char (point-min))
-           (call-interactively #'xenops-dwim))
-          ('at-point
-           (goto-char (plist-get element :begin))
-           (call-interactively #'xenops-render-at-point))
-          (t
-           (goto-char (point-min))
-           (call-interactively #'xenops-render)))
+        (cond
+         ((eq 'dwim command-type)
+          (goto-char (point-min))
+          (call-interactively #'xenops-dwim))
+         ((eq 'at-point command-type)
+          (goto-char (plist-get element :begin))
+          (call-interactively #'xenops-render-at-point))
+         (t
+          (goto-char (point-min))
+          (call-interactively #'xenops-render)))
 
         (xenops-test-math--assert-image-is-displayed element))
 
       ;; reveal
       (save-excursion
-        (case command-type
-          ('dwim
-           (goto-char (point-min))
-           (let ((current-prefix-arg '(4)))
-             (call-interactively #'xenops-dwim)))
-          ('at-point
-           (goto-char (plist-get element :begin))
-           (call-interactively #'xenops-reveal-at-point))
-          (t
-           (goto-char (point-min))
-           (call-interactively #'xenops-reveal))))
+        (cond
+         ((eq 'dwim command-type)
+          (goto-char (point-min))
+          (let ((current-prefix-arg '(4)))
+            (call-interactively #'xenops-dwim)))
+         ((eq 'at-point command-type)
+          (goto-char (plist-get element :begin))
+          (call-interactively #'xenops-reveal-at-point))
+         (t
+          (goto-char (point-min))
+          (call-interactively #'xenops-reveal))))
 
       (xenops-test-math--assert-image-is-not-displayed element))))
 

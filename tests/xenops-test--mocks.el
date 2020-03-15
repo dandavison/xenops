@@ -46,7 +46,7 @@ paths."
 
 The real `org-latex-color' makes use of face attributes which are
 not set when the tests are running."
-  (case attr
-    (:foreground "0,0,0")
-    (:background "1,1,1")
-    (t (error "Unexpected input: %s" attr))))
+  (cond
+   ((eq attr :foreground) "0,0,0")
+   ((eq attr :background) "1,1,1")
+   (t (error "Unexpected input: %s" attr))))
