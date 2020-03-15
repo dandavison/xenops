@@ -334,7 +334,7 @@ If we are in a math element, then paste without the delimiters"
   ;;         (apply #'append (mapcar #'cdr (xenops-elements-get 'inline-math :delimiters)))))
   (if (or (looking-back (cadr xenops-math-dollar-delimited-inline-math-delimiters)
                         (- (point) 1))
-          (looking-back (cdr xenops-math-paren-delimited-inline-math-delimiters)
+          (looking-back (cadr xenops-math-paren-delimited-inline-math-delimiters)
                         (- (point) 2)))
       (save-excursion
         (goto-char (match-beginning 0))
