@@ -45,11 +45,13 @@ The checks run are:
           - The emacs package on Homebrew
           - The emacs-plus package on Homebrew"))
 
-    (unless (>= emacs-major-version 25)
+    (unless (>= emacs-major-version 26)
       (push (xenops-doctor-format
-             "⚠️ Xenops requires Emacs version >= 25.
+             "⚠️ Xenops requires Emacs version >= 26.
 
-              Your emacs version is %s.
+              This is due to the dependency on the emacs-aio
+              library, but it's good to have a recent Emacs
+              version. Your Emacs version is %s.
 
               For Linux or Windows, see
               https://www.gnu.org/software/emacs/download.html,
