@@ -12,8 +12,6 @@
 
 (require 'xenops-math-latex)
 
-(defvar xenops-math-dvi-to-image-process 'dvisvgm)
-
 (defvar xenops-math-image-change-size-factor 1.1
   "The multiplicative factor used when resizing images.
 
@@ -133,13 +131,6 @@ If a prefuix argument is in effect, also delete its cache file."
                    (1+ begin-content)
                  begin-content))))
 
-(defun xenops-math-image-type ()
-  "The image type used for LaTeX math images, as a string.
-E.g. \"svg\" or \"png\"."
-  (plist-get
-   (cdr (assq xenops-math-dvi-to-image-process org-preview-latex-process-alist))
-   :image-output-type))
-
 (defun xenops-math-display-waiting (element)
   "Style a math element to indicate that its processing task is waiting in the queue to be executed."
   (xenops-element-overlays-delete element)
@@ -158,7 +149,7 @@ Use `M-x xenops-cancel-waiting-tasks` to make this element editable.") ov))
                     0 `(,xenops-math-image-margin . 0)))
         (ov (xenops-math-make-overlay element commands help-echo)))
     (overlay-put ov 'display
-                 `(image :type ,(intern (xenops-math-image-type))
+                 `(image :type ,(intern  (xenops-math-latex-process-get :image-output-type))
                          :file ,cache-file :ascent center :margin ,margin)))
   (unless (equal xenops-math-image-current-scale-factor 1.0)
     (xenops-math-image-change-size element xenops-math-image-current-scale-factor)))
@@ -527,10 +518,14 @@ If we are in a math element, then paste without the delimiters"
 
 (defun xenops-math-file-name-static-hash-data ()
   "Return static data used to compute the math content hash."
-  (list org-format-latex-header
-        org-latex-default-packages-alist
-        org-latex-packages-alist
-        org-format-latex-options))
+  (let ((hash-data (list xenops-math-latex-process
+                         xenops-math-latex-process-alist
+                         org-format-latex-header
+                         org-format-latex-options)))
+    (if (eq major-mode 'org-mode)
+        (append hash-data (list org-latex-default-packages-alist
+                                org-latex-packages-alist))
+      hash-data)))
 
 (defun xenops-math-compute-file-name (latex colors)
   "Compute the cache file name for LATEX math content."
@@ -538,7 +533,7 @@ If we are in a math element, then paste without the delimiters"
          (hash (sha1 (prin1-to-string data))))
     (format "%s.%s"
             (f-join (f-expand xenops-cache-directory) hash)
-            (xenops-math-image-type))))
+            (xenops-math-latex-process-get :image-output-type))))
 
 (provide 'xenops-math)
 
