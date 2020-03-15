@@ -38,7 +38,7 @@ This determines the size of the image in the image file that is
   "Number of pixels to be used as left margin for non-inline math images.")
 
 (setq xenops-math-dollar-delimited-inline-math-delimiters
-      '("\\$" .
+      '("\\$"
         "\\$"))
 
 (setq xenops-math-paren-delimited-inline-math-delimiters
@@ -332,7 +332,7 @@ If we are in a math element, then paste without the delimiters"
   ;; This code executes on every insert! Hard-coding the delimiters, instead of
   ;; (let ((closing-delimiters
   ;;         (apply #'append (mapcar #'cdr (xenops-elements-get 'inline-math :delimiters)))))
-  (if (or (looking-back (cdr xenops-math-dollar-delimited-inline-math-delimiters)
+  (if (or (looking-back (cadr xenops-math-dollar-delimited-inline-math-delimiters)
                         (- (point) 1))
           (looking-back (cdr xenops-math-paren-delimited-inline-math-delimiters)
                         (- (point) 2)))
