@@ -1,19 +1,18 @@
-FROM ubuntu
+FROM ubuntu:18.04
 
 RUN apt-get update && \
     apt-get install -y \
         software-properties-common
 
-RUN add-apt-repository ppa:kelleyk/emacs && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y \
-        emacs26 \
+        emacs \
         git \
         libgl1-mesa-glx \
         mesa-utils \
         texinfo \
         texlive-base \
-        texlive-binaries \        
+        texlive-binaries \
         texlive-latex-base \
         texlive-fonts-recommended \
         texlive-generic-recommended
