@@ -26,7 +26,7 @@ the beginning of the overlay and attempt the parse there."
      (or parse-at-point-fns
          (xenops-elements-get-all :parser)))))
 
-(defun xenops-parse-element-at-point (type &optional lim-up lim-down)
+(defun xenops-parse-element-at-point (type &optional lim-up lim-down delimiters)
   "Return the element at point if there is one and it is of type TYPE."
   ;; This is a base `parse-at-point` implementation that is used by
   ;; some concrete element types. It is not expected to work for all
@@ -39,26 +39,18 @@ the beginning of the overlay and attempt the parse there."
       pair
       (or lim-up (point-min))
       (or lim-down (point-max))))
-   (xenops-elements-get type :delimiters)))
+   (if delimiters (list delimiters)
+     (xenops-elements-get type :delimiters))))
 
 (defun xenops-parse-image-at (pos)
   (let ((display (get-char-property pos 'display )))
     (and (eq (car display) 'image) display)))
 
 (defun xenops-parse-element-at-point-matching-delimiters (type delimiters lim-up lim-down)
-  "If point is between regexps, return plist describing match.
-
-Like `org-between-regexps-p', but modified to return more match
-  data."
-  (-if-let* ((coords
-              (save-excursion
-                (xenops-parse-between-regexps? delimiters lim-up lim-down (point)))))
-      (append coords `(:type ,type :delimiters ,delimiters))))
-
-(defun xenops-parse-between-regexps? (delimiters lim-up lim-down pos)
-  "Based on `org-between-regexps-p'."
+  "If point is between regexps, return plist describing match."
+  ;; Based on `org-between-regexps-p'.
   (save-excursion
-    (let (beg-beg beg-end end-beg end-end)
+    (let ((pos (point)) beg-beg beg-end end-beg end-end)
       (and (or (org-in-regexp (car delimiters))
                (and (< lim-up (point)) (re-search-backward (car delimiters) lim-up t)))
            (save-match-data
@@ -74,7 +66,12 @@ Like `org-between-regexps-p', but modified to return more match
               (setq end-beg (point))
               (skip-chars-backward " \t\n")
               (not (re-search-backward (car delimiters) (1+ beg-beg) t))
-              (list :begin beg-beg :begin-content beg-end :end-content end-beg :end end-end)))))))
+              (list :type type
+                    :begin beg-beg
+                    :begin-content beg-end
+                    :end-content end-beg
+                    :end end-end
+                    :delimiters delimiters)))))))
 
 (provide 'xenops-parse)
 

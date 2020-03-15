@@ -44,12 +44,14 @@ After.")
 
 (ert-deftest xenops-test-math--parse-inline-math--dollar-delimited ()
   (should (equal (xenops-math-parse-element-from-string "$x$")
-                 '(:begin 1 :begin-content 2 :end-content 3 :end 4 :type inline-math
+                 '(:type inline-math
+                   :begin 1 :begin-content 2 :end-content 3 :end 4
                    :delimiters ("\\$" "\\$")))))
 
 (ert-deftest xenops-test-math--parse-inline-math--paren-delimited ()
   (should (equal (xenops-math-parse-element-from-string "\\(x\\)")
-                 `(:begin 1 :begin-content 3 :end-content 4 :end 6 :type inline-math
+                 `(:type inline-math
+                   :begin 1 :begin-content 3 :end-content 4 :end 6
                    :delimiters ,xenops-math-paren-delimited-inline-math-delimiters))))
 
 (ert-deftest xenops-test-math--parse-block-math--align ()
@@ -60,7 +62,8 @@ After.")
   x
 \\end{align}
 "))
-                 `(:begin 1 :begin-content 14 :end-content 19 :end 30 :type block-math
+                 `(:type block-math
+                   :begin 1 :begin-content 14 :end-content 19 :end 30
                    :delimiters ,(car (xenops-elements-get 'block-math :delimiters))))))
 
 (ert-deftest xenops-test-math--parse-block-math--align* ()
@@ -71,7 +74,8 @@ After.")
   x
 \\end{align*}
 "))
-                 `(:begin 1 :begin-content 15 :end-content 20 :end 32 :type block-math
+                 `(:type block-math
+                   :begin 1 :begin-content 15 :end-content 20 :end 32
                    :delimiters ,(car (xenops-elements-get 'block-math :delimiters))))))
 
 (ert-deftest xenops-test-math--parse-block-math--equation ()
@@ -82,7 +86,8 @@ After.")
   x
 \\end{equation}
 "))
-                 `(:begin 1 :begin-content 17 :end-content 22 :end 36 :type block-math
+                 `(:type block-math
+                   :begin 1 :begin-content 17 :end-content 22 :end 36
                    :delimiters ,(car (xenops-elements-get 'block-math :delimiters))))))
 
 (ert-deftest xenops-test-math--parse-block-math--equation* ()
@@ -93,7 +98,8 @@ After.")
   x
 \\end{equation*}
 "))
-                 `(:begin 1 :begin-content 18 :end-content 23 :end 38 :type block-math
+                 `(:type block-math
+                   :begin 1 :begin-content 18 :end-content 23 :end 38
                    :delimiters ,(car (xenops-elements-get 'block-math :delimiters))))))
 
 (ert-deftest xenops-test-math--parse-block-math--square-bracket ()
@@ -104,7 +110,8 @@ After.")
   x
 \\]
 "))
-                 `(:begin 1 :begin-content 3 :end-content 8 :end 10 :type block-math
+                 `(:type block-math
+                   :begin 1 :begin-content 3 :end-content 8 :end 10
                    :delimiters ,(cadr (xenops-elements-get 'block-math :delimiters))))))
 
 (ert-deftest xenops-test-math--parse-block-math--align--inline ()
@@ -113,7 +120,8 @@ After.")
                    "
 \\begin{align}x\\end{align}
 "))
-                 `(:begin 1 :begin-content 14 :end-content 15 :end 26 :type inline-math
+                 `(:type inline-math
+                   :begin 1 :begin-content 14 :end-content 15 :end 26
                    :delimiters ,xenops-math-environment-delimited-inline-math-delimiters))))
 
 (ert-deftest xenops-test-math--parse-block-math--align*--inline ()
@@ -122,7 +130,8 @@ After.")
                    "
 \\begin{align*}x\\end{align*}
 "))
-                 `(:begin 1 :begin-content 15 :end-content 16 :end 28 :type inline-math
+                 `(:type inline-math
+                   :begin 1 :begin-content 15 :end-content 16 :end 28
                    :delimiters ,xenops-math-environment-delimited-inline-math-delimiters))))
 
 (ert-deftest xenops-test-math--parse-block-math--equation--inline ()
@@ -131,7 +140,8 @@ After.")
                    "
 \\begin{equation}x\\end{equation}
 "))
-                 `(:begin 1 :begin-content 17 :end-content 18 :end 32 :type inline-math
+                 `(:type inline-math
+                   :begin 1 :begin-content 17 :end-content 18 :end 32
                    :delimiters ,xenops-math-environment-delimited-inline-math-delimiters))))
 
 (ert-deftest xenops-test-math--parse-block-math--equation*--inline ()
@@ -140,7 +150,8 @@ After.")
                    "
 \\begin{equation*}x\\end{equation*}
 "))
-                 `(:begin 1 :begin-content 18 :end-content 19 :end 34 :type inline-math
+                 `(:type inline-math
+                   :begin 1 :begin-content 18 :end-content 19 :end 34
                    :delimiters ,xenops-math-environment-delimited-inline-math-delimiters))))
 
 (ert-deftest xenops-test-math--parse-block-math--square-bracket--inline ()
@@ -149,7 +160,8 @@ After.")
                    "
 \\[x\\]
 "))
-                 `(:begin 1 :begin-content 3 :end-content 4 :end 6 :type inline-math
+                 `(:type inline-math
+                   :begin 1 :begin-content 3 :end-content 4 :end 6
                    :delimiters ,xenops-math-square-bracket-delimited-inline-math-delimiters))))
 
 (defun xenops-test-math--do-render-and-reveal-test (text &optional command-type)
