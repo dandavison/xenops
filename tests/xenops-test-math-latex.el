@@ -69,7 +69,7 @@ After blocks.
    (forward-char element-begin)
    (let ((element (xenops-parse-any-element-at-point)))
      (should (equal (plist-get element :type) expected-type)))
-   (let ((image (xenops-parse-image-at (point))))
+   (let ((image (xenops-util-parse-image-at (point))))
      (should (equal (image-property image :type) 'svg)))))
 
 (ert-deftest xenops-test-math-latex--test-render--inline-math ()

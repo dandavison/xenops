@@ -35,7 +35,7 @@
   t)
 
 (defun xenops-element-get-image (element)
-  (xenops-parse-image-at (plist-get element :begin)))
+  (xenops-util-parse-image-at (plist-get element :begin)))
 
 (defun xenops-element-create-marker (el)
   "Create a marker pointing at the current :begin position of ELEMENT."

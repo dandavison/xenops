@@ -44,6 +44,10 @@ ARGS will typically look like :k1 v1 :k2 v2 ..."
     (setq plist (apply #'plist-put plist pair)))
   plist)
 
+(defun xenops-util-parse-image-at (pos)
+  (let ((display (get-char-property pos 'display )))
+    (and (eq (car display) 'image) display)))
+
 (defun xenops-util-svg-resize (svg scale)
   "Return SVG data with height and width scaled by SCALE"
   (cl-flet ((resize (match)
