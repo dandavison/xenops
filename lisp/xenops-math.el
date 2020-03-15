@@ -12,7 +12,7 @@
 
 (require 'xenops-math-latex)
 
-(defvar xenops-math-process 'dvisvgm)
+(defvar xenops-math-dvi-to-image-process 'dvisvgm)
 
 (defvar xenops-math-image-change-size-factor 1.1
   "The multiplicative factor used when resizing images.
@@ -94,22 +94,18 @@ the LaTeX to SVG, and insert the SVG into the buffer."
                                                          (plist-get element :end-content)))))
     (let ((latex (buffer-substring-no-properties (plist-get element :begin)
                                                  (plist-get element :end))))
-      ;; The name "image-type" is bound by image-mode and this interferes with the closure.
-      (let* ((-image-type (plist-get (cdr (assq xenops-math-process
-                                                org-preview-latex-process-alist))
-                                     :image-output-type))
-             (colors (xenops-math-latex-get-colors))
-             (cache-file (xenops-math-compute-file-name latex -image-type colors))
+      (let* ((colors (xenops-math-latex-get-colors))
+             (cache-file (xenops-math-compute-file-name latex colors))
              (cache-file-exists? (file-exists-p cache-file))
              (display-image
               (lambda (element &optional commands)
-                (xenops-math-display-image element commands latex cache-file -image-type))))
+                (xenops-math-display-image element commands latex cache-file))))
         (cond
          (cache-file-exists?
           (funcall display-image element))
          ((not cached-only)
           (xenops-math-display-waiting element)
-          (xenops-math-latex-create-image element latex -image-type colors cache-file display-image)))))))
+          (xenops-math-latex-create-image element latex colors cache-file display-image)))))))
 
 (defun xenops-math-regenerate (element)
   "Regenerate math element ELEMENT.
@@ -137,6 +133,13 @@ If a prefuix argument is in effect, also delete its cache file."
                    (1+ begin-content)
                  begin-content))))
 
+(defun xenops-math-image-type ()
+  "The image type used for LaTeX math images, as a string.
+E.g. \"svg\" or \"png\"."
+  (plist-get
+   (cdr (assq xenops-math-dvi-to-image-process org-preview-latex-process-alist))
+   :image-output-type))
+
 (defun xenops-math-display-waiting (element)
   "Style a math element to indicate that its processing task is waiting in the queue to be executed."
   (xenops-element-overlays-delete element)
@@ -149,13 +152,13 @@ If a prefuix argument is in effect, also delete its cache file."
     (overlay-put ov 'help-echo "Image-generation task in-progress. \
 Use `M-x xenops-cancel-waiting-tasks` to make this element editable.") ov))
 
-(defun xenops-math-display-image (element commands help-echo cache-file -image-type)
+(defun xenops-math-display-image (element commands help-echo cache-file)
   "Display SVG image resulting from successful LaTeX compilation."
   (let ((margin (if (eq 'inline-math (plist-get element :type))
                     0 `(,xenops-math-image-margin . 0)))
         (ov (xenops-math-make-overlay element commands help-echo)))
     (overlay-put ov 'display
-                 `(image :type ,(intern -image-type)
+                 `(image :type ,(intern (xenops-math-image-type))
                          :file ,cache-file :ascent center :margin ,margin)))
   (unless (equal xenops-math-image-current-scale-factor 1.0)
     (xenops-math-image-change-size element xenops-math-image-current-scale-factor)))
@@ -517,13 +520,10 @@ If we are in a math element, then paste without the delimiters"
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
          (latex (buffer-substring-no-properties beg end))
-         (image-type (plist-get (cdr (assq xenops-math-process
-                                           org-preview-latex-process-alist))
-                                :image-output-type))
          (colors (save-excursion
                    (goto-char beg)
                    (xenops-math-latex-get-colors))))
-    (xenops-math-compute-file-name latex image-type colors)))
+    (xenops-math-compute-file-name latex colors)))
 
 (defun xenops-math-file-name-static-hash-data ()
   "Return static data used to compute the math content hash."
@@ -532,11 +532,13 @@ If we are in a math element, then paste without the delimiters"
         org-latex-packages-alist
         org-format-latex-options))
 
-(defun xenops-math-compute-file-name (latex image-type colors)
+(defun xenops-math-compute-file-name (latex colors)
   "Compute the cache file name for LATEX math content."
   (let* ((data (append (xenops-math-file-name-static-hash-data) (list latex colors)))
          (hash (sha1 (prin1-to-string data))))
-    (format "%s.%s" (f-join (f-expand xenops-cache-directory) hash) image-type)))
+    (format "%s.%s"
+            (f-join (f-expand xenops-cache-directory) hash)
+            (xenops-math-image-type))))
 
 (provide 'xenops-math)
 

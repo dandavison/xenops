@@ -26,11 +26,11 @@ to not make `xenops-doctor' checks."
 
 (defun xenops-math-render (element &optional _)
   "A mock of `xenops-math-render'."
-  (xenops-math-latex-create-image element nil nil nil
+  (xenops-math-latex-create-image element nil nil
                                   xenops-test--example-svg--cache-file #'identity)
-  (xenops-math-display-image element nil nil xenops-test--example-svg--cache-file "svg"))
+  (xenops-math-display-image element nil nil xenops-test--example-svg--cache-file))
 
-(defun xenops-math-latex-create-image (element _ _ _ file callback)
+(defun xenops-math-latex-create-image (element _ _ file callback)
   "A mock of `xenops-math-latex-create-image'.
 
 The real `xenops-math-latex-create-image' is asynchronous. Xenops

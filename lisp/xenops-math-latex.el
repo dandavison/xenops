@@ -49,35 +49,42 @@ individual math elements.")
                 "\n}\n"
                 "\n\\end{document}\n")))))
 
-(defun xenops-math-latex-make-commands (element dir tex-file dvi-file svg-file)
+(defun xenops-math-latex-make-commands (element dir tex-file dvi-file img-file)
   "Construct the external process invocations used to convert a single LaTeX fragment to SVG."
-  (let* ((processing-type 'dvisvgm)
-         (processing-info (cdr (assq processing-type org-preview-latex-process-alist)))
+  ;; See `org-preview-latex-process-alist'
+  (let* ((image-type (xenops-math-image-type))
+         (processing-info (cdr (assq xenops-math-dvi-to-image-process org-preview-latex-process-alist)))
          (dpi (* (org--get-display-dpi)
                  (car (plist-get processing-info :image-size-adjust))
                  xenops-math-image-scale-factor))
          (scale (/ dpi 140))
-         (bounding-box (if (eq 'inline-math (plist-get element :type)) 1 10)))
-    `(("latex" "-shell-escape" "-interaction" "nonstopmode" "-output-directory" ,dir ,tex-file)
-      ("dvisvgm" ,dvi-file
-       "-n"
-       "-b" ,(number-to-string bounding-box)
-       "-c" ,(number-to-string scale)
-       "-o" ,svg-file))))
+         (bounding-box (if (eq 'inline-math (plist-get element :type)) 1 10))
+         (latex-command
+          `("latex" "-shell-escape" "-interaction" "nonstopmode" "-output-directory" ,dir ,tex-file))
+         (dvi-to-image-command
+          (cond
+           ((string-equal image-type "svg")
+            `("dvisvgm" ,dvi-file
+              "-n"
+              "-b" ,(number-to-string bounding-box)
+              "-c" ,(number-to-string scale)
+              "-o" ,img-file))
+           (t (error "Invalid image type: %S" image-type)))))
+    (list latex-command dvi-to-image-command)))
 
-(aio-defun xenops-math-latex-create-image (element latex image-type colors cache-file display-image)
-  "Process LaTeX string to SVG via external processes, asynchronously."
+(aio-defun xenops-math-latex-create-image (element latex colors cache-file display-image)
+  "Process LaTeX string to image via external processes, asynchronously."
   (let ((buffer (current-buffer)))
     (aio-await (aio-sem-wait xenops-math-latex-tasks-semaphore))
     (with-current-buffer buffer
       (xenops-element-create-marker element))
     (let* ((dir temporary-file-directory)
            (base-name (f-base cache-file))
-           (make-file-name (lambda (ext) (f-join dir (concat base-name ext))))
+           (make-file-name (lambda (ext) (f-join dir (concat base-name "." ext))))
            (tex-file (funcall make-file-name ".tex"))
            (dvi-file (funcall make-file-name ".dvi"))
-           (svg-file (funcall make-file-name ".svg"))
-           (commands (xenops-math-latex-make-commands element dir tex-file dvi-file svg-file)))
+           (img-file (funcall make-file-name (xenops-math-image-type)))
+           (commands (xenops-math-latex-make-commands element dir tex-file dvi-file img-file)))
       (condition-case error
           (progn
             (aio-await
@@ -88,7 +95,7 @@ individual math elements.")
                   (insert latex-document)))))
             (dolist (command commands)
               (aio-await (xenops-aio-subprocess command)))
-            (aio-await (aio-with-async (copy-file svg-file cache-file 'replace)))
+            (aio-await (aio-with-async (copy-file img-file cache-file 'replace)))
             (aio-await
              (xenops-aio-with-async-with-buffer
               buffer
