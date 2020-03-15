@@ -52,10 +52,6 @@ Like `org-between-regexps-p', but modified to return more match
   data."
   (-if-let* ((coords
               (save-excursion
-                (when (looking-at (car (last delimiters)))
-                  ;; This function will return nil if point is between delimiters separated by
-                  ;; zero characters.
-                  (left-char))
                 (xenops-parse-between-regexps? delimiters lim-up lim-down (point)))))
       (append coords `(:type ,type :delimiters ,delimiters))))
 
