@@ -69,6 +69,12 @@ individual math elements.")
               "-b" ,(number-to-string bounding-box)
               "-c" ,(number-to-string scale)
               "-o" ,img-file))
+           ((string-equal image-type "png")
+            `("dvipng"
+              "-D" ,(number-to-string dpi)
+              "-T" "tight"
+              "-o" ,img-file
+              ,dvi-file))
            (t (error "Invalid image type: %S" image-type)))))
     (list latex-command dvi-to-image-command)))
 
