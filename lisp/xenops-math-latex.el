@@ -97,20 +97,22 @@ individual math elements.")
 (defun xenops-math-latex-make-commands (element dir tex-file image-input-file image-output-file)
   "Construct the external process invocations used to convert a single LaTeX fragment to SVG."
   ;; See `org-preview-latex-process-alist'
-  (let* ((processing-info (cdr (assq xenops-math-latex-process xenops-math-latex-process-alist)))
-         (dpi (* (org--get-display-dpi)
-                 (car (plist-get processing-info :image-size-adjust))
-                 xenops-math-image-scale-factor))
+  (let* ((dpi (xenops-math-latex-calculate-dpi))
          (bounding-box (if (eq 'inline-math (plist-get element :type)) 1 10))
          (format-data
           `((?o . ,dir)
             (?B . ,(number-to-string bounding-box))
             (?D . ,(number-to-string dpi))
             (?S . ,(number-to-string (/ dpi 140))))))
-    (append (xenops-math-latex-format-commands (plist-get processing-info :latex-compiler)
+    (append (xenops-math-latex-format-commands (xenops-math-latex-process-get :latex-compiler)
                                                tex-file image-input-file format-data)
-            (xenops-math-latex-format-commands (plist-get processing-info :image-converter)
+            (xenops-math-latex-format-commands (xenops-math-latex-process-get :image-converter)
                                                image-input-file image-output-file format-data))))
+
+(defun xenops-math-latex-calculate-dpi ()
+  (* (org--get-display-dpi)
+     (car (xenops-math-latex-process-get :image-size-adjust))
+     xenops-math-image-scale-factor))
 
 (defun xenops-math-latex-process-get (key)
   "Return the value of KEY in `xenops-math-latex-process-alist' for `xenops-math-latex-process'."
