@@ -25,6 +25,7 @@ the commands used to run these processes.")
      :message "you need to install the programs: latex and dvipng."
      :image-input-type "dvi"
      :image-output-type "png"
+     :image-output-ppi 960
      :image-size-adjust (1.0 . 1.0)
      :latex-compiler ("latex -interaction nonstopmode -shell-escape -output-directory %o %f")
      :image-converter ("dvipng -D %D -T tight -o %O %f"))
@@ -149,7 +150,11 @@ individual math elements.")
                   (insert latex-document)))))
             (dolist (command commands)
               (aio-await (xenops-aio-subprocess command)))
-            (aio-await (aio-with-async (copy-file image-output-file cache-file 'replace)))
+            (aio-await (aio-with-async
+                         (if (eq xenops-math-latex-process 'dvipng)
+                             (xenops-png-set-phys (xenops-math-latex-process-get :output-png-ppi)
+                                                  image-output-file cache-file)
+                           (copy-file image-output-file cache-file 'replace))))
             (aio-await
              (xenops-aio-with-async-with-buffer
               buffer
