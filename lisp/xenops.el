@@ -76,6 +76,7 @@
 (require 'xenops-minted)
 (require 'xenops-overlay)
 (require 'xenops-parse)
+(require 'xenops-png)
 (require 'xenops-src)
 (require 'xenops-util)
 (require 'xenops-xen)
