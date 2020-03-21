@@ -152,8 +152,10 @@ individual math elements.")
               (aio-await (xenops-aio-subprocess command)))
             (aio-await (aio-with-async
                          (if (eq xenops-math-latex-process 'dvipng)
-                             (xenops-png-set-phys (xenops-math-latex-process-get :output-png-ppi)
-                                                  image-output-file cache-file)
+                             (let ((png-bytes (xenops-png-set-phys-chunk
+                                               (f-read-bytes image-output-file)
+                                               (xenops-math-latex-process-get :image-output-ppi))))
+                               (f-write-bytes png-bytes cache-file))
                            (copy-file image-output-file cache-file 'replace))))
             (aio-await
              (xenops-aio-with-async-with-buffer

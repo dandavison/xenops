@@ -1,12 +1,18 @@
 ;; -*- lexical-binding: t -*-
 
-(ert-deftest xenops-png-unpack-word--test ()
+(ert-deftest xenops-test-png-pack-quartet--test ()
+  (should (equal (xenops-png-pack-quartet '(0 0 0 0)) 0))
+  (should (equal (xenops-png-pack-quartet '(0 0 0 1)) 1))
+  (should (equal (xenops-png-pack-quartet '(0 0 0 255)) 255))
+  (should (equal (xenops-png-pack-quartet '(0 0 1 0)) 256)))
+
+(ert-deftest xenops-test-png-unpack-word--test ()
   (should (equal (xenops-png-unpack-word 0) '(0 0 0 0)))
   (should (equal (xenops-png-unpack-word 1) '(0 0 0 1)))
   (should (equal (xenops-png-unpack-word 255) '(0 0 0 255)))
   (should (equal (xenops-png-unpack-word 256) '(0 0 1 0))))
 
-(ert-deftest xenops-png-crc ()
+(ert-deftest xenops-test-png-crc ()
   (should (equal
            (xenops-png-crc '(0))
            '(#xD2 #x02 #xEF #x8D)))

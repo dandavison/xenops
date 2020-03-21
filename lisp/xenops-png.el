@@ -4,37 +4,58 @@
 
 ;;; Code:
 
-(defun xenops-png-set-phys (ppi in-file out-file)
-  "Write PNG data with new pHYs chunk to OUT-FILE.
+(defun xenops-png-set-phys-chunk (png-string ppi)
+  "Set the pHYs chunk in PNG data.
 
-PNG data is read from IN-FILE, and altered such that the pHYs
-chunk specifies size according to PPI."
+Input PNG-STRING is a unibyte string containing the PNG data. The
+return value is a unibyte string specifying an equivalent PNG
+image, but with the pHYs chunk set according to PPI."
   (let* ((m/i 0.0254)
          (ppm (round (/ ppi m/i)))
-         (in-bytes (f-read-bytes in-file))
-         (out-bytes)
-         (i 0))
-    (assert (< ppm #xFFFFFFFF))
-    (dolist (byte (append in-bytes nil))
-      (setq i (1+ i))
-      (cond
-       ((or (< i 42)
-            (> i 54))
-        (push byte out-bytes))
-       ((= i 42)
-        ;; Push Data and CRC bytes for the pHYS chunk.
-        (setq phys-crc-message nil)
-        (dolist (title-byte '(#x70 #x48 #x59 #x73))  ;; p H Y s
-          (push title-byte phys-crc-message))
-        (dolist (_ '(x y))
-          (dolist (ppm-byte (xenops-png-unpack-word ppm))
-            (push ppm-byte out-bytes)
-            (push ppm-byte phys-crc-message)))
-        (push 1 out-bytes)
-        (push 1 phys-crc-message)
-        (dolist (crc-byte (xenops-png-crc (nreverse phys-crc-message)))
-          (push crc-byte out-bytes)))))
-    (f-write-bytes (apply #'unibyte-string (nreverse out-bytes)) out-file)))
+         (in-bytes (append png-string nil))
+         (out-bytes))
+    ;; Emit the initial PNG signature (8 bytes)
+    (dolist (_ (number-sequence 1 8))
+      (push (pop in-bytes) out-bytes))
+    ;; Emit the pHYs chunk
+    (dolist (phys-byte (xenops-png-make-phys-chunk ppm))
+      (push phys-byte out-bytes))
+    ;; Now, emit everything, except pHYs chunks, if there are any.
+    (while in-bytes
+      (let (length type data crc)
+        (dotimes (_ 4)
+          (push (pop in-bytes) length))
+        (dotimes (_ 4)
+          (push (pop in-bytes) type))
+        (dotimes (_ (xenops-png-pack-quartet (nreverse (copy-list length))))
+          (push (pop in-bytes) data))
+        (dotimes (_ 4)
+          (push (pop in-bytes) crc))
+        (unless (equal type '(#x70 #x48 #x59 #x73))  ;; p H Y s
+          (dolist (byte (apply #'append (mapcar #'nreverse (list length type data crc))))
+            (push byte out-bytes)))))
+    (apply #'unibyte-string (nreverse out-bytes))))
+
+(defun xenops-png-make-phys-chunk (ppm)
+  "Construct the pHYs chunk for the requested size PPM.
+
+Return value is a list of bytes."
+  (let ((bytes nil))
+    ;; The length (4 bytes) is always 9. It is not included in the CRC message.
+    (dolist (byte '(0 0 0 9))
+      (push byte bytes))
+    (setq phys-crc-message nil)
+    (dolist (title-byte '(#x70 #x48 #x59 #x73))
+      (push title-byte phys-crc-message))
+    (dolist (_ '(x y))
+      (dolist (ppm-byte (xenops-png-unpack-word ppm))
+        (push ppm-byte bytes)
+        (push ppm-byte phys-crc-message)))
+    (push 1 bytes)
+    (push 1 phys-crc-message)
+    (dolist (crc-byte (xenops-png-crc (nreverse phys-crc-message)))
+      (push crc-byte bytes))
+    (nreverse bytes)))
 
 (defun xenops-png-crc (bytes)
   "Return crc32 checksum of BYTES.
@@ -58,12 +79,33 @@ https://www.w3.org/TR/PNG-Structure.html#CRC-algorithm."
         (setq c (lsh c -1))))
     c))
 
+(defun xenops-png-pack-quartet (quartet)
+  "Convert list of 4 bytes to 32-bit word.
+
+ QUARTET is a list of 4 integers in the range 0-255."
+  (unless (equal (length quartet) 4)
+    (error "Input must have length 4"))
+  (let ((masks '(#xFF000000 #xFF0000 #xFF00 #xFF))
+        (register 0))
+    (cl-loop for (index . (byte mask)) in (-zip '(0 1 2 3) quartet masks) do
+             (setq register
+                   (logior register (logand mask (lsh byte (xenops-png-byte-offset index))))))
+    register))
+
 (defun xenops-png-unpack-word (word)
   "Convert 32-bit WORD to a list of 4 bytes.
 
 A byte is represented as an integer in the range 0-255."
-  (-map-indexed (lambda (index mask) (lsh (logand mask word) (- (* 8 (- 4 (1+ index))))))
+  (unless (< word #xFFFFFFFF)
+    (error "Input must fit in 4 bytes"))
+  (-map-indexed (lambda (index mask) (lsh (logand mask word) (- (xenops-png-byte-offset index))))
                 '(#xFF000000 #xFF0000 #xFF00 #xFF)))
+
+(defun xenops-png-byte-offset (n)
+  "Return bit offset of N-th byte.
+
+ N=0 for the most significant byte, and N=3 for the least significant."
+  (* 8 (- 4 (1+ n))))
 
 (provide 'xenops-png)
 
