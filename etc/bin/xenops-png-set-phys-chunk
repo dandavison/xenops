@@ -1,0 +1,19 @@
+#!/usr/bin/env emacs --script
+(setq debug-on-error t)
+(let ((package-load-list '((dash t) (s t) (f t)))) (package-initialize))
+(require 'dash)
+(require 'f)
+(let ((xenops-directory (getenv "XENOPS_DIRECTORY")))
+  (unless xenops-directory
+    (error "XENOPS_DIRECTORY env var must be set to location of Xenops repo"))
+  (add-to-list 'load-path (f-join xenops-directory "lisp")))
+(require 'xenops-png)
+
+(unless (equal (length argv) 3)
+  (error "usage: xenops-png-set-phys-chunk ppi infile outfile"))
+
+(let* ((ppi (string-to-number (pop argv)))
+       (in-file (pop argv))
+       (out-file (pop argv))
+       (png-bytes (xenops-png-set-phys-chunk (f-read-bytes in-file) ppi)))
+  (f-write-bytes png-bytes out-file))
