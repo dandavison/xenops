@@ -30,8 +30,8 @@ returns non-nil."
 
 The region operated on is either the active region, or the entire
 buffer."
-  (cl-flet ((handle (lambda (el) (save-excursion
-                              (xenops-dispatch-handlers handlers el)))))
+  (cl-flet ((handle (el) (save-excursion
+                           (xenops-dispatch-handlers handlers el))))
     (save-excursion
       (goto-char beg)
       (let ((parse-at-point-fns (xenops-elements-get-all :parser)))
