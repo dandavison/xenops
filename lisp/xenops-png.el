@@ -9,17 +9,20 @@
 
 Input PNG-STRING is a unibyte string containing the PNG data. The
 return value is a unibyte string specifying an equivalent PNG
-image, but with the pHYs chunk set according to PPI."
+image, but with the pHYs chunk set according to PPI.
+
+If PPI is nil, return an exact copy of the input PNG data."
   (let* ((m/i 0.0254)
-         (ppm (round (/ ppi m/i)))
+         (ppm (and ppi (round (/ ppi m/i))))
          (in-bytes (append png-string nil))
          (out-bytes))
     ;; Emit the initial PNG signature (8 bytes)
     (dolist (_ (number-sequence 1 8))
       (push (pop in-bytes) out-bytes))
     ;; Emit the pHYs chunk
-    (dolist (phys-byte (xenops-png-make-phys-chunk ppm))
-      (push phys-byte out-bytes))
+    (if ppm
+        (dolist (phys-byte (xenops-png-make-phys-chunk ppm))
+          (push phys-byte out-bytes)))
     ;; Now, emit everything, except pHYs chunks, if there are any.
     (while in-bytes
       (let (length type data crc)
@@ -27,11 +30,11 @@ image, but with the pHYs chunk set according to PPI."
           (push (pop in-bytes) length))
         (dotimes (_ 4)
           (push (pop in-bytes) type))
-        (dotimes (_ (xenops-png-pack-quartet (nreverse (copy-list length))))
+        (dotimes (_ (xenops-png-pack-quartet (nreverse (append length nil))))
           (push (pop in-bytes) data))
         (dotimes (_ 4)
           (push (pop in-bytes) crc))
-        (unless (equal type '(#x70 #x48 #x59 #x73))  ;; p H Y s
+        (unless (and ppm (equal type (nreverse '(#x70 #x48 #x59 #x73))))  ;; p H Y s
           (dolist (byte (apply #'append (mapcar #'nreverse (list length type data crc))))
             (push byte out-bytes)))))
     (apply #'unibyte-string (nreverse out-bytes))))

@@ -37,6 +37,13 @@
             228 51 77 0 18 188 1 7 24 138 78 37 52 48 116 150 150 39 0 0 159 154 9 151 38 199 60
             218 0 0 0 0 73 69 78 68 174 66 96 130))
 
+(ert-deftest xenops-test-png-set-phys-chunk--makes-no-changes-when-ppi-is-nil ()
+  "When the PPI argument is nil, `png-set-phys-chunk' should make no changes."
+  (let* ((in-png-string (apply #'unibyte-string xenops-test-png--png-bytes-1))
+         (out-png-string (xenops-png-set-phys-chunk in-png-string nil))
+         (out-png-bytes (append out-png-string nil)))
+    (should (equal out-png-bytes xenops-test-png--png-bytes-1))))
+
 (ert-deftest xenops-test-png-set-phys-chunk--creates-valid-png ()
   (let* ((in-file (make-temp-file "xenops-test-png" nil "png"))
          (out-file (make-temp-file "xenops-test-png" nil "png"))
