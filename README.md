@@ -76,11 +76,11 @@ Xenops can also be used with [org-mode](https://orgmode.org) documents that cont
 
     If you are using MacOS, install emacs from homebrew using either the `emacs-plus` or `emacs-mac` packages, since they provide the required SVG support.
 
-1. **Install the Emacs packages that Xenops needs**
+1. **Clone the Xenops git repository to a location on your computer.**
 
-    (Xenops will be submitted to MELPA soon, which will make installation simpler.)
+1. **Add the following code to your Emacs init file.**
 
-    First ensure that you have the Melpa package repository activated in your Emacs init file:
+    *Note that you must change `"/PATH/TO/XENOPS-REPO/"` below.*
 
     ```emacs-lisp
     (require 'package)
@@ -88,44 +88,24 @@ Xenops can also be used with [org-mode](https://orgmode.org) documents that cont
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
     (package-initialize)
     (package-refresh-contents)
-    ```
 
-    Next use the Emacs package manager to install the following packages:
-    - `aio`
-    - `auctex`
-    - `avy`
-    - `dash-functional`
-    - `f`
-
-    The simplest way to do that is to use `M-x package-install` repeatedly, installing them one-at-a-time.
-
-    Alternatively you could put the following code in your Emacs init file and restart Emacs:
-
-    ```emacs-lisp
     (dolist (package '(aio auctex avy dash-functional f))
       (unless (package-installed-p package)
         (package-install package)))
-    ```
 
-1. **Clone the Xenops git repository to a location on your computer.**
-
-1.  **Load Xenops in your Emacs init file.**
-
-    ```emacs-lisp
-    (add-to-list 'load-path "/path/to/xenops-repo/lisp")
+    (add-to-list 'load-path "/PATH/TO/XENOPS-REPO/lisp")
     (require 'xenops)
     (add-hook 'latex-mode-hook #'xenops-mode)
     (add-hook 'LaTeX-mode-hook #'xenops-mode)
     ```
 
+    (Xenops will be submitted to [MELPA](https://melpa.org/) soon, which will simplify installation.)
 
-1. **Start Emacs**
+1.  **Restart Emacs and run `M-x xenops-doctor`**
 
-    Note that Xenops can only display images if you run Emacs as a GUI application, not as a terminal application.
+    You must run Emacs as a GUI application, not as a terminal application. This is because Xenops displays images in Emacs buffers.
 
-1. **`M-x xenops-doctor`**
-
-    This will check all the requirements listed above and some others. You should see this:
+    `M-x xenops-doctor` will check all the requirements listed above and some others. You should see this:
     <img width=250px src="https://user-images.githubusercontent.com/52205/76026875-3b1d5d00-5ef5-11ea-9eeb-9df0fcadf6ab.png" alt="image" /><br>
     If so, move on to the next section, `"How to use Xenops"`. If not, the `xenops-doctor` output will explain what is wrong.
 
