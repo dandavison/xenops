@@ -72,21 +72,56 @@ Xenops can also be used with [org-mode](https://orgmode.org) documents that cont
 
 1. **Ensure that your Emacs version is at least Emacs 26.**
 
+    This is necessary because Xenops uses [emacs-aio](https://github.com/skeeto/emacs-aio).
+
     If you are using MacOS, install emacs from homebrew using either the `emacs-plus` or `emacs-mac` packages, since they provide the required SVG support.
 
-    Xenops can only display images if you run Emacs as a GUI application, not as a terminal application.
+1. **Install the Emacs packages that Xenops needs**
 
-1. **Clone this repository.**
+    (Xenops will be submitted to MELPA soon, which will make installation simpler.)
 
-    (Xenops will be submitted to MELPA soon.)
+    First ensure that you have the Melpa package repository activated in your Emacs init file:
 
-1.  **Load Xenops in your Emacs config file.**
     ```emacs-lisp
-    (add-to-list 'load-path "/path/to/xenops/repo")
+    (require 'package)
+    (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")  ;; Not necessary in Emacs>=26.3
+    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+    (package-initialize)
+    (package-refresh-contents)
+    ```
+
+    Next use the Emacs package manager to install the following packages:
+    - `aio`
+    - `auctex`
+    - `avy`
+    - `dash-functional`
+    - `f`
+
+    The simplest way to do that is to use `M-x package-install` repeatedly, installing them one-at-a-time.
+
+    Alternatively you could put the following code in your Emacs init file and restart Emacs:
+
+    ```emacs-lisp
+    (dolist (package '(aio auctex avy dash-functional f))
+      (unless (package-installed-p package)
+        (package-install package)))
+    ```
+
+1. **Clone the Xenops git repository to a location on your computer.**
+
+1.  **Load Xenops in your Emacs init file.**
+
+    ```emacs-lisp
+    (add-to-list 'load-path "/path/to/xenops-repo/lisp")
     (require 'xenops)
     (add-hook 'latex-mode-hook #'xenops-mode)
     (add-hook 'LaTeX-mode-hook #'xenops-mode)
     ```
+
+
+1. **Start Emacs**
+
+    Note that Xenops can only display images if you run Emacs as a GUI application, not as a terminal application.
 
 1. **`M-x xenops-doctor`**
 
