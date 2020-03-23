@@ -117,7 +117,7 @@ You don't need to learn any commands for Xenops to render your math: you just ty
 
 More explicitly, here are the basic steps for working with math in Xenops:
 
-  1. **Enter some LaTeX math code, using any of the standard delimiters:**<br>`$...$`, `\(...\)`, `\begin{equation|align|table|tabular|tikzpicture}`.
+  1. **Enter some LaTeX math code, using any of the standard delimiters:**<br>`$...$`, `\(...\)`, `\[...\]`, `\begin{equation|align|table|tabular|tikzpicture}`.
 
   2. **Move the cursor out of the block: an image of the math will appear.**
 
@@ -147,7 +147,7 @@ This section gives step-by-step instructions and shows what to do if it is not w
     \end{document}
     ```
 
-    Xenops recognizes the usual delimiters: `$...$`, `\(...\)`, `\begin{equation|align|table|tabular|tikzpicture}`.
+    Xenops recognizes the usual delimiters: `$...$`, `\(...\)`, `\[...\]`, `\begin{equation|align|table|tabular|tikzpicture}`.
 
 2. **Move the cursor into a math element:**
 
