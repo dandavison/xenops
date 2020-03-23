@@ -39,7 +39,7 @@ Installation instructions are below. To use Xenops, open a `.tex` file in Emacs 
 
 - **LaTeX math, tables, and TikZ content are automatically displayed as SVG images in the Emacs buffer.**
 
-  You don't need to do anything: rendering is triggered automatically. The result is that you can work on the document in Emacs without needing to frequently check the appearance of the PDF. Rendering is asynchronous, so it doesn't interrupt your writing. One of the motivations for Xenops is that LaTeX math looks beautiful in Emacs when rendered as SVG.
+  You don't need to do anything: rendering is triggered automatically. The result is that you can work on the document in Emacs without needing to frequently check the appearance of the PDF. Rendering is asynchronous, so it doesn't interrupt your writing.
 
 - **A LaTeX file edited with Xenops is just a normal `.tex` file.**
 
@@ -404,6 +404,7 @@ In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops
 
 # 6. Documentation TODOs
 
+- How to avoid blurry / low-quality LaTeX preview images.
 - Generating graphics from minted blocks
 - Relation to preview-latex in auctex
 - Relation to org-mode
