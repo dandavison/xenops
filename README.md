@@ -380,16 +380,16 @@ In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops
 <br>
 <br>
 
-| Variable                                |                                                                                                                            | Default value            |
-|-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------|--------------------------|
-| `xenops-cache-directory`                | The location of the directory in which Xenops<br>saves SVG images.                                                         | ~/.emacs.d/xenops-cache/ |
-|                                         |                                                                                                                            |                          |
-| `xenops-math-latex-max-tasks-in-flight` | The maximum number of latex processing tasks<br>that are permitted to be simultaneously active.                            | 32                       |
-|                                         |                                                                                                                            |                          |
-| `xenops-font-family`                    | The font family to use in Xenops buffers.<br>(You can choose this interactively using<br>`M-x xenops-select-font-family`.) | nil                      |
-|                                         |                                                                                                                            |                          |
-| `xenops-tooltip-delay`                  | The time delay in seconds before displaying<br>a tooltip on mouseover.                                                     | 0.2                      |
-|                                         |                                                                                                                            |                          |
+| Variable                                |                                                                                                                            | Default value           |
+|-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------|-------------------------|
+| `xenops-cache-directory`                | The location of the directory in which<br>Xenops saves SVG images.                                                         | ~/.emacs.d/xenops/cache |
+|                                         |                                                                                                                            |                         |
+| `xenops-math-latex-max-tasks-in-flight` | The maximum number of latex<br>processing tasks that are permitted<br>to be simultaneously active.                         | 32                      |
+|                                         |                                                                                                                            |                         |
+| `xenops-font-family`                    | The font family to use in Xenops buffers.<br>(You can choose this interactively using<br>`M-x xenops-select-font-family`.) | nil                     |
+|                                         |                                                                                                                            |                         |
+| `xenops-tooltip-delay`                  | The time delay in seconds before<br>displaying a tooltip on mouseover.                                                     | 0.2                     |
+|                                         |                                                                                                                            |                         |
 
 
 
