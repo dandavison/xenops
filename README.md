@@ -15,22 +15,23 @@
   </a>
 </p>
 
-   * [Overview](#overview)
-   * [Getting started](#getting-started)
-   * [How to use Xenops](#how-to-use-xenops)
-      * [Rendering math, tables and TikZ content](#rendering-math-tables-and-tikz-content)
-      * [Rendering all the content in the document](#rendering-all-the-content-in-the-document)
-      * [Executing code](#executing-code)
-      * [Working with images](#working-with-images)
-      * [Xen mode](#xen-mode)
-   * [Command and variable reference](#command-and-variable-reference)
-   * [Misc](#misc)
-   * [Documentation TODOs](#documentation-todos)
-   * [Contributing](#contributing)
-   * [Internals](#internals)
-   * [Credit](#credit)
+   * [1. Overview](#1-overview)
+   * [2. Getting started](#2-getting-started)
+   * [3. How to use Xenops](#3-how-to-use-xenops)
+      * [3.1 Rendering math, tables and TikZ content](#31-rendering-math-tables-and-tikz-content)
+      * [3.2 Rendering all the content in the document](#32-rendering-all-the-content-in-the-document)
+      * [3.3 Executing code](#33-executing-code)
+         * [3.3.1 SymPy example](#331-sympy-example)
+         * [3.3.2 Mathematica example](#332-mathematica-example)
+      * [3.4 Working with images](#34-working-with-images)
+      * [3.5 Xen mode](#35-xen-mode)
+   * [4. Command and variable reference](#4-command-and-variable-reference)
+   * [5. Misc](#5-misc)
+   * [6. Documentation TODOs](#6-documentation-todos)
+   * [7. Contributing](#7-contributing)
+   * [8. Credit](#8-credit)
 
-# Overview
+# 1. Overview
 
 Xenops is a LaTeX editing environment for mathematical documents in Emacs.
 
@@ -63,7 +64,7 @@ When using Xenops, you can continue to use [auctex](https://www.gnu.org/software
 Xenops can also be used with [org-mode](https://orgmode.org) documents that contain LaTeX fragments.
 
 
-# Getting started
+# 2. Getting started
 
 
 1. **Ensure that you have [LaTeX](https://www.latex-project.org/get) installed on your machine.**
@@ -110,7 +111,7 @@ Xenops can also be used with [org-mode](https://orgmode.org) documents that cont
     If so, move on to the next section, `"How to use Xenops"`. If not, the `xenops-doctor` output will explain what is wrong.
 
 
-# How to use Xenops
+# 3. How to use Xenops
 
 You don't need to learn any commands for Xenops to render your math: you just type, and Xenops will render it. The animation at the top of this README gives an idea of what this looks like (refresh the page to make it play again).
 
@@ -128,7 +129,7 @@ The other command to know from the start is `xenops-doctor`: run this if somethi
 
 The following sections give more detailed instructions and examples.
 
-## Rendering math, tables and TikZ content
+## 3.1 Rendering math, tables and TikZ content
 
 This section gives step-by-step instructions and shows what to do if it is not working.
 
@@ -177,7 +178,7 @@ This section gives step-by-step instructions and shows what to do if it is not w
     Select `"View failing command output"` to see the errors from the `latex` process, or select `"Copy failing command"` in order to debug the problem from the command-line.
 
 
-## Rendering all the content in the document
+## 3.2 Rendering all the content in the document
 
 Place the cursor anywhere in the document, but not in a math/table/TikZ element, and issue `M-x xenops-dwim`.
 
@@ -185,7 +186,7 @@ This will kick off one asynchronous processing task for every renderable element
 
 Alternatively, you can select a region, and `xenops-dwim` will act on just the elements in that region.
 
-## Executing code
+## 3.3 Executing code
 
 Emacs provides sophisticated facilities for executing blocks of code written in many different languages: see [org-babel](https://orgmode.org/manual/Working-with-source-code.html).
 
@@ -197,9 +198,9 @@ There are many possibilities with documents that are a hybrid of code, code resu
 <br><br>
 With Xenops, we can use this to check calculations done by hand against the output of a symbolic algebra package.
 
-Both SymPy and Mathematica can return their results to the Emacs buffer as LaTeX code, and Xenops will render this immediately as an image. The result is that it feels as if Sympy/Mathematica are returning their results as an image, typeset in traditional mathematical notation, which can be helpful for a quick check of manually-obtained results:
+Both [SymPy](https://www.sympy.org/en/index.html) and [Mathematica](https://www.wolfram.com/mathematica/) can return their results to the Emacs buffer as LaTeX code, and Xenops will render this immediately as an image. The result is that it feels as if Sympy/Mathematica are returning their results as an image, typeset in traditional mathematical notation, which can be helpful for a quick check of manually-obtained results:
 
-### SymPy example
+### 3.3.1 SymPy example
 
 ```latex
 \begin{minted}{python3} :sympy t :results latex
@@ -228,7 +229,7 @@ After `xenops-dwim` on the code block, the Xenops buffer looks like this:
   <img width=550px src="https://user-images.githubusercontent.com/52205/77271553-63db7b80-6c85-11ea-85e5-8a31741569bb.png" alt="image" />
 </td></tr></table>
 
-### Mathematica example
+### 3.3.2 Mathematica example
 
 ```latex
 The derivative is
@@ -252,7 +253,7 @@ After `xenops-dwim` on the math and code blocks, the Xenops buffer looks like th
 
 Note that for SymPy, the header arguments `:sympy t :results latex` are necessary to tell Xenops that this is not a normal python code block and that it should insert SymPy code to automatically format the result as LaTeX. For Mathematica, `:results: latex` suffices for this.
 
-## Working with images
+## 3.4 Working with images
 
 The size of images displayed in the buffer can be changed with `xenops-increase-size` and `xenops-decrease-size`.
 
@@ -274,7 +275,7 @@ The document continues.
 
 
 
-## Xen mode
+## 3.5 Xen mode
 
 The command `xenops-xen-mode` toggles an alternative cleaner view that hides common LaTeX markup and applies some visual styling. These are changes in appearance only -- the actual text content of the document is never changed and hitting save after turning on Xen mode will not cause any new changes to be written to disk.
 
@@ -326,7 +327,7 @@ In the example below, Xen-mode has made the following changes to the visual appe
 </table>
 
 
-# Command and variable reference
+# 4. Command and variable reference
 
 For commands that operate on one or more elements the rule is:
 - If there is an element at the current cursor position, operate on that element.
@@ -392,7 +393,7 @@ In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops
 
 
 
-# Misc
+# 5. Misc
 
 - Xenops caches the SVG images. If it notices that it already has the image for some LaTeX math/table/TikZ content, then it will not re-run `latex`. The cache location on disk is determined by the variable `xenops-cache-directory`.
 
@@ -401,19 +402,18 @@ In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops
 - If you are encountering any problems, the first thing to try is `M-x xenops-doctor`. Beyond that, please don't hesitate to open Github issues!
 
 
-# Documentation TODOs
+# 6. Documentation TODOs
 
 - Generating graphics from minted blocks
-- SymPy examples
 - Relation to preview-latex in auctex
 - Relation to org-mode
 
-# Contributing
+# 7. Contributing
 
 Xenops can be used profitably for serious work! However, there are still bugs and missing features. Please don't hesitate to get in touch and/or open Github issues. And if you know some emacs-lisp, your help would be very welcome. Please get in touch (dandavison7@gmail.com) and/or jump on the Github issues.
 
 
-# Credit
+# 8. Credit
 
 - [auctex](https://www.gnu.org/software/auctex/)
 - [emacs-aio](https://github.com/skeeto/emacs-aio)
