@@ -149,7 +149,14 @@ individual math elements.")
                   (insert latex-document)))))
             (dolist (command commands)
               (aio-await (xenops-aio-subprocess command)))
-            (aio-await (aio-with-async (copy-file image-output-file cache-file 'replace)))
+            (aio-await (aio-with-async
+                         (if (and (eq (xenops-math-latex-process-get :image-output-type) "png")
+                                  (xenops-math-latex-process-get :image-output-ppi))
+                             (let ((png-bytes (xenops-png-set-phys-chunk
+                                               (f-read-bytes image-output-file)
+                                               (xenops-math-latex-process-get :image-output-ppi))))
+                               (f-write-bytes png-bytes cache-file))
+                           (copy-file image-output-file cache-file 'replace))))
             (aio-await
              (xenops-aio-with-async-with-buffer
               buffer
