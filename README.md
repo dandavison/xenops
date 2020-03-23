@@ -197,7 +197,38 @@ There are many possibilities with documents that are a hybrid of code, code resu
 <br><br>
 With Xenops, we can use this to check calculations done by hand against the output of a symbolic algebra package.
 
-Both SymPy and Mathematica can return their results to the Emacs buffer as LaTeX code, and Xenops will render this immediately as an image. The result is that it feels as if Sympy/Mathematica are returning their results as an image, typeset in traditional mathematical notation, which can be helpful for a quick check:
+Both SymPy and Mathematica can return their results to the Emacs buffer as LaTeX code, and Xenops will render this immediately as an image. The result is that it feels as if Sympy/Mathematica are returning their results as an image, typeset in traditional mathematical notation, which can be helpful for a quick check of manually-obtained results:
+
+### SymPy example
+
+```latex
+\begin{minted}{python3} :sympy t :results latex
+from sympy import integrate, symbols
+t, y, tau = symbols('t y tau')
+
+def picard(f, y_prev, a, b):
+    return b + integrate(f.subs([(t, tau), (y, y_prev)]), (tau, a, t))
+
+a, b = 0, 1
+
+picard_iterates = []
+y = b
+for i in [1, 2, 3]:
+    f = (1 - 2*t) * y
+    y = picard(f, y, a, b)
+    picard_iterates.append(y)
+
+return picard_iterates
+\end{minted}
+```
+
+After `xenops-dwim` on the code block, the Xenops buffer looks like this:
+
+<table><tr><td>
+  <img width=550px src="https://user-images.githubusercontent.com/52205/77271553-63db7b80-6c85-11ea-85e5-8a31741569bb.png" alt="image" />
+</td></tr></table>
+
+### Mathematica example
 
 ```latex
 The derivative is
@@ -213,10 +244,13 @@ D[y'[x]/Sqrt[1 + y'[x]^2], x]
 \end{minted}
 ```
 
-`M-x xenops-dwim` on that minted block yields:
+After `xenops-dwim` on the math and code blocks, the Xenops buffer looks like this:
 
-<img width=700px src="https://user-images.githubusercontent.com/52205/76138564-27feb000-600f-11ea-849c-bad5b79e77cd.png" alt="image" />
+<table><tr><td>
+  <img width=700px src="https://user-images.githubusercontent.com/52205/76138564-27feb000-600f-11ea-849c-bad5b79e77cd.png" alt="image" />
+</td></tr></table>
 
+Note that for SymPy, the header arguments `:sympy t :results latex` are necessary to tell Xenops that this is not a normal python code block and that it should insert SymPy code to automatically format the result as LaTeX. For Mathematica, `:results: latex` suffices for this.
 
 ## Working with images
 
