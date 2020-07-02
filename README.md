@@ -287,6 +287,15 @@ In the example below, Xen-mode has made the following changes to the visual appe
 
 <table>
   <tr>
+    <td></td>
+    <td>
+      <b>Math block in edit mode</b>
+    </td>
+    <td>
+      <b>Math block rendered</b>
+    </td>
+  </tr>
+  <tr>
     <td>
       <b>Default view</b>
     </td>
