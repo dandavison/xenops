@@ -23,6 +23,7 @@ test:
 		-l tests/xenops-test-image.el \
 		-l tests/xenops-test-math-latex.el \
 		-l tests/xenops-test-math.el \
+		-l tests/xenops-test-parse.el \
 		-l tests/xenops-test-png.el \
 		-l tests/xenops-test-src.el \
 		-l tests/xenops-test-util.el \
