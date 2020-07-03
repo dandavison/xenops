@@ -53,6 +53,7 @@
 
 (require 'cl-lib)
 (require 'org)
+(require 'org-element)
 (require 'subr-x)
 
 (require 'aio)

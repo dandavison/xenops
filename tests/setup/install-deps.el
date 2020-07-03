@@ -26,3 +26,8 @@
   (push 'auctex xenops-dependencies))
 (package-refresh-contents)
 (mapc #'xenops-package-install xenops-dependencies)
+
+(require 'org)
+(unless (string-match "^9\." org-version)
+  (message "org-version is %S but >= 9 is required" org-version)
+  (kill-emacs 1))
