@@ -1,6 +1,8 @@
 #!/bin/bash
 
-emacs \
+EMACS=${EMACS:-emacs}
+
+$EMACS \
     --no-init-file \
     --load tests/setup/init.el \
     --load tests/setup/install-deps.el \
