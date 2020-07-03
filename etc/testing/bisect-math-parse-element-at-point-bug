@@ -1,0 +1,15 @@
+#!/bin/bash
+
+EMACS=${EMACS:-emacs}
+
+# TODO: this should use etc/bin/emacs instead of duplicating it 
+$EMACS \
+    --no-init-file \
+    --load tests/setup/init.el \
+    --load tests/setup/install-deps.el \
+    --eval "(add-to-list 'load-path \"$PWD/lisp\")" \
+    --eval "(add-to-list 'load-path \"$PWD\")" \
+    --eval "(require 'xenops)" \
+    --eval "(add-hook 'LaTeX-mode-hook #'xenops-mode)" \
+    --eval '(with-temp-buffer (insert "$x$") (goto-char 3) (message "%S" (xenops-math-parse-inline-element-at-point)))' \
+    --batch
