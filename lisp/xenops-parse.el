@@ -46,6 +46,10 @@ the beginning of the overlay and attempt the parse there."
   "If point is between regexps, return plist describing match."
   ;; Based on `org-between-regexps-p'.
   (save-excursion
+    (when (looking-at (car (last delimiters)))
+      ;; This function will return nil if point is between delimiters separated by
+      ;; zero characters.
+      (left-char))
     (let ((pos (point)) beg-beg beg-end end-beg end-end)
       (and (or (org-in-regexp (car delimiters))
                (and (< lim-up (point)) (re-search-backward (car delimiters) lim-up t)))
