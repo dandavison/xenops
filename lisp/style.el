@@ -179,7 +179,7 @@ replacement text.")
         (capture (save-match-data
                    (s-join " " (split-string (match-string match-string-index))))))
     (pcase spec
-      (`(,regexp . ,formatter) (funcall formatter capture))
+      (`(,_ . ,formatter) (funcall formatter capture))
       (_ capture))))
 
 (defun style-compose (composition properties beg end)

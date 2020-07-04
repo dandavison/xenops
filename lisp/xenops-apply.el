@@ -38,17 +38,20 @@ of elements operated on."
                            (xenops-dispatch-handlers handlers el))))
     (save-excursion
       (goto-char beg)
-      (let ((parse-at-point-fns (xenops-elements-get-all :parser)))
+      (let ((el)
+            (parse-at-point-fns (xenops-elements-get-all :parser)))
         (while (setq el (xenops-apply-parse-next-element end parse-at-point-fns))
           (and el
                (or (null pred) (funcall pred el))
                (ignore-errors (handle el))))))))
 
-(defun xenops-apply-operations-at-point (ops &optional _)
-  "Apply operation types OPS to element at point, if there is one."
+(defun xenops-apply-operations-at-point (ops &optional args)
+  "Apply operation types OPS to element at point, if there is one.
+
+Optional argument ARGS are passed to `xenops-apply-handlers-at-point'."
   (let ((handlers (xenops-ops-get-for-ops ops :handlers)))
     (run-hook-with-args 'xenops-apply-pre-apply-hook handlers)
-    (prog1 (xenops-apply-handlers-at-point handlers _)
+    (prog1 (xenops-apply-handlers-at-point handlers args)
       (run-hook-with-args 'xenops-apply-post-apply-hook handlers))))
 
 (defun xenops-apply-handlers-at-point (handlers &optional _)
@@ -66,13 +69,13 @@ subset of parsing functions to use."
   (let ((start-regexp (xenops-elements-delimiter-start-regexp))
         (end (or end (point-max)))
         (parse-at-point-fns (or parse-at-point-fns (xenops-elements-get-all :parser))))
-    (-if-let* ((_ (re-search-forward start-regexp end t))
-               (_ (goto-char (match-beginning 0)))
+    (-if-let* ((find (re-search-forward start-regexp end t))
+               (visit-beg (goto-char (match-beginning 0)))
                (element (xenops-parse-any-element-at-point parse-at-point-fns))
-               (_ (goto-char (plist-get element :end))))
+               (visit-end (goto-char (plist-get element :end))))
         element)))
 
-(defun xenops-apply-post-apply-deactivate-mark (handlers &optional _ _ region-active)
+(defun xenops-apply-post-apply-deactivate-mark (handlers &optional _ __ region-active)
   "Deactivate mark when appropriate.
 
 HANDLERS are the current handlers and are used to determine

@@ -111,7 +111,7 @@ environment."
   (cond ((xenops-src-latex-results? element)
          (xenops-src-post-process-latex-result element))
         ((xenops-src-image-results? element)
-         (xenops-src-post-process-image-result element))))
+         (xenops-src-post-process-image-result))))
 
 (defun xenops-src-post-process-latex-result (element)
   "Post-process latex result of executing ELEMENT."
@@ -126,17 +126,16 @@ environment."
       (-if-let* ((element (xenops-apply-parse-next-element)))
           (xenops-dispatch-operation 'render element)))))
 
-(defun xenops-src-post-process-image-result (element)
-  "Post-process image result of executing ELEMENT."
-  (let* ((lang (downcase (plist-get element :language))))
-    (save-excursion
-      (when (re-search-forward
-             "#\\+RESULTS:\n\\[\\[file:\\([^]\n]+\\)\\]\\]" nil t)
-        (replace-match
-         "\\\\includegraphics{\\1}" t)))
-    (save-excursion
-      (-if-let* ((element (xenops-apply-parse-next-element)))
-          (xenops-dispatch-operation 'render element)))))
+(defun xenops-src-post-process-image-result ()
+  "Post-process image result."
+  (save-excursion
+    (when (re-search-forward
+           "#\\+RESULTS:\n\\[\\[file:\\([^]\n]+\\)\\]\\]" nil t)
+      (replace-match
+       "\\\\includegraphics{\\1}" t)))
+  (save-excursion
+    (-if-let* ((element (xenops-apply-parse-next-element)))
+        (xenops-dispatch-operation 'render element))))
 
 (defun xenops-src-org-babel-result-params (element)
   "Return org-babel result-params for src element ELEMENT."

@@ -47,11 +47,11 @@ If PPI is nil, return an exact copy of the input PNG data."
   "Construct the pHYs chunk for the requested size PPM.
 
 Return value is a list of bytes."
-  (let ((bytes nil))
+  (let ((phys-crc-message)
+        (bytes nil))
     ;; The length (4 bytes) is always 9. It is not included in the CRC message.
     (dolist (byte '(0 0 0 9))
       (push byte bytes))
-    (setq phys-crc-message nil)
     (dolist (title-byte '(#x70 #x48 #x59 #x73))
       (push title-byte bytes)
       (push title-byte phys-crc-message))

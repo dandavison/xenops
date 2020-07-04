@@ -17,12 +17,10 @@
   (setf (aref sem 2) '(nil . nil)
         (aref sem 1) init))
 
-(defun xenops-aio-subprocess (command &optional output-buffer error-buffer)
+(defun xenops-aio-subprocess (command &optional _ __)
   "Start asynchronous subprocess; return a promise.
 
 COMMAND is the command to run as an asynchronous subprocess.
-Standard output of the process is sent to OUTPUT-BUFFER.
-ERROR-BUFFER is ignored currently.
 
 Resolve the promise when the process exits. The value function
 does nothing if the exit is successful, but if the process exits

@@ -21,7 +21,7 @@
 (defun xenops-font-get-fontified-family-strings (face-spec)
   "Return font family names, fontified for display using FACE-SPEC."
   (mapcar (lambda (family)
-            (setq family (substring family))
+            (setq family (copy-sequence family))
             (add-face-text-property 0 (length family)
                                     (append `(:family ,family) face-spec)
                                     nil family)

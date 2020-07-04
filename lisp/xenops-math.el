@@ -390,7 +390,7 @@ If we are in a math element, then paste without the delimiters"
                   (length element-string))
           element))))
 
-(defun xenops-math-handle-element-transgression (window oldpos event-type)
+(defun xenops-math-handle-element-transgression (_window oldpos event-type)
   "Render a math element when point leaves it.
 
 WINDOW is currently ignored. OLDPOS is the previous location of
@@ -421,9 +421,9 @@ is the start event of the mouse drag."
                                          ;; TODO: detect image type
                                          `(image . (:file ,(xenops-math-get-cache-file element) :type svg)))))
           (cl-letf (((symbol-function 'mouse-posn-property)
-                     (lambda (&rest args) 'region))
+                     (lambda (&rest _) 'region))
                     ((symbol-function 'tooltip-show)
-                     (lambda (text &rest args)
+                     (lambda (_ &rest args)
                        (apply tooltip-show-fn image-tooltip args))))
             (funcall mouse-drag-region-fn start-event))))
     (funcall mouse-drag-region-fn start-event)))
@@ -501,8 +501,7 @@ DELIMITERS is the delimiter pair sought."
 
 BEG and END define the region acted on."
   (interactive "r")
-  (let* ((delimiters )
-         (boundary-regexp
+  (let* ((boundary-regexp
           (format "\\(\n?%s\n?\\)"
                   (s-join "\\|"
                           (cl-loop

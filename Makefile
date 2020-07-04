@@ -33,7 +33,7 @@ test:
 lint:
 	emacs -Q --batch -l elisp-lint.el -f elisp-lint-files-batch lisp/*.el
 
-build:
-	@:
+compile:
+	./etc/bin/emacs --batch -f batch-byte-compile lisp/*.el
 
 .PHONY: deps test lint build

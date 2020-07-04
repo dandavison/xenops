@@ -41,12 +41,12 @@ resulting LaTeX.")
                           (plist-get element :end)
                           '(display nil keymap nil)))
 
-(defun xenops-image-increase-size (element)
-  "Increase size of image element ELEMENT."
+(defun xenops-image-increase-size (_)
+  "Increase size of images."
   (image--change-size xenops-math-image-change-size-factor))
 
-(defun xenops-image-decrease-size (element)
-  "Decrease size of image element ELEMENT."
+(defun xenops-image-decrease-size (_)
+  "Decrease size of images."
   (image--change-size (/ 1 xenops-math-image-change-size-factor)))
 
 (defun xenops-image-post-apply-hook-function (handlers &optional beg end _)
