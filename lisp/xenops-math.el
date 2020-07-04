@@ -522,19 +522,19 @@ BEG and END define the region acted on."
 
 (defun xenops-math-copy-and-paste-element ()
   "Copy and paste a math element using avy."
-  (let ((element)
-        (avy-action
+  (let ((avy-action
          (lambda (pt)
-           (save-excursion
-             (goto-char
-              ;; TODO: hack: This should be just `pt`, but inline
-              ;; math elements are not recognized when point is on
-              ;; match for first delimiter.
-              (1+ pt))
-             (setq element (xenops-math-parse-element-at-point))
-             (when element (xenops-element-copy element)))
-           (when element
-             (save-excursion (xenops-math-paste))))))
+           (let ((element))
+             (save-excursion
+               (goto-char
+                ;; TODO: hack: This should be just `pt`, but inline
+                ;; math elements are not recognized when point is on
+                ;; match for first delimiter.
+                (1+ pt))
+               (setq element (xenops-math-parse-element-at-point))
+               (when element (xenops-element-copy element)))
+             (when element
+               (save-excursion (xenops-math-paste)))))))
     (xenops-avy-do-at-element '(block-math inline-math))))
 
 (defun xenops-math-get-cache-file (element)
