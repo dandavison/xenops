@@ -31,7 +31,7 @@ test:
 		-f ert-run-tests-batch-and-exit
 
 lint:
-	emacs -Q --batch -l elisp-lint.el -f elisp-lint-files-batch *.el
+	emacs -Q --batch -l elisp-lint.el -f elisp-lint-files-batch lisp/*.el
 
 build:
 	@:
