@@ -1,5 +1,7 @@
 ;;; xenops-overlay.el --- Create/Read/Delete API for xenops overlays used to render Xenops elements -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

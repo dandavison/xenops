@@ -1,5 +1,7 @@
 ;;; xenops-util.el --- Miscellaneous utility functions  -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

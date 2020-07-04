@@ -1,5 +1,7 @@
 ;;; xenops-auctex.el --- Xenops-auctex integration -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

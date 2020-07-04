@@ -1,5 +1,7 @@
 ;;; xenops-math-latex.el --- Asynchronous processing of LaTeX fragments to SVG -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

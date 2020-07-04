@@ -1,5 +1,7 @@
 ;;; style.el --- A library for visual styling of text in a buffer, inspired by `prettify-symbols-mode' -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

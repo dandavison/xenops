@@ -1,5 +1,7 @@
 ;;; xenops-png.el --- Functions for manipulating binary PNG data -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

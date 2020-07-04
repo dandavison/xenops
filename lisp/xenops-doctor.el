@@ -1,5 +1,7 @@
 ;;; xenops-doctor.el --- Cure unhappy Xenopsen -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

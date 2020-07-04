@@ -1,5 +1,7 @@
 ;;; xenops-font.el --- Functions for setting fonts in a Xenops buffer -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

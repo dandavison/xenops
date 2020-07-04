@@ -1,5 +1,7 @@
 ;;; xenops-math.el --- Functions for working with elements of type 'block-math, 'inline-math, and 'table  -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;; Terminology

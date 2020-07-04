@@ -1,5 +1,7 @@
 ;;; xenops-image.el --- Functions for working with elements of type 'image -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;; Elements of type 'image represent (bitmap) images whose point of truth is an image file on disk

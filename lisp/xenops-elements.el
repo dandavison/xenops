@@ -1,5 +1,7 @@
 ;;; xenops-elements.el --- API for working with `xenops-elements' -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

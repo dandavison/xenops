@@ -1,5 +1,7 @@
 ;;; xenops-apply.el --- Functions for applying operations to elements in a region -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

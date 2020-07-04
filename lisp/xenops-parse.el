@@ -1,5 +1,7 @@
 ;;; xenops-parse.el --- Functions for parsing elements from their text representation -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

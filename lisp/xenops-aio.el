@@ -1,5 +1,7 @@
 ;;; xenops-aio.el --- Xenops-aio integration -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

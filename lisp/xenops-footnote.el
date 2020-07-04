@@ -1,5 +1,7 @@
 ;;; xenops-footnote.el --- Functions for working with elements of type 'footnote -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

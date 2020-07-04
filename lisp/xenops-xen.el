@@ -1,5 +1,7 @@
 ;;; xenops-xen.el --- A alternative cleaner view of a LaTeX buffer -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

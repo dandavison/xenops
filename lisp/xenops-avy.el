@@ -1,5 +1,7 @@
 ;;; xenops-avy.el --- Operate on elements using avy -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;;; Code:

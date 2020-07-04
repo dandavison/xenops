@@ -1,5 +1,7 @@
 ;;; xenops-minted.el --- Utilities for working with elements of type 'minted -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;; Elements of type 'minted represent LaTeX minted environments (https://github.com/gpoore/minted).

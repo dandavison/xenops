@@ -1,5 +1,7 @@
 ;;; xenops-src.el --- Utilities for working with elements of type 'src -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;; Elements of type 'src represent alien org-mode 'src blocks in a LaTeX buffer. They contain code.

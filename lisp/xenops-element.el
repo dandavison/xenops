@@ -1,5 +1,7 @@
 ;;; xenops-element.el --- Functions for operating generically on an element -*- lexical-binding: t; -*-
 
+;; SPDX-License-Identifier: MIT
+
 ;;; Commentary:
 
 ;; Generic operations on an element. Functions in this file should determine behavior based on the
