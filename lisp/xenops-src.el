@@ -11,7 +11,7 @@
 ;;; Code:
 
 (defvar xenops-src-mathematica-use-wolframscript t
-  "Whether to use `wolframscript` or `MathematicaScript` to execute Mathematica code.
+  "Use `wolframscript` or `MathematicaScript` to execute Mathematica code?
 
 If non-nil then use the `wolframscript` executable to execute
 mathematica code; otherwise use `MathematicaScript`. Note that
@@ -97,7 +97,7 @@ as LaTeX."
 (defun xenops-src-execute-src-block (element)
   "Execute parsed src element ELEMENT.
 
-If `:results latex`, post-process by replacing the org-mode LaTeX
+If `:results latex`, post-process by replacing the Org mode LaTeX
 export block (see `org-babel-insert-result') with a LaTeX align
 environment."
   ;; ELEMENT is executed in a temporary org-mode buffer and the
@@ -155,7 +155,7 @@ environment."
 (defun xenops-src-execute-parsed-src-block (info)
   "Execute an org-babel src block from the parsed org-babel data structure INFO.
 
-Return the results section that is written to the org-mode
+Return the results section that is written to the Org mode
 buffer, as a string."
   (with-temp-buffer
     (org-mode)
@@ -165,7 +165,7 @@ buffer, as a string."
     (buffer-substring (point) (point-max))))
 
 (defmacro xenops-src-do-in-org-mode (&rest body)
-  "Execute forms in BODY with current src block in an org-mode buffer."
+  "Execute forms in BODY with current src block in an Org mode buffer."
   `(save-restriction
      (progn
        (condition-case nil

@@ -7,8 +7,7 @@
 ;;; Code:
 
 (defun xenops-doctor (&optional quiet)
-  "Check your Emacs environment for any problems that will
-prevent Xenops from working correctly.
+  "Check your Emacs environment for any problems that will affect Xenops.
 
 The checks run are:
 
@@ -16,7 +15,9 @@ The checks run are:
 - External latex and dvisvgm executables can be located.
 - This Emacs is able to display SVGs.
 - Emacs is not running as a terminal application.
-"
+
+With optional argument QUIET, don't display any output unless
+there are problems."
   (interactive)
   (let ((problems)
         (emacs-major-version (string-to-number (car (s-split "\\." emacs-version))))
@@ -129,8 +130,13 @@ The checks run are:
       (if (or problems (not quiet)) (display-buffer buf)))))
 
 (defun xenops-doctor-format (s &rest args)
+  "Format string S for `xenops-doctor' output using format arguments ARGS."
   (apply #'format (s-replace-regexp "\n  +" "\n" s) args))
 
 (provide 'xenops-doctor)
 
 ;;; xenops-doctor.el
+
+(provide 'xenops-doctor)
+
+;;; xenops-doctor.el ends here

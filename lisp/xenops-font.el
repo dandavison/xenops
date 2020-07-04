@@ -19,6 +19,7 @@
   (buffer-face-mode))
 
 (defun xenops-font-get-fontified-family-strings (face-spec)
+  "Return font family names, fontified for display using FACE-SPEC."
   (mapcar (lambda (family)
             (setq family (substring family))
             (add-face-text-property 0 (length family)
@@ -28,10 +29,13 @@
           (font-family-list)))
 
 (defun xenops-select-font-family (&rest face-spec)
-  "Interactively select and activate a new font family for the current Xenops buffer.
+  "Select and activate a new font family for the current Xenops buffer.
 
 For example, this can be used to choose a font for normal Emacs
-buffer text that matches the font in typeset LaTeX SVG output."
+buffer text that matches the font in typeset LaTeX SVG output.
+
+Optional argument FACE-SPEC is base face to use when displaying
+font family names."
   (interactive)
   (unless face-spec (setq face-spec '(:height 1.1 :foreground "blue4" :weight 'bold)))
   (let* ((completing-read-function

@@ -7,16 +7,18 @@
 ;;; Code:
 
 (defun xenops-goto-element ()
+  "Jump to a xenops element."
   (interactive)
   (let (avy-action)
     (xenops-avy-do-at-element)))
 
 (defun xenops-copy-and-paste-element ()
+  "Copy a xenops element and paste ijt at point."
   (interactive)
   (xenops-math-copy-and-paste-element))
 
 (defun xenops-avy-do-at-element (&optional types)
-  "Perform an avy action on an element."
+  "Perform an avy action on an element of a type in TYPES."
   (avy-jump (xenops-elements-delimiter-start-regexp types)))
 
 (provide 'xenops-avy)

@@ -11,7 +11,7 @@
 
 The binding is such that if HANDLER returns nil, then the
 function is called that would have been bound to KEY were
-`xenops-mode' not active."
+variable `xenops-mode' not active."
   `(define-key xenops-mode-map ,key
      (lambda ()
        (interactive)
@@ -47,11 +47,12 @@ ARGS will typically look like :k1 v1 :k2 v2 ..."
   plist)
 
 (defun xenops-util-parse-image-at (pos)
+  "Parse image at POS."
   (let ((display (get-char-property pos 'display )))
     (and (eq (car display) 'image) display)))
 
 (defun xenops-util-svg-resize (svg scale)
-  "Return SVG data with height and width scaled by SCALE"
+  "Return SVG data with height and width scaled by SCALE."
   (cl-flet ((resize (match)
                     (cl-destructuring-bind (size . units)
                         (xenops-util-svg-parse-length-or-percent (match-string 1 match))
@@ -78,3 +79,7 @@ For example, STRING might look like '1.5pt' or '50.5%'"
 (provide 'xenops-util)
 
 ;; xenops-util.el ends here
+
+(provide 'xenops-util)
+
+;;; xenops-util.el ends here

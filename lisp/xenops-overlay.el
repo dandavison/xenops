@@ -30,3 +30,7 @@
     (delete-overlay ov)))
 
 (provide 'xenops-overlay)
+
+(provide 'xenops-overlay)
+
+;;; xenops-overlay.el ends here

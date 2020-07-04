@@ -88,19 +88,19 @@
   "Path to a directory in which xenops can save files.")
 
 (defvar xenops-font-family nil
-  "The font family used for all text other than math and source code elements in a Xenops buffer.
+  "Font family used for all text other than math and source code elements.
 
-To make this take effect, restart `xenops-mode'. You can use
-`xenops-select-font-family' to try out different fonts
+To make this take effect, use toggle command `xenops-mode'. You
+can use `xenops-select-font-family' to try out different fonts
 interactively.")
 
 (defvar xenops-mode-map (make-sparse-keymap)
   "The main Xenops keymap.
 
-Xenops is a minor-mode, so it is not allowed to override
-major-mode keybindings. Therefore, all Xenops commands are bound
-in `xenops-secondary-keymap'. A few important commands are also
-made available in this keymap.")
+Xenops is a minor-mode, so it is not allowed to override major
+mode keybindings. Therefore, all Xenops commands are bound in
+`xenops-secondary-keymap'. A few important commands are also made
+available in this keymap.")
 
 (defvar xenops-secondary-keymap (make-sparse-keymap)
   "All Xenops commands are available in this keymap.")
@@ -109,9 +109,10 @@ made available in this keymap.")
   "A keymap that is active when point is on a rendered element, such as a math/table image.")
 
 (defvar xenops-tooltip-delay 0.2
-  "The value of the variable `tooltip-delay' when xenops-mode is active.")
+  "The value of the variable `tooltip-delay' when variable `xenops-mode' is active.")
 
 (defmacro xenops-define-apply-command (op docstring)
+  "Define an apply command for OP with DOCSTRING."
   `(defun ,(intern (concat "xenops-" (symbol-name op))) ()
      ,(concat docstring "\n\n"
               "The elements operated on are determined by trying the following:
@@ -137,6 +138,7 @@ made available in this keymap.")
                              "Decrease size of images.")
 
 (defmacro xenops-define-apply-at-point-command (op docstring)
+  "Define an apply-at-point command for OP with DOCSTRING."
   `(defun ,(intern (concat "xenops-" (symbol-name op) "-at-point")) ()
      ,docstring
      (interactive)
@@ -193,6 +195,7 @@ made available in this keymap.")
     (xenops-xen-mode -1))))
 
 (defun xenops-define-keys ()
+  "Define key bindings for xenops mode."
   ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Keymaps-and-Minor-Modes.html
   ;;
   ;; Minor modes may bind commands to key sequences consisting of C-c followed by a punctuation
@@ -244,11 +247,11 @@ By default this command displays LaTeX math/tables/TikZ as
 images, or executes the code block at point. This is equivalent
 to using `xenops-render' or `xenops-execute'.
 
-With a single C-u prefix argument, it reveals the element at
+With a single prefix argument ARG, it reveals the element at
 point for editing (removes the image). This is equivalent to
 `xenops-reveal'.
 
-With two C-u prefix arguments, it regenerates the image (i.e.
+With a double prefix argument ARG, it regenerates the image (i.e.
 re-runs LaTeX, refusing to use a cached image). This is
 equivalent to `xenops-regenerate'."
   (interactive "P")
@@ -357,7 +360,7 @@ equivalent to `xenops-regenerate'."
       value)))
 
 (defun xenops-get-for-types (data types key)
-  "Concatenated list of all items under key KEY for any type in TYPES.
+  "Concatenated list of all items in DATA under key KEY for any type in TYPES.
 
 If TYPES is 'all, then all items under key KEY for any type."
   (-uniq
@@ -367,11 +370,13 @@ If TYPES is 'all, then all items under key KEY for any type."
                                    (let ((val (xenops-get data type key)))
                                      (if (listp val) val (list val))))))))
 
-(defun xenops-dispatch-handlers (handlers el)
-  "Call the first handler in HANDLERS that is valid for an element of this type."
+(defun xenops-dispatch-handlers (handlers element)
+  "Call the first handler in HANDLERS that is valid for an element of this type.
+
+ELEMENT is the element whose type is used."
   (-when-let* ((handler (car (-intersection handlers
-                                            (xenops-elements-get (plist-get el :type) :handlers)))))
-    (funcall handler el)
+                                            (xenops-elements-get (plist-get element :type) :handlers)))))
+    (funcall handler element)
     t))
 
 (defun xenops-dispatch-operation (op element)
@@ -406,7 +411,7 @@ If TYPES is 'all, then all items under key KEY for any type."
       (xenops-render))))
 
 (defun xenops-handle-paste ()
-  "Handle a paste event, if the clipboard data contains an element that Xenops can paste."
+  "Handle a paste event, if the clipboard data contain an element that Xenops can paste."
   (interactive)
   (or (xenops-math-handle-paste)
       (xenops-image-handle-paste)

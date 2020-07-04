@@ -134,7 +134,10 @@ If a prefuix argument is in effect, also delete its cache file."
                  begin-content))))
 
 (defun xenops-math-display-waiting (element)
-  "Style a math element to indicate that its processing task is waiting in the queue to be executed."
+  "Style a math element ELEMENT as waiting.
+
+The style indicates that its processing task is waiting in the
+queue to be executed."
   (xenops-element-overlays-delete element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
@@ -146,7 +149,11 @@ If a prefuix argument is in effect, also delete its cache file."
 Use `M-x xenops-cancel-waiting-tasks` to make this element editable.") ov))
 
 (defun xenops-math-display-image (element commands help-echo cache-file)
-  "Display SVG image resulting from successful LaTeX compilation."
+  "Display SVG image resulting from successful LaTeX compilation of ELEMENT.
+
+COMMANDS are the latex processing commands used to render the
+element. HELP-ECHO is the tooltip text to display. CACHE-FILE is
+the image cache file."
   (let ((margin (if (eq 'inline-math (plist-get element :type))
                     0 `(,xenops-math-image-margin . 0)))
         (ov (xenops-math-make-overlay element commands help-echo)))
@@ -157,7 +164,7 @@ Use `M-x xenops-cancel-waiting-tasks` to make this element editable.") ov))
     (xenops-math-image-change-size element xenops-math-image-current-scale-factor)))
 
 (defun xenops-math-display-error (element error)
-  "Style a math element to indicate that an error occurred during execution of its processing task.
+  "Style ELEMENT to indicate ERROR during execution of its processing task.
 
 Make error details available via hover-over text and contextual
 menu."
@@ -196,7 +203,10 @@ Right-click on the warning badge to copy the failing command or view its output.
     ov))
 
 (defun xenops-math-make-overlay (element commands help-echo)
-  "Make an overlay used to style a math element and display images and error information."
+  "Make overlay used to style ELEMENT and display images and error information.
+
+COMMANDS are the latex processing commands used to render the
+element. HELP-ECHO is the tooltip text to display."
   (xenops-element-overlays-delete element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
@@ -217,7 +227,7 @@ Right-click on the warning badge to copy the failing command or view its output.
     ov))
 
 (defun xenops-math-display-process-output (output)
-  "Display external process output OUTPUT in a buffer"
+  "Display external process output OUTPUT in a buffer."
   (let ((buf (get-buffer-create "*Xenops external command output*")))
     (with-current-buffer buf
       (erase-buffer)
@@ -225,17 +235,22 @@ Right-click on the warning badge to copy the failing command or view its output.
     (display-buffer buf)))
 
 (defun xenops-math-copy-latex-command (overlay)
-  "Copy external latex command to clipboard (kill-ring)."
+  "Copy external latex command to clipboard (kill-ring).
+
+OVERLAY is an element overlay from which the commands can be obtained."
   (let ((latex-command (car (overlay-get overlay 'commands))))
     (kill-new (s-join " " latex-command))))
 
 (defun xenops-math-image-increase-size (element)
+  "Increase ELEMENT image size."
   (xenops-math-image-change-size element xenops-math-image-change-size-factor))
 
 (defun xenops-math-image-decrease-size (element)
+  "Decrease ELEMENT image size."
   (xenops-math-image-change-size element (/ 1 xenops-math-image-change-size-factor)))
 
 (defun xenops-math-image-change-size (element factor)
+  "Change ELEMENT image size by multiplicative FACTOR."
   (-if-let* ((image (xenops-element-get-image element)))
       (when (eq (image-property image :type) 'svg)
         (image-flush image)
@@ -253,16 +268,18 @@ Right-click on the warning badge to copy the failing command or view its output.
                   (apply #'append (xenops-elements-get-for-types '(block-math table) :delimiters)))))
 
 (defun xenops-math-block-math-font-lock-handler ()
+  "Font-lock handler for math elements."
   (add-face-text-property (match-beginning 0) (match-end 0) 'fixed-pitch)
   (xenops-math-add-cursor-sensor-property)
   nil)
 
 (defun xenops-math-inline-math-font-lock-handler ()
+  "Font-lock handler for inline math elements."
   (xenops-math-add-cursor-sensor-property)
   nil)
 
 (defun xenops-math-add-cursor-sensor-property ()
-  "Arrange for math elements to be rendered whenever the cursor leaves the element.
+  "Render a math element whenever the cursor leaves the element.
 
 Suppose we have inline element 1$345$7 where the integers are the
 buffer positions of the corresponding characters. The following
@@ -279,7 +296,9 @@ tables shows required behavior for cursor position transitions.
 The above is achieved by setting the `cursor-sensor-functions'
 property on positions 3-6 inclusive (which are 1+:begin and :end indices).
 
-In addition, we require the following text property inheritance behavior on insertion
+In addition, we require the following text property inheritance
+behavior on insertion:
+
 | pos | behavior                  | implementation                           |
 |-----+---------------------------+------------------------------------------|
 |   2 | do not inherit from right | front-nonsticky: default Emacs behaviour |
@@ -312,10 +331,11 @@ If we are in a math element, then paste without the delimiters"
           t))))
 
 (defun xenops-math-paste ()
-  "Paste handler for math elements"
+  "Paste handler for math elements."
   (or (xenops-math-handle-paste) (yank)))
 
-(defun xenops-math-look-back-and-render-inline-math (&rest args)
+(defun xenops-math-look-back-and-render-inline-math (&rest _)
+  "Render an inline math element when a closing delimiter is inserted."
   ;; Hack:
   ;;
   ;; Unless `TeX-electric-math' is set to '("$" . "$") then, without the following, an inline
@@ -343,7 +363,7 @@ If we are in a math element, then paste without the delimiters"
   (insert ")")
   (xenops-math-look-back-and-render-inline-math))
 
-(defun xenops-math-fill-paragraph-after-advice (&rest args)
+(defun xenops-math-fill-paragraph-after-advice (&rest _)
   "Re-render cached images after `fill-paragraph'."
   (let ((forward-paragraph-fn (if (fboundp 'LaTeX-forward-paragraph)
                                   'LaTeX-forward-paragraph
@@ -361,7 +381,7 @@ If we are in a math element, then paste without the delimiters"
           (xenops-render-if-cached)))))
 
 (defun xenops-math-parse-element-from-string (element-string)
-  "Parse a math element from a string."
+  "Parse a math element from ELEMENT-STRING."
   (with-temp-buffer
     (save-excursion (insert element-string))
     (-if-let* ((element (xenops-math-parse-element-at-point)))
@@ -371,7 +391,11 @@ If we are in a math element, then paste without the delimiters"
           element))))
 
 (defun xenops-math-handle-element-transgression (window oldpos event-type)
-  "Render a math element when point leaves it."
+  "Render a math element when point leaves it.
+
+WINDOW is currently ignored. OLDPOS is the previous location of
+point. EVENT-TYPE is the type of cursor sensor event that
+triggered this handler."
   ;; TODO: check window
   (if (eq event-type 'left)
       (-if-let* ((was-in (xenops-math-parse-element-at oldpos)))
@@ -379,10 +403,13 @@ If we are in a math element, then paste without the delimiters"
             (xenops-math-render was-in)))))
 
 (defun xenops-math-mouse-drag-region-around-advice (mouse-drag-region-fn start-event)
-  "If point is in a math element, then cause mouse drag to appear to drag the associated image.
+  "If point is in a math element, then make mouse drag the associated image.
 
 1. Select the math element as the currently active region.
-2. Temporarily alter tooltip-show so that it displays the image."
+2. Temporarily alter `tooltip-show' so that it displays the image.
+
+MOUSE-DRAG-REGION-FN is the function being advised. START-EVENT
+is the start event of the mouse drag."
   (-if-let* ((element (xenops-math-parse-element-at (posn-point (event-start start-event)))))
       (progn
         (push-mark (plist-get element :begin))
@@ -432,7 +459,9 @@ If we are in a math element, then paste without the delimiters"
              xenops-math-environment-delimited-inline-math-delimiters))))
 
 (defun xenops-math-parse-hetero-delimited-inline-element-at-point (delimiters)
-  "Parse an inline math element at point for which the start and end delimiters differ."
+  "Parse inline math element at point for which start and end delimiters differ.
+
+DELIMITERS is the delimiter pair sought."
   (xenops-parse-element-at-point 'inline-math (point-at-bol) (point-at-eol) delimiters))
 
 (defun xenops-math-parse-homo-delimited-inline-element-at-point (delimiter)
@@ -468,7 +497,9 @@ If we are in a math element, then paste without the delimiters"
           (point-at-eol)))))
 
 (defun xenops-math-concatenate (beg end)
-  "Concatenate and re-render contiguous block math elements in region."
+  "Concatenate and re-render contiguous block math elements in region.
+
+BEG and END define the region acted on."
   (interactive "r")
   (let* ((delimiters )
          (boundary-regexp
@@ -530,7 +561,7 @@ If we are in a math element, then paste without the delimiters"
       hash-data)))
 
 (defun xenops-math-compute-file-name (latex colors)
-  "Compute the cache file name for LATEX math content."
+  "Compute the cache file name for LATEX math content using COLORS."
   (let* ((data (append (xenops-math-file-name-static-hash-data) (list latex colors)))
          (hash (sha1 (prin1-to-string data))))
     (format "%s.%s"

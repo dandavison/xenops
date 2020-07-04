@@ -77,7 +77,8 @@
     "\\\\textit{\\([^\n}]+\\)}"
     ("\\\\\\(?:sub\\)*section\\*?{\\([^\n}]+\\)}" . xenops-xen-section-title-formatter)
     "{\\\\bf +\\([^\n}]+\\)}"
-    "{\\\\it +\\([^\n}]+\\)}"))
+    "{\\\\it +\\([^\n}]+\\)}")
+  "Style rules for xenops xen-mode.")
 
 (defun xenops-xen-begin-latex-environment-formatter (env)
   "Return visual replacement for environment ENV begin token."
@@ -106,7 +107,9 @@
     (format "%s%s" (s-repeat indent " ") title)))
 
 (defun xenops-xen-style-regexp-rules-get-text-properties (match)
-  "An implementation of `style-regexp-rules-get-text-properties'."
+  "An implementation of `style-regexp-rules-get-text-properties'.
+
+MATCH is the current regular expression match."
   (cond
    ((string-match "\\(\\\\textbf{\\|{\\\\bf \\)" match)
     '(face bold))

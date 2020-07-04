@@ -73,6 +73,7 @@ REGEXP                 In this case, REGEXP must be a regular expression with
     (font-lock-mode 1))))
 
 (defun style-extra-font-lock-keywords ()
+  "Create the font-lock keyword style rules."
   `((,(style-regexp-rules-make-regexp)
      (0
       (style-regexp-rule-apply)))))
@@ -80,7 +81,9 @@ REGEXP                 In this case, REGEXP must be a regular expression with
 (setq style-tooltip-delay-orig nil)
 
 (defun style-configure-tooltips (&optional deactivate)
-  ;; Add tooltips to prettify replacements
+  "Add tooltips to prettify replacements.
+
+Optional argument DEACTIVATE removes tooltips."
   ;; TODO: I think this is causing the very long regexp to be matched twice during fontification.
   ;; Can this be done by modifying the existing prettify-symbols entry?
   (dolist (regexp (list (caar prettify-symbols--keywords)
@@ -111,13 +114,12 @@ properties, and display it."
   nil)
 
 (defun style-regexp-rules-make-regexp ()
-  "Return a regular expression matching text corresponding to any
-regular expression rule in `style-rules'."
+  "Return a regular expression matching text corresponding to any regular expression rule in `style-rules'."
   (format "\\(%s\\)"
           (s-join "\\|" (style-regexp-rules-get-regexps))))
 
 (defun style-regexp-rule-get-canonicalized-rule (spec)
-  "Return cons cell (REGEXP . FORMATTER) where FORMATTER may be nil."
+  "Return cons cell (REGEXP . FORMATTER) for SPEC where FORMATTER may be nil."
   (pcase spec
     (`(,(and (pred stringp) regexp) . ,(and (pred functionp) formatter))
      `(,regexp . ,formatter))
@@ -125,17 +127,20 @@ regular expression rule in `style-rules'."
      `(,regexp))))
 
 (defun style-regexp-rules-get-regexps ()
+  "Return the regexps used by style rules."
   (-remove
    #'null
    (mapcar (-compose #'car #'style-regexp-rule-get-canonicalized-rule)
            style-rules)))
 
 (defun style-get-regexp-rules ()
+  "Return the suset of rules that are regexp rules."
   (-filter
    #'style-regexp-rule-get-canonicalized-rule
    style-rules))
 
 (defun style-get-string-rules ()
+  "Return the suset of rules that are string rules."
   (-remove
    #'style-regexp-rule-get-canonicalized-rule
    style-rules))
@@ -169,6 +174,7 @@ might return text properties that will apply a bold face to the
 replacement text.")
 
 (defun style-regexp-rules-make-display-string (match-string-index)
+  "Return the string to be displayed for the regexp rule with index MATCH-STRING-INDEX."
   (let ((spec (nth (- match-string-index 2) (style-get-regexp-rules)))
         (capture (save-match-data
                    (s-join " " (split-string (match-string match-string-index))))))
@@ -177,7 +183,10 @@ replacement text.")
       (_ capture))))
 
 (defun style-compose (composition properties beg end)
-  "Taken from `prettify-symbols--compose-symbol'"
+  "Compose symbols for COMPOSITION.
+
+Adds to PROPERTIES between BEG and END."
+  ;; Taken from `prettify-symbols--compose-symbol'
   ;; TODO: look at defensive measures in that function.
   (with-silent-modifications
     (compose-region beg end composition)
@@ -188,10 +197,13 @@ replacement text.")
 
 ;; https://emacs.stackexchange.com/a/34882/9007
 (defun style-process-string-rule (pair)
-  "Make `prettify-symbols-mode' replace string FROM with string TO.
+  "Register a style string replacekent rule.
 
-Updates `prettify-symbols-alist'.  You may need to toggle
-`prettify-symbols-mode' to make the changes take effect.
+PAIR is a cons (FROM, TO). Make function `prettify-symbols-mode'
+replace FROM with TO.
+
+Updates `prettify-symbols-alist'. You may need to call toggle
+command `prettify-symbols-mode' to make the changes take effect.
 
 Each character of TO is vertically aligned using the baseline,
 such that base-left of the character is aligned with base-right
@@ -202,6 +214,7 @@ for more information."
         prettify-symbols-alist))
 
 (defun style-make-composition (string)
+  "Return composition for STRING."
   (let ((composition nil))
     (dolist (char (string-to-list string)
                   (nreverse (cdr composition)))

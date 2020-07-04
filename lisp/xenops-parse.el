@@ -29,7 +29,10 @@ the beginning of the overlay and attempt the parse there."
          (xenops-elements-get-all :parser)))))
 
 (defun xenops-parse-element-at-point (type &optional lim-up lim-down delimiters)
-  "Return the element at point if there is one and it is of type TYPE."
+  "Return the element at point if there is one and it is of type TYPE.
+
+Optional arguments LIM-UP and LIM-DOWN bound the search. Optional
+argument DELIMITERS specifies the delimiters sought."
   ;; This is a base `parse-at-point` implementation that is used by
   ;; some concrete element types. It is not expected to work for all
   ;; types.
@@ -45,7 +48,10 @@ the beginning of the overlay and attempt the parse there."
      (xenops-elements-get type :delimiters))))
 
 (defun xenops-parse-element-at-point-matching-delimiters (type delimiters lim-up lim-down)
-  "If point is between regexps, return plist describing match."
+  "If point is between regexps, return plist describing match.
+
+TYPE is the element type being parsed. LIM-UP and LIM-DOWN bound
+the search. DELIMITERS are the delimiters sought."
   ;; Based on `org-between-regexps-p'.
   (save-excursion
     (when (looking-at (car (last delimiters)))

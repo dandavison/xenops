@@ -27,11 +27,13 @@ returns non-nil."
       (xenops-apply-handlers-over-region handlers beg end region-active pred)
       (run-hook-with-args 'xenops-apply-post-apply-hook handlers beg end region-active))))
 
-(defun xenops-apply-handlers-over-region (handlers beg end region-active &optional pred)
-  "Apply HANDLERS to any elements encountered.
+(defun xenops-apply-handlers-over-region (handlers beg end _ &optional pred)
+  "Apply HANDLERS to any elements encountered between BEG and END.
 
 The region operated on is either the active region, or the entire
-buffer."
+buffer. Optional argument PRED is a predicate function taking an
+element and returning a boolean, to be used to restrict the set
+of elements operated on."
   (cl-flet ((handle (el) (save-excursion
                            (xenops-dispatch-handlers handlers el))))
     (save-excursion
@@ -42,22 +44,25 @@ buffer."
                (or (null pred) (funcall pred el))
                (ignore-errors (handle el))))))))
 
-(defun xenops-apply-operations-at-point (ops &optional pred)
+(defun xenops-apply-operations-at-point (ops &optional _)
   "Apply operation types OPS to element at point, if there is one."
   (let ((handlers (xenops-ops-get-for-ops ops :handlers)))
     (run-hook-with-args 'xenops-apply-pre-apply-hook handlers)
-    (prog1 (xenops-apply-handlers-at-point handlers pred)
+    (prog1 (xenops-apply-handlers-at-point handlers _)
       (run-hook-with-args 'xenops-apply-post-apply-hook handlers))))
 
-(defun xenops-apply-handlers-at-point (handlers &optional pred)
+(defun xenops-apply-handlers-at-point (handlers &optional _)
   "Apply HANDLERS to element at point if there is one."
   (-if-let* ((el (xenops-parse-any-element-at-point)))
       (xenops-dispatch-handlers handlers el)))
 
 (defun xenops-apply-parse-next-element (&optional end parse-at-point-fns)
   "If there is another element, return it and leave point after it.
+
 An element is a plist containing data about a regexp match for a
-section of the buffer that Xenops can do something to."
+section of the buffer that Xenops can do something to. Optional
+argument END limits the search. Optional PARSE-AT-POINT-FNS are a
+subset of parsing functions to use."
   (let ((start-regexp (xenops-elements-delimiter-start-regexp))
         (end (or end (point-max)))
         (parse-at-point-fns (or parse-at-point-fns (xenops-elements-get-all :parser))))
@@ -67,8 +72,12 @@ section of the buffer that Xenops can do something to."
                (_ (goto-char (plist-get element :end))))
         element)))
 
-(defun xenops-apply-post-apply-deactivate-mark (handlers &optional beg end region-active)
+(defun xenops-apply-post-apply-deactivate-mark (handlers &optional _ _ region-active)
   "Deactivate mark when appropriate.
+
+HANDLERS are the current handlers and are used to determine
+whether deactivation is appropriate. REGION-ACTIVE is a boolean
+indicating whether there is an active region.
 
 `increase-size` and `decrease-size` are expected to be applied
 multiple times, and we want to preserve the active region.
@@ -78,8 +87,12 @@ it."
                                                     xenops-image-decrease-size)))
        (deactivate-mark)))
 
-(defun xenops-apply-post-reveal-delete-overlays (handlers &optional beg end region-active)
+(defun xenops-apply-post-reveal-delete-overlays (handlers &optional beg end _)
   "Delete any image overlays that may remain after a `reveal` operation.
+
+HANDLERS are the current handlers and are used to determine
+whether deletion is appropriate. BEG and END define the region
+within which deletion occurs.
 
 If the underlying textual representation of an element has become
 malformed, `xenops-reveal' will fail to delete its overlay, which

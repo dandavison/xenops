@@ -21,7 +21,9 @@
   (xenops-elements-get-for-types 'all key))
 
 (defun xenops-elements-delimiter-start-regexp (&optional types)
-  "A regexp matching the start of any element."
+  "A regexp matching the start of any element.
+
+Optional argument TYPES limits the elements considered."
   (format "\\(%s\\)"
           (s-join "\\|"
                   (mapcar #'car (xenops-elements-get-for-types (or types 'all) :delimiters)))))

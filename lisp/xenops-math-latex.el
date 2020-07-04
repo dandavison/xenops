@@ -56,11 +56,12 @@ This variable plays exactly the same role for Xenops.")
 (defvar-local xenops-math-latex-tasks-semaphore nil)
 
 (defvar xenops-math-latex-max-tasks-in-flight 32
-  "The maximum number of latex processing tasks that are permitted
-to be simultaneously active. Your operating system will schedule
-these processes onto available CPU cores. Any other waiting
-Xenops tasks will remain in the Xenops task queue until one of
-the active tasks completes.")
+  "Maximum number of latex processing tasks allowed to be simultaneously active.
+
+Your operating system will schedule these processes onto
+available CPU cores. Any other waiting Xenops tasks will remain
+in the Xenops task queue until one of the active tasks
+completes.")
 
 (setq xenops-math-latex-tasks-semaphore-value-copy nil)
 
@@ -73,7 +74,10 @@ these will be excluded when constructing the LaTeX document for
 individual math elements.")
 
 (defun xenops-math-latex-make-latex-document (latex colors)
-  "Make the LaTeX document for a single math image."
+  "Make the LaTeX document for a single math image.
+
+LATEX is the string of LaTeX code. COLORS is a pair (FG, BG)
+containing the foreground and background colors."
   (cl-flet ((get-latex-header () (org-latex-make-preamble
                                   (org-export-get-environment (org-export-get-backend 'latex))
                                   org-format-latex-header
@@ -97,7 +101,13 @@ individual math elements.")
                 "\n\\end{document}\n")))))
 
 (defun xenops-math-latex-make-commands (element dir tex-file image-input-file image-output-file)
-  "Construct the external process invocations used to convert a single LaTeX fragment to SVG."
+  "Construct external process invocations used to render a LaTeX fragment.
+
+ELEMENT is the latex element to be rendered. DIR is a directory
+to hold output. TEX-FILE is a file to which the LaTeX code will
+be written. IMAGE-INPUT-FILE is a file to which the LaTeX
+compilation output (.dvi) will be written IMAGE-OUTPUT-FILE is
+the name of the file to contain the output image."
   ;; See `org-preview-latex-process-alist'
   (let* ((dpi (xenops-math-latex-calculate-dpi))
          (bounding-box (if (eq 'inline-math (plist-get element :type)) 1 10))
@@ -112,6 +122,7 @@ individual math elements.")
                                                image-input-file image-output-file format-data))))
 
 (defun xenops-math-latex-calculate-dpi ()
+  "Calculate DPI to be used during fragment image generation."
   (* (org--get-display-dpi)
      (car (xenops-math-latex-process-get :image-size-adjust))
      xenops-math-image-scale-factor))
@@ -121,7 +132,11 @@ individual math elements.")
   (plist-get (cdr (assq xenops-math-latex-process xenops-math-latex-process-alist)) key))
 
 (defun xenops-math-latex-format-commands (command-templates input-file output-file format-data)
-  "Return a formatted command as a list of strings, suitable for `make-process'."
+  "Return a formatted command as a list of strings, suitable for `make-process'.
+
+COMMAND-TEMPLATES are formatting templates for the commands.
+FORMAT-DATA, INPUT-FILE, and OUTPUT-FILE contain data used to
+format the commands."
   (let ((format-data (append format-data `((?f . ,input-file)
                                            (?O . ,output-file)))))
     (mapcar (lambda (template)
@@ -229,10 +244,11 @@ individual math elements.")
   "Internal cache for per-file LaTeX preamble.")
 
 (defun xenops-math-latex-make-preamble-cache-key ()
+  "Return key for the current file in the LaTeX preamble cache."
   (sha1 (prin1-to-string (list (buffer-file-name) TeX-master))))
 
 (defun xenops-math-latex-get-preamble-lines ()
-  "Return preamble lines used for the LaTeX document used to render a single math element.
+  "Return LaTeX preamble lines used when rendering a single math element.
 
 The first element of the returned list is the \\documentclass;
 subsequent elements are \\usepackage lines, macro definitions,
@@ -266,17 +282,23 @@ etc."
         (assoc-delete-all (xenops-math-latex-make-preamble-cache-key)
                           xenops-math-latex-preamble-cache)))
 
-(defun xenops-math-latex-pre-apply-copy-semaphore-value (handlers &rest args)
+(defun xenops-math-latex-pre-apply-copy-semaphore-value (handlers &rest _)
   "Copy current semaphore value to a global variable.
 
 This allows the number of started tasks to be shown by
-`xenops-math-latex-post-apply-show-started-tasks'."
+`xenops-math-latex-post-apply-show-started-tasks'.
+
+HANDLERS are the currently active handlers and are used to
+determine whether the action is appropriate."
   (if (memq 'xenops-math-render handlers)
       (setq xenops-math-latex-tasks-semaphore-value-copy
             (aref xenops-math-latex-tasks-semaphore 1))))
 
-(defun xenops-math-latex-post-apply-show-started-tasks (handlers &rest args)
-  "Show number of asynchronous processing tasks started by `xenops-render'."
+(defun xenops-math-latex-post-apply-show-started-tasks (handlers &rest _)
+  "Show number of asynchronous processing tasks started by `xenops-render'.
+
+HANDLERS are the currently active handlers and are used to
+determine whether the action is appropriate."
   (if (memq 'xenops-math-render handlers)
       (message "Started %d latex processing tasks"
                (- xenops-math-latex-tasks-semaphore-value-copy

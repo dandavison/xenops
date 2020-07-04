@@ -13,18 +13,22 @@
 (defvar xenops-image-width 512)
 
 (defvar xenops-image-directory nil
-  "The directory in which Xenops should offer to save images when
+  "A directory to save images in.
+
+The directory in which Xenops should offer to save images when
 pasted from the system clipboard.")
 
 (defvar xenops-image-latex-template
   "\\includegraphics[width=400pt]{%s}"
-  "LaTeX code for inclusion of a pasted image in the LaTeX
-  document. This must be a string of valid LaTeX code containing
-  a single %s placeholder, which will be replaced by the image
-  file path. Use a double backslash here to produce a single
-  backslash in the resulting LaTeX.")
+  "LaTeX code for inclusion of a pasted image in the LaTeX document.
+
+This must be a string of valid LaTeX code containing a single %s
+placeholder, which will be replaced by the image file path. Use a
+double backslash here to produce a single backslash in the
+resulting LaTeX.")
 
 (defun xenops-image-render (element)
+  "Render image element ELEMENT."
   (let ((image (create-image (plist-get element :path)
                              'imagemagick nil :width xenops-image-width)))
     (add-text-properties (plist-get element :begin)
@@ -32,18 +36,24 @@ pasted from the system clipboard.")
                          `(display ,image keymap ,xenops-rendered-element-keymap))))
 
 (defun xenops-image-reveal (element)
+  "Reveal image element ELEMENT."
   (remove-text-properties (plist-get element :begin)
                           (plist-get element :end)
                           '(display nil keymap nil)))
 
 (defun xenops-image-increase-size (element)
+  "Increase size of image element ELEMENT."
   (image--change-size xenops-math-image-change-size-factor))
 
 (defun xenops-image-decrease-size (element)
+  "Decrease size of image element ELEMENT."
   (image--change-size (/ 1 xenops-math-image-change-size-factor)))
 
-(defun xenops-image-post-apply-hook-function (handlers &optional beg end region-active)
-  "Track image size changes so that new images are displayed with the correct size."
+(defun xenops-image-post-apply-hook-function (handlers &optional beg end _)
+  "Ensure that new images are displayed with the correct size.
+
+HANDLERS, and optional arguments BEG and END are used to
+determine what action is appropriate."
   ;; Hack: In some sense we want a new image to have the expected size, given any changes to image
   ;; size that have been applied to existing images. Here we track the overall image scale, paying
   ;; attention only when a user has resized all the images in the buffer, i.e. not when region is
@@ -62,6 +72,7 @@ pasted from the system clipboard.")
 (add-hook 'xenops-apply-post-apply-hook #'xenops-image-post-apply-hook-function)
 
 (defun xenops-image-parse-at-point ()
+  "Parse image element at point."
   (if (looking-at (caar (xenops-elements-get 'image :delimiters)))
       (list :type 'image
             :begin (match-beginning 0)
@@ -69,10 +80,12 @@ pasted from the system clipboard.")
             :path (expand-file-name (match-string 2)))))
 
 (defun xenops-image-handle-paste ()
+  "Handle paste event."
   (interactive)
   (xenops-image-handle-paste-macos))
 
 (defun xenops-image-handle-paste-macos ()
+  "Handle paste event on MacOS."
   (interactive)
   ;; https://github.com/jcsalterego/pngpaste
   (when (executable-find "pngpaste")
@@ -98,6 +111,9 @@ pasted from the system clipboard.")
         t))))
 
 (defun xenops-image-suggest-file-name (&optional suffix)
+  "Return a suggested file name to which a pasted image should be saved.
+
+Optional argument SUFFIX is the file suffix to be used."
   (save-excursion
     (let ((outline-regexp "\\\\\\(sub\\)*section{\\([^}]*\\)}")
           pos headings)
