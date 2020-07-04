@@ -164,6 +164,7 @@ available in this keymap.")
 
 (defalias 'xenops-execute #'xenops-execute-at-point)
 
+;;;###autoload
 (define-minor-mode xenops-mode
   "A LaTeX editing environment.
 

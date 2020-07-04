@@ -52,6 +52,8 @@ If the :sympy header argument is set this delegates to
         (xenops-src-execute-src-block:python-sympy element)
       (xenops-src-execute-src-block element))))
 
+(defvar org-babel-python-wrapper-method)  ;; defined in ob-python
+
 (defun xenops-src-execute-src-block:python-sympy (element)
   "Execute parsed python sympy src element ELEMENT.
 
@@ -70,6 +72,8 @@ arrange for sympy to return the results as LaTeX."
                   (replace-match "return __sympy_latex__(\\1)" t nil last-line))
             (setf (nth 1 info) (s-join "\n" lines)))))
     (xenops-src-execute-src-block element)))
+
+(defvar org-babel-mathematica-command)  ;; defined in ob-mathematica
 
 (defun xenops-src-execute-src-block:mathematica (element)
   "Execute parsed mathematica src element ELEMENT.
