@@ -6,6 +6,11 @@
 
 ;;; Code:
 
+(require 'avy)
+
+(declare-function xenops-elements-delimiter-start-regexp "xenops-elements")
+(declare-function xenops-math-copy-and-paste-element "xenops-math")
+
 (defun xenops-goto-element ()
   "Jump to a xenops element."
   (interactive)

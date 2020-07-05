@@ -6,8 +6,8 @@
 
 ;;; Code:
 
-(setq xenops-auctex-electric-insert-commands
-      #'(LaTeX-insert-left-brace TeX-insert-sub-or-superscript))
+(defvar xenops-auctex-electric-insert-commands
+  #'(LaTeX-insert-left-brace TeX-insert-sub-or-superscript))
 
 (defun xenops-auctex-activate ()
   "Activate auctex-related functionality."

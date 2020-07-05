@@ -8,24 +8,9 @@
 
 (require 'style)
 
-(define-minor-mode xenops-xen-mode
-  "Minimal visual appearance for a Xenops LaTeX buffer.
-
-\\{xenops-xen-mode-map}"
-  :lighter nil
-  (cond
-   (xenops-xen-mode
-    (setq style-rules xenops-xen-style-rules
-          style-regexp-rules-get-text-properties #'xenops-xen-style-regexp-rules-get-text-properties)
-    (style-mode +1))
-   (t
-    (style-mode -1)
-    (setq style-rules nil
-          style-regexp-rules-get-text-properties nil))))
-
 ;; A brace-delimited multiline expression supporting 1 level of nesting: i.e. it can contain other
 ;; brace-delimited expressions, as long as these have no children.
-(setq xenops-brace-delimited-multiline-expression-regexp
+(defvar xenops-brace-delimited-multiline-expression-regexp
       (let ((brace-delimited-atom-regexp
              (concat
               "\\("
@@ -79,6 +64,21 @@
     "{\\\\bf +\\([^\n}]+\\)}"
     "{\\\\it +\\([^\n}]+\\)}")
   "Style rules for xenops xen-mode.")
+
+(define-minor-mode xenops-xen-mode
+  "Minimal visual appearance for a Xenops LaTeX buffer.
+
+\\{xenops-xen-mode-map}"
+  :lighter nil
+  (cond
+   (xenops-xen-mode
+    (setq style-rules xenops-xen-style-rules
+          style-regexp-rules-get-text-properties #'xenops-xen-style-regexp-rules-get-text-properties)
+    (style-mode +1))
+   (t
+    (style-mode -1)
+    (setq style-rules nil
+          style-regexp-rules-get-text-properties nil))))
 
 (defun xenops-xen-begin-latex-environment-formatter (env)
   "Return visual replacement for environment ENV begin token."

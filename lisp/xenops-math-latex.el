@@ -5,8 +5,18 @@
 ;;; Commentary:
 
 ;;; Code:
+(require 'org)
+
+(require 'aio)
+(require 'f)
 
 (require 'xenops-aio)
+
+(declare-function xenops-element-create-marker "xenops-element")
+(declare-function xenops-element-deactivate-marker "xenops-element")
+(declare-function xenops-math-display-error "xenops-math")
+(declare-function xenops-math-parse-element-at "xenops-math")
+(declare-function xenops-png-set-phys-chunk "xenops-png")
 
 (defvar xenops-math-latex-process 'dvisvgm
   "The process used for producing images from LaTeX fragments.
@@ -63,7 +73,7 @@ available CPU cores. Any other waiting Xenops tasks will remain
 in the Xenops task queue until one of the active tasks
 completes.")
 
-(setq xenops-math-latex-tasks-semaphore-value-copy nil)
+(defvar xenops-math-latex-tasks-semaphore-value-copy nil)
 
 (defvar xenops-math-latex-excluded-preamble-line-regexps
   '("^\\\\numberwithin")
@@ -72,6 +82,11 @@ completes.")
 Any preamble line in the original document that matches one of
 these will be excluded when constructing the LaTeX document for
 individual math elements.")
+
+;; Silence compiler: defined elsewhere
+(defvar xenops-mode)
+(defvar xenops-math-image-scale-factor)
+(defvar xenops-math-latex-create-image)
 
 (defun xenops-math-latex-make-latex-document (latex colors)
   "Make the LaTeX document for a single math image.

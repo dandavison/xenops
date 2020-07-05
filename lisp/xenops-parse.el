@@ -6,6 +6,11 @@
 
 ;;; Code:
 
+(declare-function xenops-elements-get "xenops-elements")
+(declare-function xenops-elements-get-all "xenops-elements")
+(declare-function xenops-overlay-at-point "xenops-overlay")
+(declare-function xenops-util-first-result "xenops-util")
+
 (defun xenops-parse-any-element-at-point (&optional parse-at-point-fns no-recurse)
   "Return the element at point if there is one.
 

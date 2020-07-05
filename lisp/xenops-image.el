@@ -9,6 +9,12 @@
 ;; the point of truth is the LaTeX code).
 
 ;;; Code:
+(require 'outline)
+
+(require 'f)
+
+(declare-function xenops-apply-parse-next-element "xenops-apply")
+(declare-function xenops-elements-get "xenops-elements")
 
 (defvar xenops-image-width 512)
 
@@ -26,6 +32,11 @@ This must be a string of valid LaTeX code containing a single %s
 placeholder, which will be replaced by the image file path. Use a
 double backslash here to produce a single backslash in the
 resulting LaTeX.")
+
+;; Silence compiler: defined elsewhere
+(defvar xenops-rendered-element-keymap)
+(defvar xenops-math-image-change-size-factor)
+(defvar xenops-math-image-current-scale-factor)
 
 (defun xenops-image-render (element)
   "Render image element ELEMENT."

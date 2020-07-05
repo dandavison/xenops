@@ -14,6 +14,22 @@
 
 (require 'xenops-math-latex)
 
+(declare-function xenops-render-if-cached "xenops")
+(declare-function xenops-apply-operations "xenops-apply")
+(declare-function xenops-avy-do-at-element "xenops-avy")
+(declare-function xenops-elements-get "xenops-elements")
+(declare-function xenops-elements-get-for-types "xenops-elements")
+(declare-function xenops-element-copy "xenops-element")
+(declare-function xenops-element-get-image "xenops-element")
+(declare-function xenops-element-overlays-delete "xenops-element")
+(declare-function xenops-element-overlay-get "xenops-element")
+(declare-function xenops-overlay-create "xenops-overlay")
+(declare-function xenops-parse-element-at-point "xenops-parse")
+(declare-function xenops-parse-element-at-point-matching-delimiters "xenops-parse")
+(declare-function xenops-util-first-result "xenops-util")
+(declare-function xenops-util-svg-resize "xenops-util")
+
+
 (defvar xenops-math-image-change-size-factor 1.1
   "The multiplicative factor used when resizing images.
 
@@ -37,21 +53,26 @@ This determines the size of the image in the image file that is
 (defvar xenops-math-image-margin 20
   "Number of pixels to be used as left margin for non-inline math images.")
 
-(setq xenops-math-dollar-delimited-inline-math-delimiters
-      '("\\$"
-        "\\$"))
+(defvar xenops-math-dollar-delimited-inline-math-delimiters
+  '("\\$"
+    "\\$"))
 
-(setq xenops-math-paren-delimited-inline-math-delimiters
-      '("\\\\("
-        "\\\\)"))
+(defvar xenops-math-paren-delimited-inline-math-delimiters
+  '("\\\\("
+    "\\\\)"))
 
-(setq xenops-math-square-bracket-delimited-inline-math-delimiters
-      '("\\\\\\["
-        "\\\\\\]"))
+(defvar xenops-math-square-bracket-delimited-inline-math-delimiters
+  '("\\\\\\["
+    "\\\\\\]"))
 
-(setq xenops-math-environment-delimited-inline-math-delimiters
-      '("\\\\begin{\\(align\\|equation\\|tikzpicture\\)\\*?}"
-        "\\\\end{\\(align\\|equation\\|tikzpicture\\)\\*?}"))
+(defvar xenops-math-environment-delimited-inline-math-delimiters
+  '("\\\\begin{\\(align\\|equation\\|tikzpicture\\)\\*?}"
+    "\\\\end{\\(align\\|equation\\|tikzpicture\\)\\*?}"))
+
+;; Silence compiler: defined elsewhere
+(defvar xenops-cache-directory)
+(defvar xenops-mode-map)
+(defvar xenops-rendered-element-keymap)
 
 (defun xenops-math-font-lock-keywords ()
   "Create font-lock entry for math elements."

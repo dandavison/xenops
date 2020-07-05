@@ -10,6 +10,13 @@
 
 ;;; Code:
 
+(declare-function xenops-dispatch-operation "xenops")
+(declare-function xenops-apply-parse-next-element "xenops-apply")
+(declare-function xenops-image-suggest-file-name "xenops-image")
+(declare-function xenops-minted-parse-at-point "xenops-minted")
+(declare-function xenops-parse-element-at-point "xenops-parse")
+(declare-function xenops-util-plist-update "xenops-util")
+
 (defvar xenops-src-mathematica-use-wolframscript t
   "Use `wolframscript` or `MathematicaScript` to execute Mathematica code?
 
@@ -18,7 +25,22 @@ mathematica code; otherwise use `MathematicaScript`. Note that
 graphics cannot be saved to file reliably using MathematicaScript
 under some OSs / Mathematica versions.")
 
-(setq xenops-src-do-in-org-mode-header "* \n")
+(defvar xenops-src-do-in-org-mode-header "* \n")
+
+(defmacro xenops-src-do-in-org-mode (&rest body)
+  "Execute forms in BODY with current src block in an Org mode buffer."
+  `(save-restriction
+     (progn
+       (condition-case nil
+           (org-narrow-to-block)
+         (user-error nil))
+       (let ((region (buffer-substring (point-min) (point-max))))
+         (with-temp-buffer
+           (erase-buffer)
+           (insert xenops-src-do-in-org-mode-header)
+           (insert region)
+           (org-mode)
+           ,@body)))))
 
 (defun xenops-src-parse-at-point ()
   "Parse 'src element at point."
@@ -166,21 +188,6 @@ buffer, as a string."
     (insert (org-babel-exp-code info 'block))
     (org-babel-execute-src-block 'ignore-cached info)
     (buffer-substring (point) (point-max))))
-
-(defmacro xenops-src-do-in-org-mode (&rest body)
-  "Execute forms in BODY with current src block in an Org mode buffer."
-  `(save-restriction
-     (progn
-       (condition-case nil
-           (org-narrow-to-block)
-         (user-error nil))
-       (let ((region (buffer-substring (point-min) (point-max))))
-         (with-temp-buffer
-           (erase-buffer)
-           (insert xenops-src-do-in-org-mode-header)
-           (insert region)
-           (org-mode)
-           ,@body)))))
 
 (defun xenops-src-apply-syntax-highlighting ()
   "Syntax highlight the src or minted element at point."

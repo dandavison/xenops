@@ -10,6 +10,9 @@
 
 ;;; Code:
 
+(declare-function xenops-parse-element-at-point "xenops-parse")
+(declare-function xenops-util-plist-update "xenops-util")
+
 (defun xenops-minted-parse-at-point ()
   "Parse a minted element at point."
   (-if-let* ((element (xenops-parse-element-at-point 'minted)))

@@ -9,6 +9,9 @@
 ;; This module implements a self-contained minor mode `style-mode' which is essentially an
 ;; extension of `prettify-symbols-mode'.
 
+(declare-function -compose "dash-functional")
+(declare-function xenops-util-first-index "xenops-util")
+
 (defvar-local style-rules nil
   "List of display strings used to change the visual appearance of text in a buffer.
 
@@ -47,6 +50,15 @@ REGEXP                 In this case, REGEXP must be a regular expression with
                       captured by the regular expression and
                       passing it to FUNCTION.")
 
+(defvar style-regexp-rules-get-text-properties nil
+  "A function of one argument (MATCH, i.e. the original matched text)
+returning a plist of text properties to be applied to the displayed text.
+E.g. if MATCH looks like \textbf{something}, then the function
+might return text properties that will apply a bold face to the
+replacement text.")
+
+(defvar style-tooltip-delay-orig nil)
+
 (define-minor-mode style-mode
   "A minor mode changing the visual appearance of the buffer according to `style-rules'.
 
@@ -77,8 +89,6 @@ REGEXP                 In this case, REGEXP must be a regular expression with
   `((,(style-regexp-rules-make-regexp)
      (0
       (style-regexp-rule-apply)))))
-
-(setq style-tooltip-delay-orig nil)
 
 (defun style-configure-tooltips (&optional deactivate)
   "Add tooltips to prettify replacements.
@@ -165,13 +175,6 @@ Return the to be supplied to `match-string' to obtain the caotured text."
   ;; We ignore the first 4 indices and start counting at index 4.  Then, we find the first `beg`
   ;; index that is non-nil. Suppose this is i. Then (i + 4)/2 is the corresponding index.
   (/ (+ (xenops-util-first-index (-drop 4 (match-data 'integers))) 4) 2))
-
-(defvar style-regexp-rules-get-text-properties nil
-  "A function of one argument (MATCH, i.e. the original matched text)
-returning a plist of text properties to be applied to the displayed text.
-E.g. if MATCH looks like \textbf{something}, then the function
-might return text properties that will apply a bold face to the
-replacement text.")
 
 (defun style-regexp-rules-make-display-string (match-string-index)
   "Return the string to be displayed for the regexp rule with index MATCH-STRING-INDEX."

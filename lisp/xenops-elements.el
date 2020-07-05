@@ -6,7 +6,11 @@
 
 ;;; Code:
 
-;; -*- lexical-binding: t -*-
+(declare-function xenops-get "xenops")
+(declare-function xenops-get-for-types "xenops")
+
+;; Silence compiler: defined elsewhere
+(defvar xenops-elements)
 
 (defun xenops-elements-get (type key)
   "The value associated with KEY for element type TYPE."

@@ -6,6 +6,9 @@
 
 ;;; Code:
 
+;; Silence compiler: defined elsewhere
+(defvar xenops-font-family)
+
 (defun xenops-font-activate ()
   "Perform xenops-font responsibilities during minor mode activation."
   (if xenops-font-family (xenops-font-set-faces)))

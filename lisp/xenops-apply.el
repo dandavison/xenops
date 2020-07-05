@@ -6,8 +6,15 @@
 
 ;;; Code:
 
-(setq xenops-apply-pre-apply-hook nil)
-(setq xenops-apply-post-apply-hook nil)
+(declare-function xenops-dispatch-handlers "xenops")
+(declare-function xenops-ops-get-for-ops "xenops")
+(declare-function xenops-elements-delimiter-start-regexp "xenops-elements")
+(declare-function xenops-elements-get-all "xenops-elements")
+(declare-function xenops-overlay-delete-overlays "xenops-overlay")
+(declare-function xenops-parse-any-element-at-point "xenops-parse")
+
+(defvar xenops-apply-pre-apply-hook nil)
+(defvar xenops-apply-post-apply-hook nil)
 
 (defun xenops-apply-operations (ops &optional pred)
   "Apply operation types OPS to any elements encountered.

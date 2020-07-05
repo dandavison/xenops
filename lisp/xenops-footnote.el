@@ -6,6 +6,9 @@
 
 ;;; Code:
 
+(declare-function xenops-elements-get "xenops-elements")
+(declare-function xenops-overlay-create "xenops-overlay")
+
 (defun xenops-footnote-render (element)
   "Render footnote element ELEMENT."
   (let ((ov (xenops-overlay-create (plist-get element :begin)

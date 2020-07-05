@@ -10,6 +10,9 @@
 ;; element type (e.g. in xenops-math, xenops-image, xenops-text).
 
 ;;; Code:
+(require 'subr-x)
+
+(declare-function xenops-util-parse-image-at "xenops-util")
 
 (defun xenops-element-overlays-get (element)
   "Return overlays overlapping ELEMENT."
