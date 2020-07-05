@@ -4,6 +4,8 @@
 
 ;;; Commentary:
 
+;; Helper functions for working with aio.
+
 ;;; Code:
 
 (declare-function aio-promise "aio" ())

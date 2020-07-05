@@ -1,13 +1,13 @@
-;;; style.el --- A library for visual styling of text in a buffer, inspired by `prettify-symbols-mode' -*- lexical-binding: t; -*-
+;;; style.el --- A library for visual styling of text in a buffer -*- lexical-binding: t; -*-
 
 ;; SPDX-License-Identifier: MIT
 
 ;;; Commentary:
 
-;;; Code:
-
 ;; This module implements a self-contained minor mode `style-mode' which is essentially an
 ;; extension of `prettify-symbols-mode'.
+
+;;; Code:
 
 (declare-function -compose "dash-functional")
 (declare-function xenops-util-first-index "xenops-util")
