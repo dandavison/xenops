@@ -37,7 +37,7 @@ Xenops is a LaTeX editing environment for mathematical documents in Emacs.
 
 Installation instructions are below. To use Xenops, open a `.tex` file in Emacs as usual, and do `M-x xenops-mode`. The key features are:
 
-- **LaTeX math, tables, and TikZ content are automatically displayed as SVG images in the Emacs buffer.**
+- **LaTeX math, tables, and TikZ diagrams are automatically displayed as SVG images in the Emacs buffer.**
 
   You don't need to do anything: rendering is triggered automatically. The result is that you can work on the document in Emacs without needing to frequently check the appearance of the PDF. Rendering is asynchronous, so it doesn't interrupt your writing.
 
@@ -415,12 +415,10 @@ In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops
 
 - How to avoid blurry / low-quality LaTeX preview images.
 - Generating graphics from minted blocks
-- Relation to preview-latex in auctex
-- Relation to org-mode
 
 # 7. Contributing
 
-Xenops can be used profitably for serious work! However, there are still bugs and missing features. Please don't hesitate to get in touch and/or open Github issues. And if you know some emacs-lisp, your help would be very welcome. Please get in touch (dandavison7@gmail.com) and/or jump on the Github issues.
+Xenops can be used profitably for serious work! However, there are still bugs and missing features. Please don't hesitate to get in touch (dandavison7@gmail.com) and/or open Github issues.
 
 
 # 8. Credit
