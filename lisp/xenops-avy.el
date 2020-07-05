@@ -18,7 +18,7 @@
     (xenops-avy-do-at-element)))
 
 (defun xenops-copy-and-paste-element ()
-  "Copy a xenops element and paste ijt at point."
+  "Copy a xenops element and paste it at point."
   (interactive)
   (xenops-math-copy-and-paste-element))
 
