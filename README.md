@@ -27,9 +27,8 @@
       * [3.5 Xen mode](#35-xen-mode)
    * [4. Command and variable reference](#4-command-and-variable-reference)
    * [5. Misc](#5-misc)
-   * [6. Documentation TODOs](#6-documentation-todos)
-   * [7. Contributing](#7-contributing)
-   * [8. Credit](#8-credit)
+   * [6. Contributing](#6-contributing)
+   * [7. Credit](#7-credit)
 
 # 1. Overview
 
@@ -66,6 +65,7 @@ Xenops can also be used with [org-mode](https://orgmode.org) documents that cont
 
 # 2. Getting started
 
+(Xenops [has been](https://github.com/melpa/melpa/pull/7006) submitted to [MELPA](https://melpa.org/), so installation should be easier soon.)
 
 1. **Ensure that you have [LaTeX](https://www.latex-project.org/get) installed on your machine.**
 
@@ -75,7 +75,7 @@ Xenops can also be used with [org-mode](https://orgmode.org) documents that cont
 
     This is necessary because Xenops uses [emacs-aio](https://github.com/skeeto/emacs-aio).
 
-    If you are using MacOS, install emacs from homebrew using either the `emacs-plus` or `emacs-mac` packages, since they provide the required SVG support.
+    If you are using MacOS, install emacs from homebrew using the `emacs-mac` package (aka Mitsuharu's Emacs build), since it uses WebKit to render SVG, resulting in beautifully crisp images.
 
 1. **Clone the Xenops git repository to a location on your computer.**
 
@@ -99,8 +99,6 @@ Xenops can also be used with [org-mode](https://orgmode.org) documents that cont
     (add-hook 'latex-mode-hook #'xenops-mode)
     (add-hook 'LaTeX-mode-hook #'xenops-mode)
     ```
-
-    (Xenops will be submitted to [MELPA](https://melpa.org/) soon, which will simplify installation.)
 
 1.  **Restart Emacs and run `M-x xenops-doctor`**
 
@@ -251,7 +249,7 @@ After `xenops-dwim` on the math and code blocks, the Xenops buffer looks like th
   <img width=700px src="https://user-images.githubusercontent.com/52205/76138564-27feb000-600f-11ea-849c-bad5b79e77cd.png" alt="image" />
 </td></tr></table>
 
-Note that for SymPy, the header arguments `:sympy t :results latex` are necessary to tell Xenops that this is not a normal python code block and that it should insert SymPy code to automatically format the result as LaTeX. For Mathematica, `:results: latex` suffices for this.
+Note that for SymPy, the header arguments `:sympy t :results latex` are necessary to tell Xenops that this is not a normal python code block and that it should insert SymPy code to automatically format the result as LaTeX. For Mathematica, `:results latex` suffices for this.
 
 ## 3.4 Working with images
 
@@ -411,17 +409,12 @@ In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops
 - If you are encountering any problems, the first thing to try is `M-x xenops-doctor`. Beyond that, please don't hesitate to open Github issues!
 
 
-# 6. Documentation TODOs
-
-- How to avoid blurry / low-quality LaTeX preview images.
-- Generating graphics from minted blocks
-
-# 7. Contributing
+# 6. Contributing
 
 Xenops can be used profitably for serious work! However, there are still bugs and missing features. Please don't hesitate to get in touch (dandavison7@gmail.com) and/or open Github issues.
 
 
-# 8. Credit
+# 7. Credit
 
 - [auctex](https://www.gnu.org/software/auctex/)
 - [emacs-aio](https://github.com/skeeto/emacs-aio)
