@@ -121,6 +121,14 @@ More explicitly, here are the basic steps for working with math in Xenops:
 
   3. **Move the cursor over the image and hit Enter: the image will disappear and you can edit the LaTeX code.**
 
+      <table style="width:100%">
+        <tr>
+          <td>
+            <img width=400px src="etc/img/bayesian-network.gif" alt="bayesian-network" />
+          </td>
+        </tr>
+      </table>
+
 You may also want to create the image for all math/table/TikZ elements in the document. To do that, position the cursor outside any element and issue `xenops-dwim`.
 
 The other command to know from the start is `xenops-doctor`: run this if something is not working.
