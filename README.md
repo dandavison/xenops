@@ -419,7 +419,7 @@ In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops
 
 # 6. Contributing
 
-Xenops can be used profitably for serious work! However, there are still bugs and missing features. Please don't hesitate to get in touch (dandavison7@gmail.com) and/or open Github issues.
+Xenops can already be used profitably for serious work. But there are also many areas for further work. Please don't hesitate to get in touch (dandavison7@gmail.com), submit a PR, or open a Github issue.
 
 
 # 7. Credit
