@@ -403,6 +403,10 @@ In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops
 |                                         |                                                                                                                            |                         |
 | `xenops-font-family`                    | The font family to use in Xenops buffers.<br>(You can choose this interactively using<br>`M-x xenops-select-font-family`.) | nil                     |
 |                                         |                                                                                                                            |                         |
+| `xenops-font-height`                    | The font height for the main font.                                                                                         | 160                     |
+|                                         |                                                                                                                            |                         |
+| `xenops-font-height-code`               | The font height for the font used for LaTeX code, and code in code blocks.                                                 | 140                     |
+|                                         |                                                                                                                            |                         |
 | `xenops-tooltip-delay`                  | The time delay in seconds before<br>displaying a tooltip on mouseover.                                                     | 0.2                     |
 |                                         |                                                                                                                            |                         |
 

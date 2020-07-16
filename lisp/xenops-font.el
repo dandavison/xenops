@@ -8,6 +8,10 @@
 
 ;; Silence compiler: defined elsewhere
 (defvar xenops-font-family)
+(defvar xenops-font-height 160
+  "The font height for the main font.")
+(defvar xenops-font-height-code 140
+  "The font height for the font used for LaTeX code, and code in code blocks.")
 
 (defun xenops-font-activate ()
   "Perform xenops-font responsibilities during minor mode activation."
@@ -16,9 +20,9 @@
 (defun xenops-font-set-faces ()
   "Set certain faces in a Xenops buffer to use `xenops-font-family'."
   (face-remap-add-relative 'variable-pitch :family xenops-font-family)
-  (face-remap-add-relative 'default :family xenops-font-family :height 160)
-  (face-remap-add-relative 'font-latex-math-face 'fixed-pitch :height 140)
-  (face-remap-add-relative 'font-latex-verbatim-face 'fixed-pitch :height 140)
+  (face-remap-add-relative 'default :family xenops-font-family :height xenops-font-height)
+  (face-remap-add-relative 'font-latex-math-face 'fixed-pitch :height xenops-font-height-code)
+  (face-remap-add-relative 'font-latex-verbatim-face 'fixed-pitch :height xenops-font-height-code)
   (buffer-face-mode))
 
 (defun xenops-font-get-fontified-family-strings (face-spec)
