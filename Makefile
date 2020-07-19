@@ -36,4 +36,7 @@ lint:
 compile:
 	./etc/bin/emacs --batch -f batch-byte-compile lisp/*.el
 
+package-lint:
+	./etc/bin/emacs --batch -f package-lint-batch-and-exit lisp/*.el
+
 .PHONY: deps test lint build

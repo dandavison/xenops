@@ -9,6 +9,7 @@
     dash
     dash-functional
     f
+    package-lint
     s
     use-package))
 
