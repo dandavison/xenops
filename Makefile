@@ -39,4 +39,4 @@ compile:
 package-lint:
 	./etc/bin/emacs --batch -f package-lint-batch-and-exit lisp/*.el
 
-.PHONY: deps test lint build
+.PHONY: deps test lint compile package-lint
