@@ -9,6 +9,8 @@
 
 (require 'aio)
 (require 'f)
+(require 'tex)
+(require 'tex-buf)
 
 (require 'xenops-aio)
 

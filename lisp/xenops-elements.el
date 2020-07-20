@@ -5,6 +5,7 @@
 ;;; Commentary:
 
 ;;; Code:
+(require 's)
 
 (declare-function xenops-get "xenops")
 (declare-function xenops-get-for-types "xenops")

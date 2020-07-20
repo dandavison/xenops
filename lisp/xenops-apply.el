@@ -5,6 +5,7 @@
 ;;; Commentary:
 
 ;;; Code:
+(require 'dash)
 
 (declare-function xenops-dispatch-handlers "xenops")
 (declare-function xenops-ops-get-for-ops "xenops")

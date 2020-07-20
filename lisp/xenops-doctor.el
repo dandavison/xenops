@@ -5,6 +5,7 @@
 ;;; Commentary:
 
 ;;; Code:
+(require 's)
 
 (defun xenops-doctor (&optional quiet)
   "Check your Emacs environment for any problems that will affect Xenops.

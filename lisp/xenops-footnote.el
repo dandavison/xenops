@@ -5,6 +5,7 @@
 ;;; Commentary:
 
 ;;; Code:
+(require 's)
 
 (declare-function xenops-elements-get "xenops-elements")
 (declare-function xenops-overlay-create "xenops-overlay")

@@ -8,8 +8,9 @@
 ;; extension of `prettify-symbols-mode'.
 
 ;;; Code:
+(require 'dash-functional)
+(require 's)
 
-(declare-function -compose "dash-functional")
 (declare-function xenops-util-first-index "xenops-util")
 
 (defvar-local style-rules nil

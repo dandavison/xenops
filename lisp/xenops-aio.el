@@ -7,9 +7,8 @@
 ;; Helper functions for working with aio.
 
 ;;; Code:
-
-(declare-function aio-promise "aio" ())
-(declare-function aio-resolve "aio" (promise value-function))
+(require 'aio)
+(require 's)
 
 (defmacro xenops-aio-with-async-with-buffer (buffer &rest body)
   "Evaluate BODY under `aio-with-async' with current buffer set to BUFFER."

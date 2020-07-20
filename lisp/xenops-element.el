@@ -12,6 +12,8 @@
 ;;; Code:
 (require 'subr-x)
 
+(require 'dash)
+
 (declare-function xenops-util-parse-image-at "xenops-util")
 
 (defun xenops-element-overlays-get (element)
