@@ -8,6 +8,7 @@
 (require 'org)
 
 (require 'aio)
+(require 'dash)
 (require 'f)
 (require 'tex)
 (require 'tex-buf)
@@ -295,9 +296,10 @@ etc."
 (defun xenops-clear-latex-preamble-cache ()
   "Clear the LaTeX preamble cache."
   (interactive)
-  (setq xenops-math-latex-preamble-cache
-        (assoc-delete-all (xenops-math-latex-make-preamble-cache-key)
-                          xenops-math-latex-preamble-cache)))
+  (let ((key (xenops-math-latex-make-preamble-cache-key)))
+    (setq xenops-math-latex-preamble-cache
+          (--remove (equal (car it) key)
+                    xenops-math-latex-preamble-cache))))
 
 (defun xenops-math-latex-pre-apply-copy-semaphore-value (handlers &rest _)
   "Copy current semaphore value to a global variable.
