@@ -6,7 +6,7 @@
 
 ;;; Code:
 
-(require 'style)
+(require 'xenops-style)
 
 ;; A brace-delimited multiline expression supporting 1 level of nesting: i.e. it can contain other
 ;; brace-delimited expressions, as long as these have no children.
@@ -72,13 +72,13 @@
   :lighter nil
   (cond
    (xenops-xen-mode
-    (setq style-rules xenops-xen-style-rules
-          style-regexp-rules-get-text-properties #'xenops-xen-style-regexp-rules-get-text-properties)
-    (style-mode +1))
+    (setq xenops-style-rules xenops-xen-style-rules
+          xenops-style-regexp-rules-get-text-properties #'xenops-xen-style-regexp-rules-get-text-properties)
+    (xenops-style-mode +1))
    (t
-    (style-mode -1)
-    (setq style-rules nil
-          style-regexp-rules-get-text-properties nil))))
+    (xenops-style-mode -1)
+    (setq xenops-style-rules nil
+          xenops-style-regexp-rules-get-text-properties nil))))
 
 (defun xenops-xen-begin-latex-environment-formatter (env)
   "Return visual replacement for environment ENV begin token."
@@ -107,7 +107,7 @@
     (format "%s%s" (s-repeat indent " ") title)))
 
 (defun xenops-xen-style-regexp-rules-get-text-properties (match)
-  "An implementation of `style-regexp-rules-get-text-properties'.
+  "An implementation of `xenops-style-regexp-rules-get-text-properties'.
 
 MATCH is the current regular expression match."
   (cond

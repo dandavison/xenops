@@ -1,10 +1,10 @@
-;;; style.el --- A library for visual styling of text in a buffer -*- lexical-binding: t; -*-
+;;; xenops-style.el --- A library for visual styling of text in a buffer -*- lexical-binding: t; -*-
 
 ;; SPDX-License-Identifier: MIT
 
 ;;; Commentary:
 
-;; This module implements a self-contained minor mode `style-mode' which is essentially an
+;; This module implements a self-contained minor mode `xenops-style-mode' which is essentially an
 ;; extension of `prettify-symbols-mode'.
 
 ;;; Code:
@@ -13,7 +13,7 @@
 
 (declare-function xenops-util-first-index "xenops-util")
 
-(defvar-local style-rules nil
+(defvar-local xenops-style-rules nil
   "List of display strings used to change the visual appearance of text in a buffer.
 
 An item in the list must have one of the following forms:
@@ -39,7 +39,7 @@ REGEXP                 In this case, REGEXP must be a regular expression with
                        causes occurrences of the LaTeX italic
                        markup \"\\textit{some text}\" to be
                        displayed visually as \"some text\". See
-                       `style-regexp-rules-get-text-properties'
+                       `xenops-style-regexp-rules-get-text-properties'
                        for how an italic font is then applied to
                        \"some text\".
 
@@ -51,54 +51,54 @@ REGEXP                 In this case, REGEXP must be a regular expression with
                       captured by the regular expression and
                       passing it to FUNCTION.")
 
-(defvar style-regexp-rules-get-text-properties nil
+(defvar xenops-style-regexp-rules-get-text-properties nil
   "A function of one argument (MATCH, i.e. the original matched text)
 returning a plist of text properties to be applied to the displayed text.
 E.g. if MATCH looks like \textbf{something}, then the function
 might return text properties that will apply a bold face to the
 replacement text.")
 
-(defvar style-tooltip-delay-orig nil)
+(defvar xenops-style-tooltip-delay-orig nil)
 
-(define-minor-mode style-mode
-  "A minor mode changing the visual appearance of the buffer according to `style-rules'.
+(define-minor-mode xenops-style-mode
+  "A minor mode changing the visual appearance of the buffer according to `xenops-style-rules'.
 
-\\{style-mode-map}"
+\\{xenops-style-mode-map}"
   :lighter " style"
   (cond
-   (style-mode
+   (xenops-style-mode
     (let ((prettify-symbols-alist prettify-symbols-alist))
-      (mapc #'style-process-string-rule
-            (style-get-string-rules))
+      (mapc #'xenops-style-process-string-rule
+            (xenops-style-get-string-rules))
 
       (setq prettify-symbols-alist
             (sort prettify-symbols-alist (lambda (x y) (> (length (car x)) (length (car y))))))
 
       (prettify-symbols-mode +1))
-    (font-lock-add-keywords nil (style-extra-font-lock-keywords))
-    (style-configure-tooltips))
+    (font-lock-add-keywords nil (xenops-style-extra-font-lock-keywords))
+    (xenops-style-configure-tooltips))
    (t
     ;; Deactivate
-    (font-lock-remove-keywords nil (style-extra-font-lock-keywords))
-    (style-configure-tooltips 'deactivate)
+    (font-lock-remove-keywords nil (xenops-style-extra-font-lock-keywords))
+    (xenops-style-configure-tooltips 'deactivate)
     (prettify-symbols-mode -1)
     (font-lock-mode -1)
     (font-lock-mode 1))))
 
-(defun style-extra-font-lock-keywords ()
+(defun xenops-style-extra-font-lock-keywords ()
   "Create the font-lock keyword style rules."
-  `((,(style-regexp-rules-make-regexp)
+  `((,(xenops-style-regexp-rules-make-regexp)
      (0
-      (style-regexp-rule-apply)))))
+      (xenops-style-regexp-rule-apply)))))
 
-(defun style-configure-tooltips (&optional deactivate)
+(defun xenops-style-configure-tooltips (&optional deactivate)
   "Add tooltips to prettify replacements.
 
 Optional argument DEACTIVATE removes tooltips."
   ;; TODO: I think this is causing the very long regexp to be matched twice during fontification.
   ;; Can this be done by modifying the existing prettify-symbols entry?
   (dolist (regexp (list (caar prettify-symbols--keywords)
-                        (style-regexp-rules-make-regexp)))
+                        (xenops-style-regexp-rules-make-regexp)))
     (funcall
      (if deactivate 'font-lock-remove-keywords 'font-lock-add-keywords)
      nil
@@ -106,30 +106,31 @@ Optional argument DEACTIVATE removes tooltips."
         0 `(face font-lock-keyword-face
                  help-echo ,(match-string 0))))))
   (if deactivate
-      (setq tooltip-delay style-tooltip-delay-orig)
-    (setq style-tooltip-delay-orig tooltip-delay)))
+      (setq tooltip-delay xenops-style-tooltip-delay-orig)
+    (setq xenops-style-tooltip-delay-orig tooltip-delay)))
 
-(defun style-regexp-rule-apply ()
+(defun xenops-style-regexp-rule-apply ()
   "A match for a regexp capture replacement has just been made.
 Compute the replacement text to be displayed, with its text
 properties, and display it."
   (let* ((beg (match-beginning 0))
          (end (match-end 0))
          (match (match-string 0))
-         (match-string-index (style-regexp-rules-get-match-string-index))
-         (display-string (style-regexp-rules-make-display-string match-string-index))
-         (composition (style-make-composition display-string))
-         (properties (if style-regexp-rules-get-text-properties
-                         (funcall style-regexp-rules-get-text-properties match))))
-    (style-compose composition properties beg end))
+         (match-string-index (xenops-style-regexp-rules-get-match-string-index))
+         (display-string (xenops-style-regexp-rules-make-display-string match-string-index))
+         (composition (xenops-style-make-composition display-string))
+         (properties (if xenops-style-regexp-rules-get-text-properties
+                         (funcall xenops-style-regexp-rules-get-text-properties match))))
+    (xenops-style-compose composition properties beg end))
   nil)
 
-(defun style-regexp-rules-make-regexp ()
-  "Return a regular expression matching text corresponding to any regular expression rule in `style-rules'."
+(defun xenops-style-regexp-rules-make-regexp ()
+  "Return a regular expression matching text corresponding to any
+regular expression rule in `xenops-style-rules'."
   (format "\\(%s\\)"
-          (s-join "\\|" (style-regexp-rules-get-regexps))))
+          (s-join "\\|" (xenops-style-regexp-rules-get-regexps))))
 
-(defun style-regexp-rule-get-canonicalized-rule (spec)
+(defun xenops-style-regexp-rule-get-canonicalized-rule (spec)
   "Return cons cell (REGEXP . FORMATTER) for SPEC where FORMATTER may be nil."
   (pcase spec
     (`(,(and (pred stringp) regexp) . ,(and (pred functionp) formatter))
@@ -137,26 +138,26 @@ properties, and display it."
     ((and (pred stringp) regexp)
      `(,regexp))))
 
-(defun style-regexp-rules-get-regexps ()
+(defun xenops-style-regexp-rules-get-regexps ()
   "Return the regexps used by style rules."
   (-remove
    #'null
-   (mapcar (-compose #'car #'style-regexp-rule-get-canonicalized-rule)
-           style-rules)))
+   (mapcar (-compose #'car #'xenops-style-regexp-rule-get-canonicalized-rule)
+           xenops-style-rules)))
 
-(defun style-get-regexp-rules ()
+(defun xenops-style-get-regexp-rules ()
   "Return the suset of rules that are regexp rules."
   (-filter
-   #'style-regexp-rule-get-canonicalized-rule
-   style-rules))
+   #'xenops-style-regexp-rule-get-canonicalized-rule
+   xenops-style-rules))
 
-(defun style-get-string-rules ()
+(defun xenops-style-get-string-rules ()
   "Return the suset of rules that are string rules."
   (-remove
-   #'style-regexp-rule-get-canonicalized-rule
-   style-rules))
+   #'xenops-style-regexp-rule-get-canonicalized-rule
+   xenops-style-rules))
 
-(defun style-regexp-rules-get-match-string-index ()
+(defun xenops-style-regexp-rules-get-match-string-index ()
   "A match for a regexp capture replacement has just been made.
 Return the to be supplied to `match-string' to obtain the caotured text."
   ;; The regexp is like (option_1(captured)|option_2(captured)|...).
@@ -177,16 +178,16 @@ Return the to be supplied to `match-string' to obtain the caotured text."
   ;; index that is non-nil. Suppose this is i. Then (i + 4)/2 is the corresponding index.
   (/ (+ (xenops-util-first-index (-drop 4 (match-data 'integers))) 4) 2))
 
-(defun style-regexp-rules-make-display-string (match-string-index)
+(defun xenops-style-regexp-rules-make-display-string (match-string-index)
   "Return the string to be displayed for the regexp rule with index MATCH-STRING-INDEX."
-  (let ((spec (nth (- match-string-index 2) (style-get-regexp-rules)))
+  (let ((spec (nth (- match-string-index 2) (xenops-style-get-regexp-rules)))
         (capture (save-match-data
                    (s-join " " (split-string (match-string match-string-index))))))
     (pcase spec
       (`(,_ . ,formatter) (funcall formatter capture))
       (_ capture))))
 
-(defun style-compose (composition properties beg end)
+(defun xenops-style-compose (composition properties beg end)
   "Compose symbols for COMPOSITION.
 
 Adds to PROPERTIES between BEG and END."
@@ -200,7 +201,7 @@ Adds to PROPERTIES between BEG and END."
              `(prettify-symbols-start ,beg prettify-symbols-end ,end)))))
 
 ;; https://emacs.stackexchange.com/a/34882/9007
-(defun style-process-string-rule (pair)
+(defun xenops-style-process-string-rule (pair)
   "Register a style string replacekent rule.
 
 PAIR is a cons (FROM, TO). Make function `prettify-symbols-mode'
@@ -214,10 +215,10 @@ such that base-left of the character is aligned with base-right
 of the preceding character.  Refer to `reference-point-alist'
 for more information."
   (push (cons (car pair)
-              (style-make-composition (cdr pair)))
+              (xenops-style-make-composition (cdr pair)))
         prettify-symbols-alist))
 
-(defun style-make-composition (string)
+(defun xenops-style-make-composition (string)
   "Return composition for STRING."
   (let ((composition nil))
     (dolist (char (string-to-list string)
@@ -225,6 +226,6 @@ for more information."
       (push char composition)
       (push '(Br . Bl) composition))))
 
-(provide 'style)
+(provide 'xenops-style)
 
-;;; style.el ends here
+;;; xenops-style.el ends here
