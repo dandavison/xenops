@@ -59,24 +59,24 @@ under some OSs / Mathematica versions.")
 ELEMENT is an 'src element."
   (let* ((language (plist-get element :language))
          (execute-language-fn
-          (intern (concat "xenops-src-execute-src-block:" language))))
+          (intern (concat "xenops-src-execute-src-block--" language))))
     (if (fboundp execute-language-fn)
         (funcall execute-language-fn element)
       (xenops-src-execute-src-block element))))
 
-(defun xenops-src-execute-src-block:python (element)
+(defun xenops-src-execute-src-block--python (element)
   "Execute parsed python src element ELEMENT.
 
 If the :sympy header argument is set this delegates to
-`xenops-src-execute-src-block:python-sympy'."
+`xenops-src-execute-src-block--python-sympy'."
   (let ((info (plist-get element :org-babel-info)))
     (if (cdr (assq :sympy (nth 2 info)))
-        (xenops-src-execute-src-block:python-sympy element)
+        (xenops-src-execute-src-block--python-sympy element)
       (xenops-src-execute-src-block element))))
 
 (defvar org-babel-python-wrapper-method)  ;; defined in ob-python
 
-(defun xenops-src-execute-src-block:python-sympy (element)
+(defun xenops-src-execute-src-block--python-sympy (element)
   "Execute parsed python sympy src element ELEMENT.
 
 Add an `import * from sympy` line and, if `:results latex`,
@@ -97,7 +97,7 @@ arrange for sympy to return the results as LaTeX."
 
 (defvar org-babel-mathematica-command)  ;; defined in ob-mathematica
 
-(defun xenops-src-execute-src-block:mathematica (element)
+(defun xenops-src-execute-src-block--mathematica (element)
   "Execute parsed mathematica src element ELEMENT.
 
 If `:results latex`, arrange for mathematica to return the result
