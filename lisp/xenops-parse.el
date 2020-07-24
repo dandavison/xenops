@@ -62,7 +62,7 @@ the search. DELIMITERS are the delimiters sought."
     (when (looking-at (car (last delimiters)))
       ;; This function will return nil if point is between delimiters separated by
       ;; zero characters.
-      (left-char))
+      (unless (bobp) (left-char)))
     (let ((pos (point)) beg-beg beg-end end-beg end-end)
       (and (or (org-in-regexp (car delimiters))
                (and (< lim-up (point)) (re-search-backward (car delimiters) lim-up t)))
