@@ -418,7 +418,15 @@ WINDOW is currently ignored. OLDPOS is the previous location of
 point. EVENT-TYPE is the type of cursor sensor event that
 triggered this handler."
   ;; TODO: check window
-  (if (eq event-type 'left)
+  (if (and (eq event-type 'left)
+           ;; HACK: this shouldn't be necessary, but in practice the 'left event is being triggered
+           ;; sometimes when point is still in a math/table element.
+           (-if-let* ((now-in (xenops-math-parse-element-at-point)))
+               (prog1 nil
+                (message
+                 "xenops-math-handle-element-transgression: event-type 'left but at %d in element %S"
+                 (point) now-in))
+             t))
       (-if-let* ((was-in (xenops-math-parse-element-at oldpos)))
           (unless (xenops-element-get-image was-in)
             (xenops-math-render was-in)))))
