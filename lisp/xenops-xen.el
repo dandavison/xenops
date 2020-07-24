@@ -85,7 +85,7 @@
   (cond
    ((member env '("src" "minted" "align")) "⚡")
    ((member env '("enumerate" "itemize" "mdframed")) " ")
-   (t (upcase-initials env))))
+   (t env)))
 
 (defun xenops-xen-end-latex-environment-formatter (env)
   "Return visual replacement for environment ENV end token."
