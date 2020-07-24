@@ -17,7 +17,7 @@
 
 (declare-function xenops-element-create-marker "xenops-element")
 (declare-function xenops-element-deactivate-marker "xenops-element")
-(declare-function xenops-math-display-error "xenops-math")
+(declare-function xenops-math-display-error-badge "xenops-math")
 (declare-function xenops-math-parse-element-at "xenops-math")
 (declare-function xenops-png-set-phys-chunk "xenops-png")
 
@@ -205,7 +205,7 @@ format the commands."
                 (xenops-aio-with-async-with-buffer
                  buffer
                  (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-                   (xenops-math-display-error element error)
+                   (xenops-math-display-error-badge element error)
                    (xenops-element-deactivate-marker element))))))
       (with-current-buffer buffer
         (aio-sem-post xenops-math-latex-tasks-semaphore)))))

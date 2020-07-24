@@ -184,7 +184,7 @@ the image cache file."
   (unless (equal xenops-math-image-current-scale-factor 1.0)
     (xenops-math-image-change-size element xenops-math-image-current-scale-factor)))
 
-(defun xenops-math-display-error (element error)
+(defun xenops-math-display-error-badge (element error)
   "Style ELEMENT to indicate ERROR during execution of its processing task.
 
 Make error details available via hover-over text and contextual
@@ -212,16 +212,14 @@ Right-click on the warning badge to copy the failing command or view its output.
 %s"
                                     failure-description
                                     failing-command))
-            (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
-            ov))
+            (define-key keymap [mouse-3] xenops-math-image-overlay-menu)))
       (setq help-echo (format "Error processing LaTeX fragment:\n\n%s"
                               (s-join "\n\n" (--map (format "%S" it) error)))))
     (add-text-properties 0 (length error-badge)
                          `(help-echo ,help-echo keymap ,keymap)
                          error-badge)
     (overlay-put ov 'after-string error-badge)
-    (overlay-put ov 'help-echo help-echo)
-    ov))
+    (overlay-put ov 'help-echo help-echo)))
 
 (defun xenops-math-make-overlay (element commands help-echo)
   "Make overlay used to style ELEMENT and display images and error information.
