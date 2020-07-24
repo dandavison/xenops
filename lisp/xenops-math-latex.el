@@ -212,9 +212,10 @@ format the commands."
 
 (defun xenops-math-latex-waiting-tasks-count ()
   "Return the number of processing tasks currently waiting in the queue."
-  (when xenops-mode
-    (- xenops-math-latex-max-tasks-in-flight
-       (aref xenops-math-latex-tasks-semaphore 1))))
+  (if xenops-mode
+      (- xenops-math-latex-max-tasks-in-flight
+         (aref xenops-math-latex-tasks-semaphore 1))
+    0))
 
 (defun xenops-show-waiting-tasks ()
   "Display number of waiting latex processing tasks."
