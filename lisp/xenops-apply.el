@@ -16,6 +16,7 @@
 
 (defvar xenops-apply-pre-apply-hook nil)
 (defvar xenops-apply-post-apply-hook nil)
+(defvar xenops-apply-user-point nil) ; The user's value of (point) at the outset of an apply operation
 
 (defun xenops-apply-operations (ops &optional pred)
   "Apply operation types OPS to any elements encountered.
@@ -26,7 +27,8 @@ buffer.
 Optional argument PRED is a function taking an element plist as
 its only argument. The element will be operated on iff PRED
 returns non-nil."
-  (let ((handlers (xenops-ops-get-for-ops ops :handlers)))
+  (let ((handlers (xenops-ops-get-for-ops ops :handlers))
+        (xenops-apply-user-point (point)))
     (cl-destructuring-bind (beg end region-active)
         (if (region-active-p)
             `(,(region-beginning) ,(region-end) t)
