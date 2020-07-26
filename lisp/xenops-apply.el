@@ -11,7 +11,7 @@
 (declare-function xenops-ops-get-for-ops "xenops")
 (declare-function xenops-elements-delimiter-start-regexp "xenops-elements")
 (declare-function xenops-elements-get-all "xenops-elements")
-(declare-function xenops-overlay-delete-overlays "xenops-overlay")
+(declare-function xenops-overlay-delete-overlays-in "xenops-overlay")
 (declare-function xenops-parse-any-element-at-point "xenops-parse")
 
 (defvar xenops-apply-pre-apply-hook nil)
@@ -113,7 +113,7 @@ makes this hook function necessary."
   (if (and beg end (-intersection handlers '(xenops-math-reveal
                                              xenops-element-reveal
                                              xenops-image-reveal)))
-      (xenops-overlay-delete-overlays beg end)))
+      (xenops-overlay-delete-overlays-in beg end)))
 
 (add-hook 'xenops-apply-post-apply-hook #'xenops-apply-post-apply-deactivate-mark)
 (add-hook 'xenops-apply-post-apply-hook #'xenops-apply-post-reveal-delete-overlays)

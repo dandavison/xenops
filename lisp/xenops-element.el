@@ -24,9 +24,8 @@
 
 (defun xenops-element-overlays-delete (element)
   "Delete xenops overlays overlapping ELEMENT."
-  (dolist (ov (xenops-element-overlays-get element))
-    (when (overlay-get ov 'xenops-overlay-type)
-      (delete-overlay ov))))
+  (xenops-overlay-delete-overlays-in (plist-get element :begin)
+                                     (plist-get element :end)))
 
 (defun xenops-element-overlay-get (element type)
   "Return first xenops overlay of type TYPE overlapping ELEMENT."
