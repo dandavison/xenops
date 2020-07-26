@@ -49,15 +49,6 @@
   "Return the display property of ELEMENT if it is of type 'image."
   (xenops-util-parse-image-at (plist-get element :begin)))
 
-(defun xenops-element-create-marker (element)
-  "Create a marker pointing at the current :begin position of ELEMENT."
-  (plist-put element :begin-marker (set-marker (make-marker) (plist-get element :begin))))
-
-(defun xenops-element-deactivate-marker (element)
-  "Delete the marker for ELEMENT created by `xenops-element-create-marker'."
-  (if-let* ((marker (plist-get element :begin-marker)))
-      (set-marker marker nil)))
-
 (provide 'xenops-element)
 
 ;;; xenops-element.el ends here

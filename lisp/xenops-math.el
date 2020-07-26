@@ -327,6 +327,15 @@ OVERLAY is an element overlay from which the commands can be obtained."
   (let ((latex-command (car (overlay-get overlay 'commands))))
     (kill-new (s-join " " latex-command))))
 
+(defun xenops-math-set-marker-on-element (element)
+  "Create a marker pointing at the current :begin position of ELEMENT."
+  (plist-put element :begin-marker (set-marker (make-marker) (plist-get element :begin))))
+
+(defun xenops-math-deactivate-marker-on-element (element)
+  "Deactivate the marker for ELEMENT created by `xenops-math-set-marker-on-element'."
+  (if-let* ((marker (plist-get element :begin-marker)))
+      (set-marker marker nil)))
+
 (defun xenops-math-image-increase-size (element)
   "Increase ELEMENT image size."
   (xenops-math-image-change-size element xenops-math-image-change-size-factor))

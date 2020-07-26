@@ -169,7 +169,7 @@ After.")
     (insert text)
     (goto-char (point-min))
     (let ((element (xenops-apply-parse-next-element)))
-      (xenops-element-create-marker element)
+      (xenops-math-set-marker-on-element element)
 
       ;; render
       (save-excursion
@@ -210,7 +210,7 @@ After.")
     (insert text)
     (goto-char (point-min))
     (let ((element (xenops-apply-parse-next-element)))
-      (xenops-element-create-marker element)
+      (xenops-math-set-marker-on-element element)
 
       ;; render
       (save-excursion
