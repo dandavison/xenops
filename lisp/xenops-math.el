@@ -27,6 +27,7 @@
 (declare-function xenops-parse-element-at-point "xenops-parse")
 (declare-function xenops-parse-element-at-point-matching-delimiters "xenops-parse")
 (declare-function xenops-util-first-result "xenops-util")
+(declare-function xenops-util-goto-line "xenops-util")
 (declare-function xenops-util-svg-resize "xenops-util")
 
 
@@ -268,7 +269,7 @@ element. HELP-ECHO is the tooltip text to display."
                        (string-to-number (match-string 1))))))))
       (when first-error-line
         (with-current-buffer input-buf
-          (goto-line first-error-line)
+          (xenops-util-goto-line first-error-line)
           (xenops-util-highlight-current-line)))
       (-when-let* ((output-win (display-buffer output-buf)))
         (with-selected-window output-win
