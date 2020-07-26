@@ -27,7 +27,8 @@
   "Delete Xenops overlays between BEG and END."
   (interactive "r")
   (dolist (ov (overlays-in (or beg (point-min)) (or end (point-max))))
-    (delete-overlay ov)))
+    (when (overlay-get ov 'xenops-overlay-type)
+      (delete-overlay ov))))
 
 (provide 'xenops-overlay)
 
