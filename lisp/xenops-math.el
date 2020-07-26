@@ -28,6 +28,7 @@
 (declare-function xenops-parse-element-at-point-matching-delimiters "xenops-parse")
 (declare-function xenops-util-first-result "xenops-util")
 (declare-function xenops-util-goto-line "xenops-util")
+(declare-function xenops-util-highlight-current-line "xenops-util")
 (declare-function xenops-util-svg-resize "xenops-util")
 
 
@@ -254,7 +255,9 @@ element. HELP-ECHO is the tooltip text to display."
     ov))
 
 (defun xenops-math-display-process-error-windows (command output)
-  "Display windows containing information about the process error."
+  "Display windows containing information about an error in an external process.
+
+COMMAND is the command used to start process, and OUTPUT is its standard output."
   ;; HACK, TODO: should make the input file available in the error-data object constructed by
   ;; `xenops-aio-subprocess', rather than inferring it from the full command.
   (let ((input-file (car (last (s-split " " command)))))
@@ -278,6 +281,9 @@ element. HELP-ECHO is the tooltip text to display."
           (recenter-top-bottom))))))
 
 (defun xenops-math-get-process-input-buffer (input-file)
+  "Return a buffer containing the input for an external process.
+
+INPUT-FILE is a file containing the input."
   (let ((buf (get-buffer-create "*Xenops external command input*")))
     (with-current-buffer buf
       (let ((buffer-read-only nil))
@@ -289,7 +295,7 @@ element. HELP-ECHO is the tooltip text to display."
       buf)))
 
 (defun xenops-math-get-process-output-buffer (output)
-  "Display external process output OUTPUT in a window."
+  "Return a buffer containing external process output OUTPUT."
   ;; TODO: is (TeX-error-overview-mode) useful?
   (let ((buf (get-buffer-create "*Xenops external command output*")))
     (with-current-buffer buf
