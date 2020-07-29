@@ -84,7 +84,7 @@
   "Return visual replacement for environment ENV begin token."
   (cond
    ((member env '("src" "minted" "align")) "⚡")
-   ((member env '("enumerate" "itemize" "mdframed")) " ")
+   ((member env '("enumerate" "itemize" "mdframed")) "↴")
    (t env)))
 
 (defun xenops-xen-end-latex-environment-formatter (env)
@@ -92,7 +92,7 @@
   (cond
    ((member env '("align" "src" "minted")) "⚡")
    ((member env '("proof")) "□")
-   (t " ")))
+   (t "↲")))
 
 (defun xenops-xen-section-title-formatter (title)
   "Return visual replacement for section title TITLE."
