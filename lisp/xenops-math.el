@@ -143,7 +143,7 @@ and then calling `xenops-render'."
 (defun xenops-math-reveal (element)
   "Remove image overlay for ELEMENT.
 
-If a prefuix argument is in effect, also delete its cache file."
+If a prefix argument is in effect, also delete its cache file."
   (xenops-element-overlays-delete element)
   (if current-prefix-arg
       (delete-file (xenops-math-get-cache-file element)))
