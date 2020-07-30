@@ -5,7 +5,6 @@
 ;;; Commentary:
 
 ;;; Code:
-(declare-function xenops-overlay-create "xenops-overlay")
 
 (defmacro xenops-util-define-key-with-fallback (key handler &optional fallback-key)
   "Bind HANDLER to KEY in `xenops-mode-map'.
