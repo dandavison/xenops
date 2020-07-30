@@ -120,7 +120,7 @@ More explicitly, here are the basic steps for working with math in Xenops:
         </tr>
       </table>
 
-You may also want to create the image for all math/table/TikZ elements in the document. To do that, position the cursor outside any element and issue `xenops-dwim`.
+You may also want to create images for all math/table/TikZ elements in the document. To do that, position the cursor outside any element and issue `xenops-dwim`.
 
 The other command to know from the start is `xenops-doctor`: run this if something is not working.
 
