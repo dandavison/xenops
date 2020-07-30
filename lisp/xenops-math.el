@@ -128,6 +128,13 @@ the LaTeX to SVG, and insert the SVG into the buffer."
           (xenops-math-display-waiting element)
           (xenops-math-latex-create-image element latex colors cache-file display-image)))))))
 
+(defun xenops-math-render-below-maybe (element)
+  "Render ELEMENT below ELEMENT, so that the rendering can be monitored while editing."
+  ;; TODO: This needs to be refactored. The decision of whether to render below or in-place is made
+  ;; by xenops-math-display-image. As things stand the name of the current function is inaccurate.
+  (unless (eq 'inline-math (plist-get element :type))
+    (xenops-math-render element)))
+
 (defun xenops-math-regenerate (element)
   "Regenerate math element ELEMENT.
 
@@ -152,14 +159,14 @@ If a prefix argument is in effect, also delete its cache file."
         (begin-content (plist-get element :begin-content)))
     (goto-char (if (eq element-type 'block-math)
                    (1+ begin-content)
-                 begin-content))))
+                 begin-content)))
+  (xenops-math-render-below-maybe element))
 
 (defun xenops-math-display-waiting (element)
   "Style a math element ELEMENT as waiting.
 
 The style indicates that its processing task is waiting in the
 queue to be executed."
-  (xenops-element-overlays-delete element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
          (ov (xenops-overlay-create beg end)))
@@ -175,9 +182,19 @@ Use `M-x xenops-cancel-waiting-tasks` to make this element editable.") ov))
 COMMANDS are the latex processing commands used to render the
 element. HELP-ECHO is the tooltip text to display. CACHE-FILE is
 the image cache file."
-  (let ((margin (if (eq 'inline-math (plist-get element :type))
-                    0 `(,xenops-math-image-margin . 0)))
-        (ov (xenops-math-make-overlay element commands help-echo)))
+  (xenops-element-overlays-delete element)
+  (let* ((inline-p (eq 'inline-math (plist-get element :type)))
+         (margin (if inline-p 0 `(,xenops-math-image-margin . 0)))
+         (display-after-element-p (and (not inline-p)
+                                       (<= (plist-get element :begin)
+                                           (or xenops-apply-user-point (point))
+                                           (plist-get element :end))))
+         (ov-beg (if display-after-element-p
+                     (save-excursion (goto-char (plist-get element :end))
+                                     (point-at-bol))
+                   (plist-get element :begin)))
+         (ov-end (plist-get element :end))
+         (ov (xenops-math-make-overlay ov-beg ov-end commands help-echo)))
     (overlay-put ov 'display
                  `(image :type ,(intern  (xenops-math-latex-process-get :image-output-type))
                          :file ,cache-file :ascent center :margin ,margin)))
@@ -221,15 +238,13 @@ Right-click on the warning badge to copy the failing command or view its output.
     (overlay-put ov 'after-string error-badge)
     (overlay-put ov 'help-echo help-echo)))
 
-(defun xenops-math-make-overlay (element commands help-echo)
-  "Make overlay used to style ELEMENT and display images and error information.
+(defun xenops-math-make-overlay (beg end commands help-echo)
+  "Return overlay used to display image of math content.
 
-COMMANDS are the latex processing commands used to render the
-element. HELP-ECHO is the tooltip text to display."
-  (xenops-element-overlays-delete element)
-  (let* ((beg (plist-get element :begin))
-         (end (plist-get element :end))
-         (ov (xenops-overlay-create beg end))
+BEG and END are the overlay extent. COMMANDS are the latex
+processing commands used to render the element. HELP-ECHO is the
+tooltip text to display."
+  (let* ((ov (xenops-overlay-create beg end))
          (keymap (overlay-get ov 'keymap))
          (xenops-math-image-overlay-menu
           (lambda (event)

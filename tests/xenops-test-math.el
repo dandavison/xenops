@@ -10,14 +10,12 @@ After.")
 
 (defun xenops-test-math--assert-image-is-displayed (element)
   "Perform a `render` operation, and assert that the image is present."
-  (save-excursion
-    (goto-char (plist-get element :begin-marker))
-    (let ((ov (xenops-overlay-at-point)))
-      (should ov)
-      (let ((image (overlay-get ov 'display)))
-        (should image)
-        (should (equal (image-property image :type) 'svg))
-        (should (equal (image-property image :file) xenops-test--example-svg--cache-file))))))
+  (let ((ov (xenops-element-overlay-get element 'xenops-overlay)))
+    (should ov)
+    (let ((image (overlay-get ov 'display)))
+      (should image)
+      (should (equal (image-property image :type) 'svg))
+      (should (equal (image-property image :file) xenops-test--example-svg--cache-file)))))
 
 (defun xenops-test-math--assert-image-is-not-displayed (element)
   "Perform a `reveal` operation, and assert that the image has gone."
