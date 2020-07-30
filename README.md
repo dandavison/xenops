@@ -65,8 +65,6 @@ Xenops can also be used with [org-mode](https://orgmode.org) documents that cont
 
 # 2. Getting started
 
-(Xenops [has been](https://github.com/melpa/melpa/pull/7006) submitted to [MELPA](https://melpa.org/), so installation should be easier soon.)
-
 1. **Ensure that you have [LaTeX](https://www.latex-project.org/get) installed on your machine.**
 
     The commands `which latex` and `which dvisvgm` must both return paths to the executables. `dvisvgm` should be present as part of your LaTeX installation, but it's also available [here](https://dvisvgm.de/Downloads).
@@ -77,30 +75,23 @@ Xenops can also be used with [org-mode](https://orgmode.org) documents that cont
 
     If you are using MacOS, install emacs from homebrew using the `emacs-mac` package (aka Mitsuharu's Emacs build), since it uses WebKit to render SVG, resulting in beautifully crisp images.
 
-1. **Clone the Xenops git repository to a location on your computer.**
+1. **Install Xenops from [MELPA](https://github.com/melpa/melpa).**
 
-1. **Add the following code to your Emacs init file.**
+    ```
+    M-x package-refresh-contents RET
+    M-x package-install RET xenops RET
+    ```
 
-    *Note that you must change `"/PATH/TO/XENOPS-REPO/"` below.*
+    To activate Xenops, use `M-x xenops-mode` after opening a LaTeX file.
+
+1. **Optional: activate xenops-mode automatically for LaTeX files.**
 
     ```emacs-lisp
-    (require 'package)
-    (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")  ;; Not necessary in Emacs>=26.3
-    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-    (package-initialize)
-    (package-refresh-contents)
-
-    (dolist (package '(aio auctex avy dash-functional f))
-      (unless (package-installed-p package)
-        (package-install package)))
-
-    (add-to-list 'load-path "/PATH/TO/XENOPS-REPO/lisp")
-    (require 'xenops)
     (add-hook 'latex-mode-hook #'xenops-mode)
     (add-hook 'LaTeX-mode-hook #'xenops-mode)
     ```
 
-1.  **Restart Emacs and run `M-x xenops-doctor`**
+1.  **Run `M-x xenops-doctor`**
 
     You must run Emacs as a GUI application, not as a terminal application. This is because Xenops displays images in Emacs buffers.
 
