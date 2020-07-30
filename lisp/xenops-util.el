@@ -19,11 +19,6 @@ variable `xenops-mode' not active."
          (let (xenops-mode)
            (execute-kbd-macro ,(or fallback-key key)))))))
 
-(defun xenops-util-goto-line (line)
-  "Move point to the first column of LINE, efficiently."
-  (goto-char (point-min))
-  (forward-line (1- line)))
-
 (defun xenops-util-first-index (list)
   "Return smallest index for which the corresponding element in LIST is non-nil.
 
