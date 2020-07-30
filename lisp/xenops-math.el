@@ -75,6 +75,7 @@ This determines the size of the image in the image file that is
 (defvar xenops-cache-directory)
 (defvar xenops-mode-map)
 (defvar xenops-rendered-element-keymap)
+(defvar xenops-apply-user-point)
 
 (defun xenops-math-font-lock-keywords ()
   "Create font-lock entry for math elements."

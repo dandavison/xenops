@@ -206,7 +206,10 @@ format the commands."
                  buffer
                  (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
                    (xenops-math-display-error-badge
-                    element error (not (> 0 (xenops-math-latex-waiting-tasks-count))))
+                    element error
+                    ;; Only display the error if a single element is being rendered.
+                    (and (not xenops-apply-user-point)
+                         (<= (xenops-math-latex-waiting-tasks-count) 0)))
                    (xenops-math-deactivate-marker-on-element element))))))
       (with-current-buffer buffer
         (aio-sem-post xenops-math-latex-tasks-semaphore)))))
