@@ -76,11 +76,6 @@ For example, STRING might look like '1.5pt' or '50.5%'"
     (cons (string-to-number (substring string 0 (- n (length unit-specifier))))
           unit-specifier)))
 
-(defun xenops-util-highlight-current-line ()
-  "Highlight the current line."
-  (let ((ov (xenops-overlay-create (point-at-bol) (point-at-eol))))
-    (overlay-put ov 'face 'highlight)))
-
 (provide 'xenops-util)
 
 ;; xenops-util.el ends here
