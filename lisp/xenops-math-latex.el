@@ -205,7 +205,8 @@ format the commands."
                 (xenops-aio-with-async-with-buffer
                  buffer
                  (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-                   (xenops-math-display-error-badge element error)
+                   (xenops-math-display-error-badge
+                    element error (not (> 0 (xenops-math-latex-waiting-tasks-count))))
                    (xenops-element-deactivate-marker element))))))
       (with-current-buffer buffer
         (aio-sem-post xenops-math-latex-tasks-semaphore)))))
