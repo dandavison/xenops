@@ -27,6 +27,8 @@
 (declare-function xenops-parse-element-at-point "xenops-parse")
 (declare-function xenops-parse-element-at-point-matching-delimiters "xenops-parse")
 (declare-function xenops-util-first-result "xenops-util")
+(declare-function xenops-util-goto-line "xenops-util")
+(declare-function xenops-util-highlight-current-line "xenops-util")
 (declare-function xenops-util-svg-resize "xenops-util")
 
 
@@ -184,8 +186,12 @@ the image cache file."
   (unless (equal xenops-math-image-current-scale-factor 1.0)
     (xenops-math-image-change-size element xenops-math-image-current-scale-factor)))
 
-(defun xenops-math-display-error-badge (element error)
+(defun xenops-math-display-error-badge (element error display-error-p)
   "Style ELEMENT to indicate ERROR during execution of its processing task.
+
+If DISPLAY-ERROR-P is non-nil, then also display the error
+immediately (as if the user had selected \"View failing command
+output\" from the contextual menu).
 
 Make error details available via hover-over text and contextual
 menu."
@@ -203,7 +209,8 @@ menu."
                     (interactive "e")
                     (popup-menu
                      `("Xenops"
-                       ["View failing command output" (xenops-math-display-process-output ,output)]
+                       ["View failing command output" (xenops-math-display-process-error-windows
+                                                       ,failing-command ,output)]
                        ["Copy failing command" (kill-new ,failing-command)]))
                     event)))
             (setq help-echo (format "External running external process: %s
@@ -212,7 +219,9 @@ Right-click on the warning badge to copy the failing command or view its output.
 %s"
                                     failure-description
                                     failing-command))
-            (define-key keymap [mouse-3] xenops-math-image-overlay-menu)))
+            (define-key keymap [mouse-3] xenops-math-image-overlay-menu))
+          (when display-error-p
+            (xenops-math-display-process-error-windows failing-command output)))
       (setq help-echo (format "Error processing LaTeX fragment:\n\n%s"
                               (s-join "\n\n" (--map (format "%S" it) error)))))
     (add-text-properties 0 (length error-badge)
@@ -245,13 +254,56 @@ element. HELP-ECHO is the tooltip text to display."
     (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
     ov))
 
-(defun xenops-math-display-process-output (output)
-  "Display external process output OUTPUT in a buffer."
+(defun xenops-math-display-process-error-windows (command output)
+  "Display windows containing information about an error in an external process.
+
+COMMAND is the command used to start process, and OUTPUT is its standard output."
+  ;; HACK, TODO: should make the input file available in the error-data object constructed by
+  ;; `xenops-aio-subprocess', rather than inferring it from the full command.
+  (let ((input-file (car (last (s-split " " command)))))
+    (let* ((input-buf (xenops-math-get-process-input-buffer input-file))
+           (output-buf (xenops-math-get-process-output-buffer output))
+           (first-error-line
+            (with-current-buffer output-buf
+              (when (re-search-forward "^!" nil t)
+                (xenops-util-highlight-current-line)
+                (save-excursion
+                  (and (re-search-forward "^l\.\\([0-9]+\\)" nil t)
+                       (string-to-number (match-string 1))))))))
+      (when first-error-line
+        (with-current-buffer input-buf
+          (xenops-util-goto-line first-error-line)
+          (xenops-util-highlight-current-line)))
+      (-when-let* ((output-win (display-buffer output-buf)))
+        (with-selected-window output-win
+          (-when-let* ((input-win (display-buffer input-buf '(display-buffer-below-selected))))
+            (with-selected-window input-win (recenter-top-bottom)))
+          (recenter-top-bottom))))))
+
+(defun xenops-math-get-process-input-buffer (input-file)
+  "Return a buffer containing the input for an external process.
+
+INPUT-FILE is a file containing the input."
+  (let ((buf (get-buffer-create "*Xenops external command input*")))
+    (with-current-buffer buf
+      (let ((buffer-read-only nil))
+        (erase-buffer)
+        (insert-file-contents input-file)
+        (-when-let* ((mode-fn (assoc-default input-file auto-mode-alist 'string-match)))
+          (funcall mode-fn)))
+      (display-line-numbers-mode)
+      buf)))
+
+(defun xenops-math-get-process-output-buffer (output)
+  "Return a buffer containing external process output OUTPUT."
+  ;; TODO: is (TeX-error-overview-mode) useful?
   (let ((buf (get-buffer-create "*Xenops external command output*")))
     (with-current-buffer buf
-      (erase-buffer)
-      (insert output))
-    (display-buffer buf)))
+      (let ((buffer-read-only nil))
+        (erase-buffer)
+        (insert output))
+      (goto-char (point-min)))
+    buf))
 
 (defun xenops-math-copy-latex-command (overlay)
   "Copy external latex command to clipboard (kill-ring).
