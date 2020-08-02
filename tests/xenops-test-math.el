@@ -162,6 +162,16 @@ After.")
                    :begin 1 :begin-content 3 :end-content 4 :end 6
                    :delimiters ,xenops-math-square-bracket-delimited-inline-math-delimiters))))
 
+(ert-deftest xenops-test-math--parse-block-math--tikz--inline ()
+  (should (equal (xenops-math-parse-element-from-string
+                  (s-trim
+                   "
+\\tikz \draw (0,0) rectangle (1,1) (0,0) parabola (1,1);
+"))
+                 `(:type inline-math
+                   :begin 1 :begin-content 6 :end-content 54 :end 55
+                   :delimiters ,xenops-math-tikz-inline-math-delimiters))))
+
 (defun xenops-test-math--do-render-and-reveal-test (text &optional command-type)
   "Render a math image overlay and use `xenops-reveal' to remove it."
   (with-temp-buffer

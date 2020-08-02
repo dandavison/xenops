@@ -67,6 +67,10 @@ This determines the size of the image in the image file that is
   '("\\\\\\["
     "\\\\\\]"))
 
+(defvar xenops-math-tikz-inline-math-delimiters
+  '("\\\\tikz"
+    ";"))
+
 (defvar xenops-math-environment-delimited-inline-math-delimiters
   '("\\\\begin{\\(align\\|equation\\|tikzpicture\\)\\*?}"
     "\\\\end{\\(align\\|equation\\|tikzpicture\\)\\*?}"))
@@ -555,6 +559,7 @@ is the start event of the mouse drag."
        #'xenops-math-parse-hetero-delimited-inline-element-at-point
        (list xenops-math-paren-delimited-inline-math-delimiters
              xenops-math-square-bracket-delimited-inline-math-delimiters
+             xenops-math-tikz-inline-math-delimiters
              xenops-math-environment-delimited-inline-math-delimiters))))
 
 (defun xenops-math-parse-hetero-delimited-inline-element-at-point (delimiters)
