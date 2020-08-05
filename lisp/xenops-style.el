@@ -54,7 +54,7 @@ REGEXP                 In this case, REGEXP must be a regular expression with
 (defvar xenops-style-regexp-rules-get-text-properties nil
   "A function of one argument (MATCH, i.e. the original matched text)
 returning a plist of text properties to be applied to the displayed text.
-E.g. if MATCH looks like \textbf{something}, then the function
+E.g. if MATCH looks like \\textbf{something}, then the function
 might return text properties that will apply a bold face to the
 replacement text.")
 
