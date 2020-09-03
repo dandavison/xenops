@@ -24,9 +24,8 @@
 
 (defun xenops-element-overlays-delete (element)
   "Delete xenops overlays overlapping ELEMENT."
-  (dolist (ov (xenops-element-overlays-get element))
-    (when (overlay-get ov 'xenops-overlay-type)
-      (delete-overlay ov))))
+  (xenops-overlay-delete-overlays-in (plist-get element :begin)
+                                     (plist-get element :end)))
 
 (defun xenops-element-overlay-get (element type)
   "Return first xenops overlay of type TYPE overlapping ELEMENT."
@@ -49,15 +48,6 @@
 (defun xenops-element-get-image (element)
   "Return the display property of ELEMENT if it is of type 'image."
   (xenops-util-parse-image-at (plist-get element :begin)))
-
-(defun xenops-element-create-marker (element)
-  "Create a marker pointing at the current :begin position of ELEMENT."
-  (plist-put element :begin-marker (set-marker (make-marker) (plist-get element :begin))))
-
-(defun xenops-element-deactivate-marker (element)
-  "Delete the marker for ELEMENT created by `xenops-element-create-marker'."
-  (if-let* ((marker (plist-get element :begin-marker)))
-      (set-marker marker nil)))
 
 (provide 'xenops-element)
 

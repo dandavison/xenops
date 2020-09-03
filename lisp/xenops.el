@@ -308,8 +308,11 @@ equivalent to `xenops-regenerate'."
      . ((:delimiters . (,xenops-math-dollar-delimited-inline-math-delimiters
                         ,xenops-math-paren-delimited-inline-math-delimiters
                         ,xenops-math-square-bracket-delimited-inline-math-delimiters
+                        ,xenops-math-tikz-inline-math-delimiters
                         ,xenops-math-environment-delimited-inline-math-delimiters))
         (:font-lock-keywords . (((((0 (xenops-math-inline-math-font-lock-handler)))))
+                                ((((0 (xenops-math-inline-math-font-lock-handler)))))
+                                ((((0 (xenops-math-inline-math-font-lock-handler)))))
                                 ((((0 (xenops-math-inline-math-font-lock-handler)))))
                                 ((((0 (xenops-math-inline-math-font-lock-handler)))))))
         (:parser . xenops-math-parse-inline-element-at-point)

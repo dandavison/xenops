@@ -10,14 +10,12 @@ After.")
 
 (defun xenops-test-math--assert-image-is-displayed (element)
   "Perform a `render` operation, and assert that the image is present."
-  (save-excursion
-    (goto-char (plist-get element :begin-marker))
-    (let ((ov (xenops-overlay-at-point)))
-      (should ov)
-      (let ((image (overlay-get ov 'display)))
-        (should image)
-        (should (equal (image-property image :type) 'svg))
-        (should (equal (image-property image :file) xenops-test--example-svg--cache-file))))))
+  (let ((ov (xenops-element-overlay-get element 'xenops-overlay)))
+    (should ov)
+    (let ((image (overlay-get ov 'display)))
+      (should image)
+      (should (equal (image-property image :type) 'svg))
+      (should (equal (image-property image :file) xenops-test--example-svg--cache-file)))))
 
 (defun xenops-test-math--assert-image-is-not-displayed (element)
   "Perform a `reveal` operation, and assert that the image has gone."
@@ -164,6 +162,16 @@ After.")
                    :begin 1 :begin-content 3 :end-content 4 :end 6
                    :delimiters ,xenops-math-square-bracket-delimited-inline-math-delimiters))))
 
+(ert-deftest xenops-test-math--parse-block-math--tikz--inline ()
+  (should (equal (xenops-math-parse-element-from-string
+                  (s-trim
+                   "
+\\tikz \draw (0,0) rectangle (1,1) (0,0) parabola (1,1);
+"))
+                 `(:type inline-math
+                   :begin 1 :begin-content 6 :end-content 54 :end 55
+                   :delimiters ,xenops-math-tikz-inline-math-delimiters))))
+
 (defun xenops-test-math--do-render-and-reveal-test (text &optional command-type)
   "Render a math image overlay and use `xenops-reveal' to remove it."
   (with-temp-buffer
@@ -171,7 +179,7 @@ After.")
     (insert text)
     (goto-char (point-min))
     (let ((element (xenops-apply-parse-next-element)))
-      (xenops-element-create-marker element)
+      (xenops-math-set-marker-on-element element)
 
       ;; render
       (save-excursion
@@ -212,7 +220,7 @@ After.")
     (insert text)
     (goto-char (point-min))
     (let ((element (xenops-apply-parse-next-element)))
-      (xenops-element-create-marker element)
+      (xenops-math-set-marker-on-element element)
 
       ;; render
       (save-excursion

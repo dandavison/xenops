@@ -11,11 +11,12 @@
 (declare-function xenops-ops-get-for-ops "xenops")
 (declare-function xenops-elements-delimiter-start-regexp "xenops-elements")
 (declare-function xenops-elements-get-all "xenops-elements")
-(declare-function xenops-overlay-delete-overlays "xenops-overlay")
+(declare-function xenops-overlay-delete-overlays-in "xenops-overlay")
 (declare-function xenops-parse-any-element-at-point "xenops-parse")
 
 (defvar xenops-apply-pre-apply-hook nil)
 (defvar xenops-apply-post-apply-hook nil)
+(defvar xenops-apply-user-point nil) ; The user's value of (point) at the outset of an apply operation
 
 (defun xenops-apply-operations (ops &optional pred)
   "Apply operation types OPS to any elements encountered.
@@ -26,7 +27,8 @@ buffer.
 Optional argument PRED is a function taking an element plist as
 its only argument. The element will be operated on iff PRED
 returns non-nil."
-  (let ((handlers (xenops-ops-get-for-ops ops :handlers)))
+  (let ((handlers (xenops-ops-get-for-ops ops :handlers))
+        (xenops-apply-user-point (point)))
     (cl-destructuring-bind (beg end region-active)
         (if (region-active-p)
             `(,(region-beginning) ,(region-end) t)
@@ -113,7 +115,7 @@ makes this hook function necessary."
   (if (and beg end (-intersection handlers '(xenops-math-reveal
                                              xenops-element-reveal
                                              xenops-image-reveal)))
-      (xenops-overlay-delete-overlays beg end)))
+      (xenops-overlay-delete-overlays-in beg end)))
 
 (add-hook 'xenops-apply-post-apply-hook #'xenops-apply-post-apply-deactivate-mark)
 (add-hook 'xenops-apply-post-apply-hook #'xenops-apply-post-reveal-delete-overlays)

@@ -15,10 +15,10 @@
 
 (require 'xenops-aio)
 
-(declare-function xenops-element-create-marker "xenops-element")
-(declare-function xenops-element-deactivate-marker "xenops-element")
+(declare-function xenops-math-deactivate-marker-on-element "xenops-math")
 (declare-function xenops-math-display-error-badge "xenops-math")
 (declare-function xenops-math-parse-element-at "xenops-math")
+(declare-function xenops-math-set-marker-on-element "xenops-math")
 (declare-function xenops-png-set-phys-chunk "xenops-png")
 
 (defvar xenops-math-latex-process 'dvisvgm
@@ -41,7 +41,7 @@ the commands used to run these processes.")
      :image-input-type "dvi"
      :image-output-type "png"
      :image-size-adjust (1.0 . 1.0)
-     :latex-compiler ("latex -interaction nonstopmode -shell-escape -output-directory %o %f")
+     :latex-compiler ("latex -interaction nonstopmode -shell-escape -output-format dvi -output-directory %o %f")
      :image-converter ("dvipng -D %D -T tight -o %O %f"))
     (dvisvgm
      :programs ("latex" "dvisvgm")
@@ -50,7 +50,7 @@ the commands used to run these processes.")
      :image-input-type "dvi"
      :image-output-type "svg"
      :image-size-adjust (1.7 . 1.5)
-     :latex-compiler ("latex -interaction nonstopmode -shell-escape -output-directory %o %f")
+     :latex-compiler ("latex -interaction nonstopmode -shell-escape -output-format dvi -output-directory %o %f")
      :image-converter ("dvisvgm %f -n -b %B -c %S -o %O"))
     (imagemagick
      :programs ("latex" "convert")
@@ -166,7 +166,7 @@ format the commands."
   (let ((buffer (current-buffer)))
     (aio-await (aio-sem-wait xenops-math-latex-tasks-semaphore))
     (with-current-buffer buffer
-      (xenops-element-create-marker element))
+      (xenops-math-set-marker-on-element element))
     (let* ((dir temporary-file-directory)
            (base-name (f-base cache-file))
            (make-file-name (lambda (ext) (f-join dir (concat base-name "." ext))))
@@ -200,13 +200,17 @@ format the commands."
                   (funcall display-image element commands)
                 (if marker (message "Failed to parse element at marker: %S" marker)
                   (message "Expected element to have marker: %S" element)))))
-            (xenops-element-deactivate-marker element))
+            (xenops-math-deactivate-marker-on-element element))
         (error (aio-await
                 (xenops-aio-with-async-with-buffer
                  buffer
                  (-when-let* ((element (xenops-math-parse-element-at (plist-get element :begin-marker))))
-                   (xenops-math-display-error-badge element error)
-                   (xenops-element-deactivate-marker element))))))
+                   (xenops-math-display-error-badge
+                    element error
+                    ;; Only display the error if a single element is being rendered.
+                    (and (not xenops-apply-user-point)
+                         (<= (xenops-math-latex-waiting-tasks-count) 0)))
+                   (xenops-math-deactivate-marker-on-element element))))))
       (with-current-buffer buffer
         (aio-sem-post xenops-math-latex-tasks-semaphore)))))
 

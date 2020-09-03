@@ -39,6 +39,7 @@
     ("^3" . "³")
     ("^n" . "ⁿ")
     ("\\&" . "&")
+    ("\\%" . "%")
     ("\\pm" . "±")
     ("\\mp" . "∓")
     ("\\to " . "⟶ ")
@@ -65,6 +66,10 @@
     "{\\\\it +\\([^\n}]+\\)}")
   "Style rules for xenops xen-mode.")
 
+(defvar xenops-xen-style-regexp-rules-get-text-properties-function
+  'xenops-xen-style-regexp-rules-get-text-properties
+  "`xenops-style-regexp-rules-get-text-properties-function' for xenops-xen mode.")
+
 (define-minor-mode xenops-xen-mode
   "Minimal visual appearance for a Xenops LaTeX buffer.
 
@@ -72,13 +77,15 @@
   :lighter nil
   (cond
    (xenops-xen-mode
-    (setq xenops-style-rules xenops-xen-style-rules
-          xenops-style-regexp-rules-get-text-properties #'xenops-xen-style-regexp-rules-get-text-properties)
+    (setq xenops-style-rules
+          xenops-xen-style-rules
+          xenops-style-regexp-rules-get-text-properties-function
+          xenops-xen-style-regexp-rules-get-text-properties-function)
     (xenops-style-mode +1))
    (t
     (xenops-style-mode -1)
     (setq xenops-style-rules nil
-          xenops-style-regexp-rules-get-text-properties nil))))
+          xenops-style-regexp-rules-get-text-properties-function nil))))
 
 (defun xenops-xen-begin-latex-environment-formatter (env)
   "Return visual replacement for environment ENV begin token."
@@ -107,7 +114,7 @@
     (format "%s%s" (s-repeat indent " ") title)))
 
 (defun xenops-xen-style-regexp-rules-get-text-properties (match)
-  "An implementation of `xenops-style-regexp-rules-get-text-properties'.
+  "An implementation of `xenops-style-regexp-rules-get-text-properties-function'.
 
 MATCH is the current regular expression match."
   (cond

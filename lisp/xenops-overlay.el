@@ -23,11 +23,12 @@
   "Return a Xenops overlay at point, if there is one."
   (--first (overlay-get it 'xenops-overlay-type) (overlays-at (point))))
 
-(defun xenops-overlay-delete-overlays (&optional beg end)
+(defun xenops-overlay-delete-overlays-in (&optional beg end)
   "Delete Xenops overlays between BEG and END."
   (interactive "r")
   (dolist (ov (overlays-in (or beg (point-min)) (or end (point-max))))
-    (delete-overlay ov)))
+    (when (overlay-get ov 'xenops-overlay-type)
+      (delete-overlay ov))))
 
 (provide 'xenops-overlay)
 

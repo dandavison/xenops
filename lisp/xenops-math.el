@@ -27,6 +27,8 @@
 (declare-function xenops-parse-element-at-point "xenops-parse")
 (declare-function xenops-parse-element-at-point-matching-delimiters "xenops-parse")
 (declare-function xenops-util-first-result "xenops-util")
+(declare-function xenops-util-goto-line "xenops-util")
+(declare-function xenops-util-highlight-current-line "xenops-util")
 (declare-function xenops-util-svg-resize "xenops-util")
 
 
@@ -65,6 +67,10 @@ This determines the size of the image in the image file that is
   '("\\\\\\["
     "\\\\\\]"))
 
+(defvar xenops-math-tikz-inline-math-delimiters
+  '("\\\\tikz"
+    ";"))
+
 (defvar xenops-math-environment-delimited-inline-math-delimiters
   '("\\\\begin{\\(align\\|equation\\|tikzpicture\\)\\*?}"
     "\\\\end{\\(align\\|equation\\|tikzpicture\\)\\*?}"))
@@ -73,6 +79,7 @@ This determines the size of the image in the image file that is
 (defvar xenops-cache-directory)
 (defvar xenops-mode-map)
 (defvar xenops-rendered-element-keymap)
+(defvar xenops-apply-user-point)
 
 (defun xenops-math-font-lock-keywords ()
   "Create font-lock entry for math elements."
@@ -92,6 +99,7 @@ This determines the size of the image in the image file that is
   (define-key xenops-mode-map ")" #'xenops-math-insert-closing-paren)
   (font-lock-add-keywords nil (xenops-math-font-lock-keywords))
   (cursor-sensor-mode +1)
+  (add-hook 'before-save-hook #'xenops-render-at-point nil t)
   (add-to-list 'fill-nobreak-predicate #'xenops-math-parse-inline-element-at-point))
 
 (defun xenops-math-deactivate ()
@@ -100,6 +108,7 @@ This determines the size of the image in the image file that is
   (advice-remove fill-paragraph-function #'xenops-math-fill-paragraph-after-advice)
   (advice-remove #'TeX-insert-dollar #'xenops-math-look-back-and-render-inline-math)
   (cursor-sensor-mode -1)
+  (remove-hook 'before-save-hook #'xenops-render-at-point)
   (font-lock-remove-keywords nil (xenops-math-font-lock-keywords)))
 
 (defun xenops-math-render (element &optional cached-only)
@@ -128,6 +137,13 @@ the LaTeX to SVG, and insert the SVG into the buffer."
           (xenops-math-display-waiting element)
           (xenops-math-latex-create-image element latex colors cache-file display-image)))))))
 
+(defun xenops-math-render-below-maybe (element)
+  "Render ELEMENT below ELEMENT, so that the rendering can be monitored while editing."
+  ;; TODO: This needs to be refactored. The decision of whether to render below or in-place is made
+  ;; by xenops-math-display-image. As things stand the name of the current function is inaccurate.
+  (unless (eq 'inline-math (plist-get element :type))
+    (xenops-math-render element)))
+
 (defun xenops-math-regenerate (element)
   "Regenerate math element ELEMENT.
 
@@ -143,7 +159,7 @@ and then calling `xenops-render'."
 (defun xenops-math-reveal (element)
   "Remove image overlay for ELEMENT.
 
-If a prefuix argument is in effect, also delete its cache file."
+If a prefix argument is in effect, also delete its cache file."
   (xenops-element-overlays-delete element)
   (if current-prefix-arg
       (delete-file (xenops-math-get-cache-file element)))
@@ -152,14 +168,14 @@ If a prefuix argument is in effect, also delete its cache file."
         (begin-content (plist-get element :begin-content)))
     (goto-char (if (eq element-type 'block-math)
                    (1+ begin-content)
-                 begin-content))))
+                 begin-content)))
+  (xenops-math-render-below-maybe element))
 
 (defun xenops-math-display-waiting (element)
   "Style a math element ELEMENT as waiting.
 
 The style indicates that its processing task is waiting in the
 queue to be executed."
-  (xenops-element-overlays-delete element)
   (let* ((beg (plist-get element :begin))
          (end (plist-get element :end))
          (ov (xenops-overlay-create beg end)))
@@ -175,17 +191,31 @@ Use `M-x xenops-cancel-waiting-tasks` to make this element editable.") ov))
 COMMANDS are the latex processing commands used to render the
 element. HELP-ECHO is the tooltip text to display. CACHE-FILE is
 the image cache file."
-  (let ((margin (if (eq 'inline-math (plist-get element :type))
-                    0 `(,xenops-math-image-margin . 0)))
-        (ov (xenops-math-make-overlay element commands help-echo)))
+  (xenops-element-overlays-delete element)
+  (let* ((inline-p (eq 'inline-math (plist-get element :type)))
+         (margin (if inline-p 0 `(,xenops-math-image-margin . 0)))
+         (display-after-element-p (and (not inline-p)
+                                       (<= (plist-get element :begin)
+                                           (or xenops-apply-user-point (point))
+                                           (plist-get element :end))))
+         (ov-beg (if display-after-element-p
+                     (save-excursion (goto-char (plist-get element :end))
+                                     (point-at-bol))
+                   (plist-get element :begin)))
+         (ov-end (plist-get element :end))
+         (ov (xenops-math-make-overlay ov-beg ov-end commands help-echo)))
     (overlay-put ov 'display
                  `(image :type ,(intern  (xenops-math-latex-process-get :image-output-type))
                          :file ,cache-file :ascent center :margin ,margin)))
   (unless (equal xenops-math-image-current-scale-factor 1.0)
     (xenops-math-image-change-size element xenops-math-image-current-scale-factor)))
 
-(defun xenops-math-display-error-badge (element error)
+(defun xenops-math-display-error-badge (element error display-error-p)
   "Style ELEMENT to indicate ERROR during execution of its processing task.
+
+If DISPLAY-ERROR-P is non-nil, then also display the error
+immediately (as if the user had selected \"View failing command
+output\" from the contextual menu).
 
 Make error details available via hover-over text and contextual
 menu."
@@ -203,7 +233,8 @@ menu."
                     (interactive "e")
                     (popup-menu
                      `("Xenops"
-                       ["View failing command output" (xenops-math-display-process-output ,output)]
+                       ["View failing command output" (xenops-math-display-process-error-windows
+                                                       ,failing-command ,output)]
                        ["Copy failing command" (kill-new ,failing-command)]))
                     event)))
             (setq help-echo (format "External running external process: %s
@@ -212,7 +243,9 @@ Right-click on the warning badge to copy the failing command or view its output.
 %s"
                                     failure-description
                                     failing-command))
-            (define-key keymap [mouse-3] xenops-math-image-overlay-menu)))
+            (define-key keymap [mouse-3] xenops-math-image-overlay-menu))
+          (when display-error-p
+            (xenops-math-display-process-error-windows failing-command output)))
       (setq help-echo (format "Error processing LaTeX fragment:\n\n%s"
                               (s-join "\n\n" (--map (format "%S" it) error)))))
     (add-text-properties 0 (length error-badge)
@@ -221,15 +254,13 @@ Right-click on the warning badge to copy the failing command or view its output.
     (overlay-put ov 'after-string error-badge)
     (overlay-put ov 'help-echo help-echo)))
 
-(defun xenops-math-make-overlay (element commands help-echo)
-  "Make overlay used to style ELEMENT and display images and error information.
+(defun xenops-math-make-overlay (beg end commands help-echo)
+  "Return overlay used to display image of math content.
 
-COMMANDS are the latex processing commands used to render the
-element. HELP-ECHO is the tooltip text to display."
-  (xenops-element-overlays-delete element)
-  (let* ((beg (plist-get element :begin))
-         (end (plist-get element :end))
-         (ov (xenops-overlay-create beg end))
+BEG and END are the overlay extent. COMMANDS are the latex
+processing commands used to render the element. HELP-ECHO is the
+tooltip text to display."
+  (let* ((ov (xenops-overlay-create beg end))
          (keymap (overlay-get ov 'keymap))
          (xenops-math-image-overlay-menu
           (lambda (event)
@@ -245,13 +276,56 @@ element. HELP-ECHO is the tooltip text to display."
     (define-key keymap [mouse-3] xenops-math-image-overlay-menu)
     ov))
 
-(defun xenops-math-display-process-output (output)
-  "Display external process output OUTPUT in a buffer."
+(defun xenops-math-display-process-error-windows (command output)
+  "Display windows containing information about an error in an external process.
+
+COMMAND is the command used to start process, and OUTPUT is its standard output."
+  ;; HACK, TODO: should make the input file available in the error-data object constructed by
+  ;; `xenops-aio-subprocess', rather than inferring it from the full command.
+  (let ((input-file (car (last (s-split " " command)))))
+    (let* ((input-buf (xenops-math-get-process-input-buffer input-file))
+           (output-buf (xenops-math-get-process-output-buffer output))
+           (first-error-line
+            (with-current-buffer output-buf
+              (when (re-search-forward "^!" nil t)
+                (xenops-util-highlight-current-line)
+                (save-excursion
+                  (and (re-search-forward "^l\.\\([0-9]+\\)" nil t)
+                       (string-to-number (match-string 1))))))))
+      (when first-error-line
+        (with-current-buffer input-buf
+          (xenops-util-goto-line first-error-line)
+          (xenops-util-highlight-current-line)))
+      (-when-let* ((output-win (display-buffer output-buf)))
+        (with-selected-window output-win
+          (-when-let* ((input-win (display-buffer input-buf '(display-buffer-below-selected))))
+            (with-selected-window input-win (recenter-top-bottom)))
+          (recenter-top-bottom))))))
+
+(defun xenops-math-get-process-input-buffer (input-file)
+  "Return a buffer containing the input for an external process.
+
+INPUT-FILE is a file containing the input."
+  (let ((buf (get-buffer-create "*Xenops external command input*")))
+    (with-current-buffer buf
+      (let ((buffer-read-only nil))
+        (erase-buffer)
+        (insert-file-contents input-file)
+        (-when-let* ((mode-fn (assoc-default input-file auto-mode-alist 'string-match)))
+          (funcall mode-fn)))
+      (display-line-numbers-mode)
+      buf)))
+
+(defun xenops-math-get-process-output-buffer (output)
+  "Return a buffer containing external process output OUTPUT."
+  ;; TODO: is (TeX-error-overview-mode) useful?
   (let ((buf (get-buffer-create "*Xenops external command output*")))
     (with-current-buffer buf
-      (erase-buffer)
-      (insert output))
-    (display-buffer buf)))
+      (let ((buffer-read-only nil))
+        (erase-buffer)
+        (insert output))
+      (goto-char (point-min)))
+    buf))
 
 (defun xenops-math-copy-latex-command (overlay)
   "Copy external latex command to clipboard (kill-ring).
@@ -259,6 +333,15 @@ element. HELP-ECHO is the tooltip text to display."
 OVERLAY is an element overlay from which the commands can be obtained."
   (let ((latex-command (car (overlay-get overlay 'commands))))
     (kill-new (s-join " " latex-command))))
+
+(defun xenops-math-set-marker-on-element (element)
+  "Create a marker pointing at the current :begin position of ELEMENT."
+  (plist-put element :begin-marker (set-marker (make-marker) (plist-get element :begin))))
+
+(defun xenops-math-deactivate-marker-on-element (element)
+  "Deactivate the marker for ELEMENT created by `xenops-math-set-marker-on-element'."
+  (if-let* ((marker (plist-get element :begin-marker)))
+      (set-marker marker nil)))
 
 (defun xenops-math-image-increase-size (element)
   "Increase ELEMENT image size."
@@ -415,19 +498,12 @@ If we are in a math element, then paste without the delimiters"
 WINDOW is currently ignored. OLDPOS is the previous location of
 point. EVENT-TYPE is the type of cursor sensor event that
 triggered this handler."
-  ;; TODO: check window
-  (if (and (eq event-type 'left)
-           ;; HACK: this shouldn't be necessary, but in practice the 'left event is being triggered
-           ;; sometimes when point is still in a math/table element.
-           (-if-let* ((now-in (xenops-math-parse-element-at-point)))
-               (prog1 nil
-                (message
-                 "xenops-math-handle-element-transgression: event-type 'left but at %d in element %S"
-                 (point) now-in))
-             t))
-      (-if-let* ((was-in (xenops-math-parse-element-at oldpos)))
-          (unless (xenops-element-get-image was-in)
-            (xenops-math-render was-in)))))
+  (and (eq event-type 'left)
+       (not (xenops-math-parse-element-at-point))  ;; TODO: shouldn't be necessary
+       (let ((was-in (xenops-math-parse-element-at oldpos)))
+         (and was-in
+              (not (xenops-element-get-image was-in))
+              (xenops-math-render was-in)))))
 
 (defun xenops-math-mouse-drag-region-around-advice (mouse-drag-region-fn start-event)
   "If point is in a math element, then make mouse drag the associated image.
@@ -483,6 +559,7 @@ is the start event of the mouse drag."
        #'xenops-math-parse-hetero-delimited-inline-element-at-point
        (list xenops-math-paren-delimited-inline-math-delimiters
              xenops-math-square-bracket-delimited-inline-math-delimiters
+             xenops-math-tikz-inline-math-delimiters
              xenops-math-environment-delimited-inline-math-delimiters))))
 
 (defun xenops-math-parse-hetero-delimited-inline-element-at-point (delimiters)

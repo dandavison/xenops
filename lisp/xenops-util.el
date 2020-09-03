@@ -5,6 +5,7 @@
 ;;; Commentary:
 
 ;;; Code:
+(declare-function xenops-overlay-create "xenops-overlay")
 
 (defmacro xenops-util-define-key-with-fallback (key handler &optional fallback-key)
   "Bind HANDLER to KEY in `xenops-mode-map'.
@@ -18,6 +19,11 @@ variable `xenops-mode' not active."
        (unless (funcall ,handler)
          (let (xenops-mode)
            (execute-kbd-macro ,(or fallback-key key)))))))
+
+(defun xenops-util-goto-line (line)
+  "Move point to the first column of LINE, efficiently."
+  (goto-char (point-min))
+  (forward-line (1- line)))
 
 (defun xenops-util-first-index (list)
   "Return smallest index for which the corresponding element in LIST is non-nil.
@@ -75,6 +81,11 @@ For example, STRING might look like '1.5pt' or '50.5%'"
                            (substring string (- n 2) n))))
     (cons (string-to-number (substring string 0 (- n (length unit-specifier))))
           unit-specifier)))
+
+(defun xenops-util-highlight-current-line ()
+  "Highlight the current line."
+  (let ((ov (xenops-overlay-create (point-at-bol) (point-at-eol))))
+    (overlay-put ov 'face 'highlight)))
 
 (provide 'xenops-util)
 

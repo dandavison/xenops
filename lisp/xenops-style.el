@@ -39,7 +39,7 @@ REGEXP                 In this case, REGEXP must be a regular expression with
                        causes occurrences of the LaTeX italic
                        markup \"\\textit{some text}\" to be
                        displayed visually as \"some text\". See
-                       `xenops-style-regexp-rules-get-text-properties'
+                       `xenops-style-regexp-rules-get-text-properties-function'
                        for how an italic font is then applied to
                        \"some text\".
 
@@ -51,10 +51,10 @@ REGEXP                 In this case, REGEXP must be a regular expression with
                       captured by the regular expression and
                       passing it to FUNCTION.")
 
-(defvar xenops-style-regexp-rules-get-text-properties nil
+(defvar xenops-style-regexp-rules-get-text-properties-function nil
   "A function of one argument (MATCH, i.e. the original matched text)
 returning a plist of text properties to be applied to the displayed text.
-E.g. if MATCH looks like \textbf{something}, then the function
+E.g. if MATCH looks like \\textbf{something}, then the function
 might return text properties that will apply a bold face to the
 replacement text.")
 
@@ -119,8 +119,8 @@ properties, and display it."
          (match-string-index (xenops-style-regexp-rules-get-match-string-index))
          (display-string (xenops-style-regexp-rules-make-display-string match-string-index))
          (composition (xenops-style-make-composition display-string))
-         (properties (if xenops-style-regexp-rules-get-text-properties
-                         (funcall xenops-style-regexp-rules-get-text-properties match))))
+         (properties (and (functionp xenops-style-regexp-rules-get-text-properties-function)
+                          (funcall xenops-style-regexp-rules-get-text-properties-function match))))
     (xenops-style-compose composition properties beg end))
   nil)
 
