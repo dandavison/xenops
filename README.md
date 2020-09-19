@@ -1,3 +1,5 @@
+<p align="center"><a href="https://www.youtube.com/watch?v=GNS-ZFVaFM4">[6-minute video introduction]</a></p>
+
 <table style="width:100%">
   <tr>
     <td>
@@ -33,6 +35,8 @@
 # 1. Overview
 
 Xenops is a LaTeX editing environment for mathematical documents in Emacs.
+
+Please see the [6-minute video introduction](https://www.youtube.com/watch?v=GNS-ZFVaFM4).
 
 Installation instructions are below. To use Xenops, open a `.tex` file in Emacs as usual, and do `M-x xenops-mode`. The key features are:
 
