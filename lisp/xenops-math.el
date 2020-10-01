@@ -79,6 +79,7 @@ This determines the size of the image in the image file that is
 (defvar xenops-cache-directory)
 (defvar xenops-mode-map)
 (defvar xenops-rendered-element-keymap)
+(defvar xenops-reveal-on-entry)
 (defvar xenops-apply-user-point)
 
 (defun xenops-math-font-lock-keywords ()
@@ -509,7 +510,13 @@ triggered this handler."
            (let ((was-in (xenops-math-parse-element-at oldpos)))
              (and was-in
                   (not (xenops-element-get-image was-in))
-                  (xenops-math-render was-in)))))))
+                  (xenops-math-render was-in)))))
+        ((and xenops-reveal-on-entry (eq event-type 'entered))
+         (-when-let* ((element (xenops-math-parse-element-at-point)))
+           (let ((entered-from-right (= oldpos (1+ (point)))))
+             (xenops-math-reveal element)
+             (when entered-from-right
+               (goto-char (plist-get element :end-content))))))))
 
 (defun xenops-math-mouse-drag-region-around-advice (mouse-drag-region-fn start-event)
   "If point is in a math element, then make mouse drag the associated image.

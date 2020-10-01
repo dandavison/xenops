@@ -124,6 +124,8 @@ More explicitly, here are the basic steps for working with math in Xenops:
         </tr>
       </table>
 
+If you want Xenops to reveal the LaTeX code for editing automatically when the cursor moves into the block, set the variable `xenops-reveal-on-entry`.
+
 You may also want to create images for all math/table/TikZ elements in the document. To do that, position the cursor outside any element and issue `xenops-dwim`.
 
 The other command to know from the start is `xenops-doctor`: run this if something is not working.
@@ -401,6 +403,8 @@ In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops
 | `xenops-font-height`                    | The font height for the main font.                                                                                         | 160                     |
 |                                         |                                                                                                                            |                         |
 | `xenops-font-height-code`               | The font height for the font used for LaTeX code, and code in code blocks.                                                 | 140                     |
+|                                         |                                                                                                                            |                         |
+| `xenops-reveal-on-entry`                | Should a math block be revealed automatically when point moves inside it?                                                  | nil                     |
 |                                         |                                                                                                                            |                         |
 | `xenops-tooltip-delay`                  | The time delay in seconds before<br>displaying a tooltip on mouseover.                                                     | 0.2                     |
 |                                         |                                                                                                                            |                         |
