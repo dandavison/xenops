@@ -71,13 +71,13 @@ the search. DELIMITERS are the delimiters sought."
               (setq beg-beg (match-beginning 0))
               (goto-char (match-end 0))
               (setq beg-end (point))
-              (skip-chars-forward " \t\n")
+              (skip-chars-forward "\t\n")
               (> lim-down (point))
               (re-search-forward (car (last delimiters)) lim-down t)
               (> (setq end-end (match-end 0)) pos)
               (goto-char (match-beginning 0))
               (setq end-beg (point))
-              (skip-chars-backward " \t\n")
+              (skip-chars-backward "\t\n")
               (not (re-search-backward (car delimiters) (1+ beg-beg) t))
               (list :type type
                     :begin beg-beg
