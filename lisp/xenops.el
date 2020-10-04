@@ -108,6 +108,9 @@ available in this keymap.")
 (defvar xenops-rendered-element-keymap (make-sparse-keymap)
   "A keymap that is active when point is on a rendered element, such as a math/table image.")
 
+(defvar xenops-reveal-on-entry nil
+  "Should an element be revealed for editing automatically when point moves inside it?")
+
 (defvar xenops-tooltip-delay 0.2
   "The value of the variable `tooltip-delay' when variable `xenops-mode' is active.")
 

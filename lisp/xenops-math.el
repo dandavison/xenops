@@ -79,6 +79,7 @@ This determines the size of the image in the image file that is
 (defvar xenops-cache-directory)
 (defvar xenops-mode-map)
 (defvar xenops-rendered-element-keymap)
+(defvar xenops-reveal-on-entry)
 (defvar xenops-apply-user-point)
 
 (defun xenops-math-font-lock-keywords ()
@@ -498,12 +499,24 @@ If we are in a math element, then paste without the delimiters"
 WINDOW is currently ignored. OLDPOS is the previous location of
 point. EVENT-TYPE is the type of cursor sensor event that
 triggered this handler."
-  (and (eq event-type 'left)
-       (not (xenops-math-parse-element-at-point))  ;; TODO: shouldn't be necessary
-       (let ((was-in (xenops-math-parse-element-at oldpos)))
-         (and was-in
-              (not (xenops-element-get-image was-in))
-              (xenops-math-render was-in)))))
+  (cond ((eq event-type 'left)
+         ;; TODO: The following check shouldn't be necessary, but in practice the 'left event is
+         ;; being triggered sometimes when point is still in a math/table element. The double-parse
+         ;; check causes us to render iff we are not strictly *inside* an element, i.e. we do
+         ;; render if we are immediately before or immediately after (as will be the case if point
+         ;; has been moved with left/right arrow keys or C-f/C-b).
+         (unless (and (xenops-math-parse-element-at-point)
+                      (xenops-math-parse-element-at (1- (point))))
+           (let ((was-in (xenops-math-parse-element-at oldpos)))
+             (and was-in
+                  (not (xenops-element-get-image was-in))
+                  (xenops-math-render was-in)))))
+        ((and xenops-reveal-on-entry (eq event-type 'entered))
+         (-when-let* ((element (xenops-math-parse-element-at-point)))
+           (let ((entered-from-right (= oldpos (1+ (point)))))
+             (xenops-math-reveal element)
+             (when entered-from-right
+               (goto-char (plist-get element :end-content))))))))
 
 (defun xenops-math-mouse-drag-region-around-advice (mouse-drag-region-fn start-event)
   "If point is in a math element, then make mouse drag the associated image.
