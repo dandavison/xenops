@@ -409,6 +409,16 @@ In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops
 | `xenops-tooltip-delay`                  | The time delay in seconds before<br>displaying a tooltip on mouseover.                                                     | 0.2                     |
 |                                         |                                                                                                                            |                         |
 
+<br>
+<br>
+When generating image previews, there are a few things one may want to configure. For example, the image type (SVG is the default, but PNG is an alternative), and details of the LaTeX document that is constructed when creating each image preview. Xenops shares these configuration mechanisms with org-mode, which also offers image preview functionality (and supports SVG). Here are the relevant org-mode variables:
+<br>
+<br>
+
+| Variable                  |                                                                                                                                               | Default value   |
+|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
+| `org-format-latex-header` | The document header used when processing LaTeX fragments.<br>You will need to change this if you need to use <br>a different `documentclass`. | (a long string) |
+
 
 
 # 5. Misc
