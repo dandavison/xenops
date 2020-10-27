@@ -72,8 +72,8 @@ This determines the size of the image in the image file that is
     ";"))
 
 (defvar xenops-math-environment-delimited-inline-math-delimiters
-  '("\\\\begin{\\(align\\|equation\\|tikzpicture\\)\\*?}"
-    "\\\\end{\\(align\\|equation\\|tikzpicture\\)\\*?}"))
+  '("\\\\begin{\\(align\\|equation\\|tikzpicture\\|gather\\)\\*?}"
+    "\\\\end{\\(align\\|equation\\|tikzpicture\\|gather\\)\\*?}"))
 
 ;; Silence compiler: defined elsewhere
 (defvar xenops-cache-directory)
