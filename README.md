@@ -425,6 +425,8 @@ When generating image previews, there are a few things one may want to configure
 
 - The command `xenops-copy-and-paste-element` is very useful: when writing a mathematical document one very often wants to write an expression that is similar to something that already exists elsewhere in the document. The default binding is `C-c , c` but I recommend binding it to something more convenient: personally I am using `s-[`.
 
+- Use `fill-paragraph` (`M-q`) while writing. In xenops-mode, in addition to its normal behavior, it ensures that all content in the paragraph is rendered.
+
 - Xenops caches the SVG images. If it notices that it already has the image for some LaTeX math/table/TikZ content, then it will not re-run `latex`. The cache location on disk is determined by the variable `xenops-cache-directory`.
 
 - Xenops understands the auctex variable [`TeX-master`](https://www.gnu.org/software/auctex/manual/auctex/Multifile.html). This means that you can work on multi-file LaTeX projects with Xenops: as long as `TeX-master` is set correctly, then Xenops will include the necessary LaTeX packages and preamble when it is generating images for math/table/TikZ fragments. Please see the [auctex documentation](https://www.gnu.org/software/auctex/manual/auctex/Multifile.html).
