@@ -28,7 +28,7 @@
       * [3.4 Working with images](#34-working-with-images)
       * [3.5 Xen mode](#35-xen-mode)
    * [4. Command and variable reference](#4-command-and-variable-reference)
-   * [5. Misc](#5-misc)
+   * [5. Tips](#5-tips)
    * [6. Contributing](#6-contributing)
    * [7. Credit](#7-credit)
 
@@ -421,7 +421,9 @@ When generating image previews, there are a few things one may want to configure
 
 
 
-# 5. Misc
+# 5. Tips
+
+- The command `xenops-copy-and-paste-element` is very useful: when writing a mathematical document one very often wants to write an expression that is similar to something that already exists elsewhere in the document. The default binding is `C-c , c` but I recommend binding it to something more convenient: personally I am using `s-[`.
 
 - Xenops caches the SVG images. If it notices that it already has the image for some LaTeX math/table/TikZ content, then it will not re-run `latex`. The cache location on disk is determined by the variable `xenops-cache-directory`.
 
