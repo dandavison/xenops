@@ -55,7 +55,7 @@ ARGS will typically look like :k1 v1 :k2 v2 ..."
 (defun xenops-util-parse-image-at (pos)
   "Parse image at POS."
   (let ((display (get-char-property pos 'display )))
-    (and (eq (car display) 'image) display)))
+    (and (listp display) (eq (car display) 'image) display)))
 
 (defun xenops-util-svg-resize (svg scale)
   "Return SVG data with height and width scaled by SCALE."
