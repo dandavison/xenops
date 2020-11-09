@@ -423,6 +423,8 @@ When generating image previews, there are a few things one may want to configure
 
 # 5. Tips
 
+- Xenops cannot currently parse `$...$` when it is broken across lines. Please try to keep them on one line for now! `fill-paragraph` (`M-q`) helps with this.
+
 - The command `xenops-copy-and-paste-element` is very useful: when writing a mathematical document one very often wants to write an expression that is similar to something that already exists elsewhere in the document. The default binding is `C-c , c` but I recommend binding it to something more convenient: personally I am using `s-[`.
 
 - Use `fill-paragraph` (`M-q`) while writing. In xenops-mode, in addition to its normal behavior, it ensures that all content in the paragraph is rendered.
