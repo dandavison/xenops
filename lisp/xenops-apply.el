@@ -52,6 +52,7 @@ of elements operated on."
             (parse-at-point-fns (xenops-elements-get-all :parser)))
         (while (setq el (xenops-apply-parse-next-element end parse-at-point-fns))
           (and el
+               (not (eq el 'parse-failure))
                (or (null pred) (funcall pred el))
                (ignore-errors (handle el))))))))
 
@@ -81,8 +82,10 @@ subset of parsing functions to use."
         (parse-at-point-fns (or parse-at-point-fns (xenops-elements-get-all :parser))))
     (-if-let* ((find (re-search-forward start-regexp end t))
                (visit-beg (goto-char (match-beginning 0)))
-               (element (xenops-parse-any-element-at-point parse-at-point-fns))
-               (visit-end (goto-char (plist-get element :end))))
+               (element (or (xenops-parse-any-element-at-point parse-at-point-fns)
+                            'parse-failure))
+               (visit-end (goto-char (if (eq element 'parse-failure) (1+ (point))
+                                       (plist-get element :end)))))
         element)))
 
 (defun xenops-apply-post-apply-deactivate-mark (handlers &optional _ __ region-active)
