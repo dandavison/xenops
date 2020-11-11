@@ -46,7 +46,7 @@ This is the net scale factor resulting from multiple applications
   of `xenops-math-image-increase-size' and
   `xenops-math-image-decrease-size'.")
 
-(defvar xenops-math-image-scale-factor 0.8
+(defvar xenops-math-image-scale-factor 1.0
   "Scaling factor for SVG math images.
 
 This determines the size of the image in the image file that is
