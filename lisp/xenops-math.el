@@ -109,7 +109,7 @@ This determines the size of the image in the image file that is
   (advice-remove fill-paragraph-function #'xenops-math-fill-paragraph-after-advice)
   (advice-remove #'TeX-insert-dollar #'xenops-math-look-back-and-render-inline-math)
   (cursor-sensor-mode -1)
-  (remove-hook 'before-save-hook #'xenops-render-at-point)
+  (remove-hook 'before-save-hook #'xenops-render-at-point t)
   (font-lock-remove-keywords nil (xenops-math-font-lock-keywords)))
 
 (defun xenops-math-render (element &optional cached-only)
