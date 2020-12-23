@@ -39,7 +39,8 @@ under some OSs / Mathematica versions.")
            (erase-buffer)
            (insert xenops-src-do-in-org-mode-header)
            (insert region)
-           (org-mode)
+           (let ((org-mode-hook))
+             (org-mode))
            ,@body)))))
 
 (defun xenops-src-parse-at-point ()
@@ -183,7 +184,8 @@ environment."
 Return the results section that is written to the Org mode
 buffer, as a string."
   (with-temp-buffer
-    (org-mode)
+    (let ((org-mode-hook))
+      (org-mode))
     ;; TODO: Execute the block based on parsed `info' without writing it into the buffer.
     (insert (org-babel-exp-code info 'block))
     (org-babel-execute-src-block 'ignore-cached info)
