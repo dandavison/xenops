@@ -396,13 +396,13 @@ In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops
 |-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------|-------------------------|
 | `xenops-cache-directory`                | The location of the directory in which<br>Xenops saves SVG images.                                                         | ~/.emacs.d/xenops/cache |
 |                                         |                                                                                                                            |                         |
-| `xenops-math-latex-max-tasks-in-flight` | The maximum number of latex<br>processing tasks that are permitted<br>to be simultaneously active.                         | 32                      |
-|                                         |                                                                                                                            |                         |
 | `xenops-font-family`                    | The font family to use in Xenops buffers.<br>(You can choose this interactively using<br>`M-x xenops-select-font-family`.) | nil                     |
 |                                         |                                                                                                                            |                         |
 | `xenops-font-height`                    | The font height for the main font.                                                                                         | 160                     |
 |                                         |                                                                                                                            |                         |
 | `xenops-font-height-code`               | The font height for the font used for LaTeX code, and code in code blocks.                                                 | 140                     |
+|                                         |                                                                                                                            |                         |
+| `xenops-math-latex-max-tasks-in-flight` | The maximum number of latex<br>processing tasks that are permitted<br>to be simultaneously active.                         | 32                      |
 |                                         |                                                                                                                            |                         |
 | `xenops-reveal-on-entry`                | Should a math block be revealed automatically when point moves inside it?                                                  | nil                     |
 |                                         |                                                                                                                            |                         |
