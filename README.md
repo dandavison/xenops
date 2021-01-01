@@ -402,6 +402,8 @@ In addition, the keybinding `C-c ,` is bound to a keymap behind which all Xenops
 |                                         |                                                                                                                            |                         |
 | `xenops-font-height-code`               | The font height for the font used for LaTeX code, and code in code blocks.                                                 | 140                     |
 |                                         |                                                                                                                            |                         |
+| `xenops-math-image-scale-factor`        | Scaling factor for SVG math images.<br>Determines image size in the image file that is  cached on disk.                    | 1.0                     |
+|                                         |                                                                                                                            |                         |
 | `xenops-math-latex-max-tasks-in-flight` | The maximum number of latex<br>processing tasks that are permitted<br>to be simultaneously active.                         | 32                      |
 |                                         |                                                                                                                            |                         |
 | `xenops-reveal-on-entry`                | Should a math block be revealed automatically when point moves inside it?                                                  | nil                     |
