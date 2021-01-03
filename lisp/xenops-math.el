@@ -415,23 +415,51 @@ behavior on insertion:
       (add-text-properties (1- end) end '(rear-nonsticky (cursor-sensor-functions))))))
 
 (defun xenops-math-handle-paste ()
-  "If the text to be pasted is a math element then handle the paste.
-
-If we are in a math element, then paste without the delimiters"
-  (let ((copied-text (current-kill 0 'do-not-rotate)))
-    (-if-let* ((element (xenops-math-parse-element-from-string copied-text)))
-        (if (xenops-math-parse-element-at-point)
+  "If the text to be pasted is a math element then handle the paste."
+  (let* ((copied-text (current-kill 0 'do-not-rotate)))
+    (-when-let* ((copied-element (xenops-math-parse-element-from-string copied-text)))
+      (-if-let* ((element-at-point (xenops-math-parse-element-at-point)))
+          (xenops-math-handle-paste-in-math-element copied-text copied-element element-at-point)
+        (let* ((copied-element-is-block (not (eq 'inline-math (plist-get copied-element :type))))
+               (copied-text
+                (s-trim
+                 (if current-prefix-arg
+                     (string-remove-prefix "\n" (read-from-minibuffer "Text to paste: " copied-text))
+                   copied-text))))
+          ;; (when (and copied-element-is-block
+          ;;            (save-excursion (goto-char (point-at-bol)) (looking-at-p "[ \t]*$")))
+          ;;   (goto-char (point-at-bol)))
+          (save-excursion
             (progn
-              (insert-for-yank
-               (substring copied-text
-                          ;; `xenops-math-parse-element-from-string' returns 1-based indexes,
-                          ;; suitable for indexing into a buffer; string is 0-based.
-                          (1- (plist-get element :begin-content))
-                          (1- (plist-get element :end-content))))
-              (rotate-yank-pointer 1))
-          (save-excursion (yank))
-          (xenops-math-render (xenops-math-parse-element-at-point))
-          t))))
+              (insert-for-yank copied-text)
+              (rotate-yank-pointer 1))))
+        (xenops-math-render (xenops-math-parse-element-at-point))
+        (length copied-text)))))
+
+(defun xenops-math-handle-paste-in-math-element (copied-text copied-element element-at-point)
+  "Paste COPIED-TEXT. Point is inside math element ELEMENT-AT-POINT.
+
+Since we are in a math element, we strip the delimiters from the copied text before pasting."
+  (let* ((copied-element-is-block (not (eq 'inline-math (plist-get copied-element :type))))
+         (element-at-point-is-block (not (eq 'inline-math (plist-get element-at-point :type))))
+         (copied-text
+          (substring copied-text
+                     ;; `xenops-math-parse-element-from-string' returns 1-based indexes,
+                     ;; suitable for indexing into a buffer; string is 0-based.
+                     (1- (plist-get copied-element :begin-content))
+                     (1- (plist-get copied-element :end-content))))
+         (copied-text
+          (s-trim
+           (if (or current-prefix-arg copied-element-is-block)
+               (string-remove-prefix "\n" (read-from-minibuffer "Text to paste: " copied-text))
+             copied-text))))
+    (when (and copied-element-is-block
+               element-at-point-is-block
+               (save-excursion (goto-char (point-at-bol)) (looking-at-p "[ \t]*$")))
+      (goto-char (point-at-bol)))
+    (progn
+      (insert-for-yank copied-text)
+      (rotate-yank-pointer 1))))
 
 (defun xenops-math-paste ()
   "Paste handler for math elements."
