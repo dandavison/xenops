@@ -93,12 +93,13 @@ determine what action is appropriate."
 (defun xenops-image-handle-paste ()
   "Handle paste event."
   (interactive)
-  (xenops-image-handle-paste-macos))
+  (xenops-image-handle-paste-pngpaste))
 
-(defun xenops-image-handle-paste-macos ()
-  "Handle paste event on MacOS."
+(defun xenops-image-handle-paste-pngpaste ()
+  "Handle paste event using pngpaste (MacOS).
+
+See https://github.com/jcsalterego/pngpaste"
   (interactive)
-  ;; https://github.com/jcsalterego/pngpaste
   (when (executable-find "pngpaste")
     (let ((temp-file (make-temp-file "xenops-image-from-clipboard-"))
           (output-file))
