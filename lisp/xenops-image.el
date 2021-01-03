@@ -93,11 +93,14 @@ determine what action is appropriate."
 (defun xenops-image-handle-paste ()
   "Write a PNG image from the system clipboard to file and include it in the LaTeX document.
 
-This is currently implemented only for MacOS: https://github.com/jcsalterego/pngpaste must be installed."
+Either xclip (Linux/X11) or pngpaste (MacOS) must be installed:
+https://github.com/astrand/xclip
+https://github.com/jcsalterego/pngpaste"
   (interactive)
   (let ((temp-file (make-temp-file "xenops-image-from-clipboard-" nil ".png"))
         (output-file))
-    (when (xenops-image-write-clipboard-image-to-file--pngpaste temp-file)
+    (when (or (xenops-image-write-clipboard-image-to-file--pngpaste temp-file)
+              (xenops-image-write-clipboard-image-to-file--xclip temp-file))
       (let ((file-name-suggestion
              (xenops-image-suggest-file-name
               (format "-%s.%s" (substring (sha1 (f-read-bytes temp-file)) 0 4) "png"))))
@@ -121,6 +124,15 @@ See https://github.com/jcsalterego/pngpaste"
   (when (executable-find "pngpaste")
     (let ((exit-status
            (call-process "pngpaste" nil `(:file ,temp-file) nil "-")))
+      (= exit-status 0))))
+
+(defun xenops-image-write-clipboard-image-to-file--xclip (temp-file)
+  "Handle paste event using xclip (Linux/X11).
+
+See https://github.com/astrand/xclip"
+  (when (executable-find "xclip")
+    (let ((exit-status
+           (call-process "xclip" nil `(:file ,temp-file) nil "-t" "image/png" "-o")))
       (= exit-status 0))))
 
 (defun xenops-image-suggest-file-name (&optional suffix)
