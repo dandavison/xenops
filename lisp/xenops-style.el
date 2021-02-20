@@ -8,7 +8,7 @@
 ;; extension of `prettify-symbols-mode'.
 
 ;;; Code:
-(require 'dash-functional)
+(require 'dash)
 (require 's)
 
 (declare-function xenops-util-first-index "xenops-util")
