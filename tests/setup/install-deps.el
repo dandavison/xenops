@@ -7,7 +7,6 @@
   '(aio
     avy
     dash
-    dash-functional
     f
     s
     use-package))
