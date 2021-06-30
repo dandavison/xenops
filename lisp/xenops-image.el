@@ -132,7 +132,7 @@ See https://github.com/jcsalterego/pngpaste"
 See https://github.com/astrand/xclip"
   (when (executable-find "xclip")
     (let ((exit-status
-           (call-process "xclip" nil `(:file ,temp-file) nil "-t" "image/png" "-o")))
+           (call-process "xclip" nil `(:file ,temp-file) nil "-selection" "clipboard" "-t" "image/png" "-o")))
       (= exit-status 0))))
 
 (defun xenops-image-suggest-file-name (&optional suffix)
