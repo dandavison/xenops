@@ -5,6 +5,7 @@
 ;;; Commentary:
 
 ;;; Code:
+(require 'dash)
 
 (defun xenops-png-set-phys-chunk (png-string ppi)
   "Set the pHYs chunk in PNG data.

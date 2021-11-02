@@ -14,6 +14,7 @@
 
 (require 'dash)
 
+(declare-function xenops-overlay-delete-overlays-in "xenops-overlay")
 (declare-function xenops-util-parse-image-at "xenops-util")
 
 (defun xenops-element-overlays-get (element)

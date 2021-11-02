@@ -6,6 +6,7 @@
 
 ;;; Code:
 (require 'dash)
+(require 's)
 
 (declare-function xenops-overlay-create "xenops-overlay")
 

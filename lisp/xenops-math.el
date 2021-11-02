@@ -14,6 +14,7 @@
 
 (require 'xenops-math-latex)
 
+(declare-function xenops-render-at-point "xenops")
 (declare-function xenops-render-if-cached "xenops")
 (declare-function xenops-apply-operations "xenops-apply")
 (declare-function xenops-avy-do-at-element "xenops-avy")

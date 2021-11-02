@@ -6,6 +6,7 @@
 
 ;;; Code:
 (require 'dash)
+(require 'org)
 
 (declare-function xenops-elements-get "xenops-elements")
 (declare-function xenops-elements-get-all "xenops-elements")

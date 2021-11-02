@@ -10,6 +10,7 @@
 
 ;;; Code:
 (require 'dash)
+(require 'org)
 
 (declare-function xenops-dispatch-operation "xenops")
 (declare-function xenops-apply-parse-next-element "xenops-apply")

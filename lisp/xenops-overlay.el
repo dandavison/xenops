@@ -5,6 +5,7 @@
 ;;; Commentary:
 
 ;;; Code:
+(require 'dash)
 
 (defun xenops-overlay-create (beg end)
   "Create a Xenops overlay between BEG and END."
