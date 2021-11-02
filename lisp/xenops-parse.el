@@ -5,6 +5,7 @@
 ;;; Commentary:
 
 ;;; Code:
+(require 'dash)
 
 (declare-function xenops-elements-get "xenops-elements")
 (declare-function xenops-elements-get-all "xenops-elements")

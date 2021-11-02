@@ -5,6 +5,8 @@
 ;;; Commentary:
 
 ;;; Code:
+(require 'dash)
+
 (declare-function xenops-overlay-create "xenops-overlay")
 
 (defmacro xenops-util-define-key-with-fallback (key handler &optional fallback-key)
