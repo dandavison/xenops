@@ -9,6 +9,7 @@
 ;; 'src.
 
 ;;; Code:
+(require 'dash)
 
 (declare-function xenops-dispatch-operation "xenops")
 (declare-function xenops-apply-parse-next-element "xenops-apply")

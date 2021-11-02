@@ -9,6 +9,7 @@
 ;; of type 'minted and 'src.
 
 ;;; Code:
+(require 'dash)
 
 (declare-function xenops-parse-element-at-point "xenops-parse")
 (declare-function xenops-util-plist-update "xenops-util")
