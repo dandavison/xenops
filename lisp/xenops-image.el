@@ -33,6 +33,10 @@ placeholder, which will be replaced by the image file path. Use a
 double backslash here to produce a single backslash in the
 resulting LaTeX.")
 
+(defvar xenops-image-try-write-clipboard-image-to-file t
+  "Should xenops try to use an external executable (xclip or
+  pngpaste) to capture images from the system clipboard?")
+
 ;; Silence compiler: defined elsewhere
 (defvar xenops-rendered-element-keymap)
 (defvar xenops-math-image-change-size-factor)
@@ -99,8 +103,9 @@ https://github.com/jcsalterego/pngpaste"
   (interactive)
   (let ((temp-file (make-temp-file "xenops-image-from-clipboard-" nil ".png"))
         (output-file))
-    (when (or (xenops-image-write-clipboard-image-to-file--pngpaste temp-file)
-              (xenops-image-write-clipboard-image-to-file--xclip temp-file))
+    (when (and xenops-image-try-write-clipboard-image-to-file
+           (or (xenops-image-write-clipboard-image-to-file--pngpaste temp-file)
+               (xenops-image-write-clipboard-image-to-file--xclip temp-file)))
       (let ((file-name-suggestion
              (xenops-image-suggest-file-name
               (format "-%s.%s" (substring (sha1 (f-read-bytes temp-file)) 0 4) "png"))))
