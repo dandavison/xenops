@@ -11,7 +11,7 @@
 (require 'dash)
 (require 'f)
 (require 'tex)
-(require 'tex-buf)
+(require 'tex-buf nil t)
 
 (require 'xenops-aio)
 
