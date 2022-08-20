@@ -167,7 +167,7 @@ format the commands."
     (aio-await (aio-sem-wait xenops-math-latex-tasks-semaphore))
     (with-current-buffer buffer
       (xenops-math-set-marker-on-element element))
-    (let* ((dir temporary-file-directory)
+    (let* ((dir (f-join temporary-file-directory "xenops"))
            (base-name (f-base cache-file))
            (make-file-name (lambda (ext) (f-join dir (concat base-name "." ext))))
            (tex-file (funcall make-file-name "tex"))
@@ -176,6 +176,7 @@ format the commands."
            (commands (xenops-math-latex-make-commands element dir tex-file image-input-file image-output-file)))
       (condition-case error
           (progn
+            (make-directory dir 't)
             (aio-await
              (xenops-aio-with-async-with-buffer
               buffer
