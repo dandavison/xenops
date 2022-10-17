@@ -53,6 +53,9 @@ This is the net scale factor resulting from multiple applications
 This determines the size of the image in the image file that is
   cached on disk.")
 
+(defvar xenops-math-reveal-render-below t
+  "Whether or not to show the preview below the math fragments.")
+
 (defvar xenops-math-image-margin 20
   "Number of pixels to be used as left margin for non-inline math images.")
 
@@ -171,7 +174,8 @@ If a prefix argument is in effect, also delete its cache file."
     (goto-char (if (eq element-type 'block-math)
                    (1+ begin-content)
                  begin-content)))
-  (xenops-math-render-below-maybe element))
+  (when xenops-math-reveal-render-below
+    (xenops-math-render-below-maybe element)))
 
 (defun xenops-math-display-waiting (element)
   "Style a math element ELEMENT as waiting.
