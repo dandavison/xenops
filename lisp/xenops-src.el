@@ -31,19 +31,20 @@ under some OSs / Mathematica versions.")
 
 (defmacro xenops-src-do-in-org-mode (&rest body)
   "Execute forms in BODY with current src block in an Org mode buffer."
-  `(save-restriction
-     (progn
-       (condition-case nil
-           (org-narrow-to-block)
-         (user-error nil))
-       (let ((region (buffer-substring (point-min) (point-max))))
-         (with-temp-buffer
-           (erase-buffer)
-           (insert xenops-src-do-in-org-mode-header)
-           (insert region)
-           (let ((org-mode-hook))
-             (org-mode))
-           ,@body)))))
+  `(save-window-excursion
+     (save-restriction
+       (progn
+         (condition-case nil
+             (org-narrow-to-block)
+           (user-error nil))
+         (let ((region (buffer-substring (point-min) (point-max))))
+           (with-temp-buffer
+             (erase-buffer)
+             (insert xenops-src-do-in-org-mode-header)
+             (insert region)
+             (let ((org-mode-hook))
+               (org-mode))
+             ,@body))))))
 
 (defun xenops-src-parse-at-point ()
   "Parse 'src element at point."
