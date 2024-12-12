@@ -260,7 +260,7 @@ Note that for SymPy, the header arguments `:sympy t :results latex` are necessar
 
 The size of images displayed in the buffer can be changed with `xenops-increase-size` and `xenops-decrease-size`.
 
-Xenops recognizes the `\includegraphics` command, and these images will be displayed by `xenops-render`. If you capture a screenshot to your system clipboard and then paste (e.g. `C-y`) into the LaTeX buffer, Xenops will notice that you're pasting image data, prompt for a file to save it in, and insert the `\includegraphics` link (implemented in MacOS only currently, see issue [#1](https://github.com/dandavison/xenops/issues/1)):
+Xenops recognizes the `\includegraphics` command, and these images will be displayed by `xenops-render`. If you capture a screenshot to your system clipboard and then paste (e.g. `C-y`) into the LaTeX buffer, Xenops will notice that you're pasting image data, prompt for a file to save it in, and insert the `\includegraphics` link. For this to work, install `pngpaste` on MacOS or `xclip` on Linux.
 
 ```latex
 Some facts:
