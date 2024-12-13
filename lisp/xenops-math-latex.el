@@ -41,7 +41,7 @@ the commands used to run these processes.")
      :image-input-type "dvi"
      :image-output-type "png"
      :image-size-adjust (1.0 . 1.0)
-     :latex-compiler ("latex -interaction nonstopmode -shell-escape -output-format dvi -output-directory %o %f")
+     :latex-compiler ("lualatex -interaction nonstopmode -shell-escape -output-format dvi -output-directory %o %f")
      :image-converter ("dvipng -D %D -T tight -o %O %f"))
     (dvisvgm
      :programs ("latex" "dvisvgm")
@@ -50,7 +50,7 @@ the commands used to run these processes.")
      :image-input-type "dvi"
      :image-output-type "svg"
      :image-size-adjust (1.7 . 1.5)
-     :latex-compiler ("latex -interaction nonstopmode -shell-escape -output-format dvi -output-directory %o %f")
+     :latex-compiler ("lualatex -interaction nonstopmode -shell-escape -output-format dvi -output-directory %o %f")
      :image-converter ("dvisvgm %f -n -b %B -c %S -o %O"))
     (imagemagick
      :programs ("latex" "convert")
