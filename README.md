@@ -73,11 +73,12 @@ Xenops can also be used with [org-mode](https://orgmode.org) documents that cont
 
     The commands `which latex` and `which dvisvgm` must both return paths to the executables. `dvisvgm` should be present as part of your LaTeX installation, but it's also available [here](https://dvisvgm.de/Downloads).
 
-1. **Ensure that your Emacs version is at least Emacs 26.**
+1. **Use a recent Emacs version.**
 
-    This is necessary because Xenops uses [emacs-aio](https://github.com/skeeto/emacs-aio).
-
-    If you are using MacOS, install emacs from homebrew using the `emacs-mac` package (aka Mitsuharu's Emacs build), since it uses WebKit to render SVG, resulting in beautifully crisp images.
+    Xenops will not work on Emacs <26 since it uses
+    [emacs-aio](https://github.com/skeeto/emacs-aio). On MacOS use the
+    latest version you can; SVG images were not rendered crisply in
+    core Emacs on MacOS until recent versions.
 
 1. **Install Xenops from [MELPA](https://github.com/melpa/melpa).**
 
