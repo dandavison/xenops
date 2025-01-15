@@ -680,7 +680,7 @@ BEG and END define the region acted on."
                (setq element (xenops-math-parse-element-at-point))
                (when element (xenops-element-copy element)))
              (when element
-               (save-excursion (xenops-math-paste)))))))
+               (forward-char (save-excursion (xenops-math-paste))))))))
     (xenops-avy-do-at-element '(block-math inline-math))))
 
 (defun xenops-math-get-cache-file (element)
