@@ -90,14 +90,14 @@
 (defun xenops-xen-begin-latex-environment-formatter (env)
   "Return visual replacement for environment ENV begin token."
   (cond
-   ((member env '("src" "minted" "align")) "⚡")
+   ((member env '("src" "minted" "align")) "↴")
    ((member env '("enumerate" "itemize" "mdframed")) "↴")
    (t env)))
 
 (defun xenops-xen-end-latex-environment-formatter (env)
   "Return visual replacement for environment ENV end token."
   (cond
-   ((member env '("align" "src" "minted")) "⚡")
+   ((member env '("align" "src" "minted")) "↲")
    ((member env '("proof")) "□")
    (t "↲")))
 
