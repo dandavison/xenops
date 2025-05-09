@@ -441,7 +441,8 @@ When generating image previews, there are a few things one may want to configure
 
 # 6. Contributing
 
-Xenops can already be used profitably for serious work. But there are also many areas for further work. Please don't hesitate to get in touch (dandavison7@gmail.com), submit a PR, or open a Github issue.
+Xenops can already be used profitably for serious work. But there are also many areas for further work. Unfortunately I (@dandavison) currently
+do not have time for Xenops maintenance and it is likely that I will not respond. Please feel free to open issues, and of course if you can help others with their issues, that would be fantastic. 
 
 
 # 7. Credit
