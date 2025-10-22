@@ -73,11 +73,12 @@ Xenops can also be used with [org-mode](https://orgmode.org) documents that cont
 
     The commands `which latex` and `which dvisvgm` must both return paths to the executables. `dvisvgm` should be present as part of your LaTeX installation, but it's also available [here](https://dvisvgm.de/Downloads).
 
-1. **Ensure that your Emacs version is at least Emacs 26.**
+1. **Use a recent Emacs version.**
 
-    This is necessary because Xenops uses [emacs-aio](https://github.com/skeeto/emacs-aio).
-
-    If you are using MacOS, install emacs from homebrew using the `emacs-mac` package (aka Mitsuharu's Emacs build), since it uses WebKit to render SVG, resulting in beautifully crisp images.
+    Xenops will not work on Emacs <26 since it uses
+    [emacs-aio](https://github.com/skeeto/emacs-aio). On MacOS use the
+    latest version you can; SVG images were not rendered crisply in
+    core Emacs on MacOS until recent versions.
 
 1. **Install Xenops from [MELPA](https://github.com/melpa/melpa).**
 
@@ -260,7 +261,7 @@ Note that for SymPy, the header arguments `:sympy t :results latex` are necessar
 
 The size of images displayed in the buffer can be changed with `xenops-increase-size` and `xenops-decrease-size`.
 
-Xenops recognizes the `\includegraphics` command, and these images will be displayed by `xenops-render`. If you capture a screenshot to your system clipboard and then paste (e.g. `C-y`) into the LaTeX buffer, Xenops will notice that you're pasting image data, prompt for a file to save it in, and insert the `\includegraphics` link (implemented in MacOS only currently, see issue [#1](https://github.com/dandavison/xenops/issues/1)):
+Xenops recognizes the `\includegraphics` command, and these images will be displayed by `xenops-render`. If you capture a screenshot to your system clipboard and then paste (e.g. `C-y`) into the LaTeX buffer, Xenops will notice that you're pasting image data, prompt for a file to save it in, and insert the `\includegraphics` link. For this to work, install `pngpaste` on MacOS or `xclip` on Linux.
 
 ```latex
 Some facts:
@@ -440,7 +441,8 @@ When generating image previews, there are a few things one may want to configure
 
 # 6. Contributing
 
-Xenops can already be used profitably for serious work. But there are also many areas for further work. Please don't hesitate to get in touch (dandavison7@gmail.com), submit a PR, or open a Github issue.
+Xenops can already be used profitably for serious work. But there are also many areas for further work. Unfortunately I (@dandavison) currently
+do not have time for Xenops maintenance and it is likely that I will not respond. Please feel free to open issues, and of course if you can help others with their issues, that would be fantastic. 
 
 
 # 7. Credit

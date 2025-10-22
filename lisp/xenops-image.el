@@ -45,7 +45,7 @@ resulting LaTeX.")
 (defun xenops-image-render (element)
   "Render image element ELEMENT."
   (let ((image (create-image (plist-get element :path)
-                             'imagemagick nil :width xenops-image-width)))
+                             nil nil :width xenops-image-width)))
     (add-text-properties (plist-get element :begin)
                          (plist-get element :end)
                          `(display ,image keymap ,xenops-rendered-element-keymap))))
